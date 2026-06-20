@@ -1,0 +1,58 @@
+# pm-agent — default config (fallback only)
+# The canonical config lives at pm-wiki/_scripts/pm-agent-config.yaml.
+# This file is the schema reference + fallback when the project config is missing.
+
+workspace_root: ""                          # MUST be set to absolute path to workspace root
+pm_wiki: pm-wiki                            # relative to workspace_root
+recipes_dir: pm-wiki/methods/report-kits
+templates_dir: pm-wiki/methods/templates
+
+defaults:
+  cadence: weekly                           # weekly | biweekly | monthly | quarterly
+  discovery_mode: existing                  # existing | new (Torres distinction)
+  report_kits:                              # default recipes if a product doesn't override
+    - weekly-product-status
+    - customer-feedback-rollup
+
+current_quarter: ""                         # e.g., 2026-Q2 — set when running OKR reviews
+
+products:
+  # Example — each product entry:
+  # - slug: cognos-agents
+  #   display_name: Cognos Reporting Agents
+  #   active: true
+  #   wiki_read:
+  #     - cognos-wiki/topics/reporting-agents
+  #   pm_write: pm-wiki/products/cognos-agents
+  #   cadence: weekly
+  #   discovery_mode: new                   # overrides defaults.discovery_mode
+  #   report_kits:                          # overrides defaults.report_kits
+  #     - weekly-product-status
+  #     - customer-feedback-rollup
+  #   okr_review_due: false
+  []
+
+# Health-color override behavior (see weekly-product-status-template)
+health_overrides:
+  manual_override_allowed: true
+  override_requires_note: true              # must populate health_note: if overriding
+
+# Notification rules
+notifications:
+  push_on_red: true                         # always notify on red status
+  push_on_yellow: false                     # not by default
+  push_on_quality_failure: true             # if any quality check fails
+  push_on_empty_river_for_active_product: true  # warn if a product has 0 signal for >2 weeks
+
+# Output behavior
+output:
+  on_existing_file: backup-and-overwrite    # overwrite | skip | backup-and-overwrite
+  draft_on_quality_failure: true            # mark draft: true in frontmatter if QC fails
+  log_dir: pm-wiki/_claude-log              # relative to workspace_root
+  dry_run_dir: pm-wiki/_claude-log/dry-run
+
+# Discovery roll-up sub-loop (runs inline with weekly recipes)
+discovery_rollup:
+  enabled: true
+  new_need_threshold: 3                     # min independent sources to create a new need
+  link_existing_first: true                 # prefer linking to existing needs over creating new
