@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-06-21. **172 skills installed in `~/.claude/skills/`.**
+Last updated: 2026-06-21. **174 skills installed in `~/.claude/skills/`.**
 
 ---
 
@@ -64,7 +64,7 @@ Last updated: 2026-06-21. **172 skills installed in `~/.claude/skills/`.**
 | **pm-marketing-growth** | 5 | North star metric, positioning, value proposition, product naming, messaging frameworks | ✅ installed |
 | **pm-data-analytics** | 3 | A/B test analysis, cohort analysis, SQL query generation for product data | ✅ installed |
 | **pm-toolkit** | 4 | NDA drafting, privacy policy, grammar check, resume review | ✅ installed |
-| **pm-ai-shipping** | 2 | Ship-check and security/performance audit for AI-built code | 📦 in package |
+| **pm-ai-shipping** | 2 | Ship-check and security/performance audit for AI-built code | ✅ installed |
 
 ---
 
@@ -400,7 +400,7 @@ Marketplace plugins installed via `claude plugin marketplace add`. State stored 
 | pm-marketing-growth | phuryn/pm-skills | 5 | ✅ installed |
 | pm-data-analytics | phuryn/pm-skills | 3 | ✅ installed |
 | pm-toolkit | phuryn/pm-skills | 4 | ✅ installed |
-| pm-ai-shipping | phuryn/pm-skills | 2 | 📦 not installed |
+| pm-ai-shipping | phuryn/pm-skills | 2 | ✅ installed |
 | knowledge-work-plugins | anthropics/knowledge-work-plugins | 127 | ✅ installed |
 
 ---

@@ -1,7 +1,7 @@
 # Claude Skills Library
 
 Personal library of Claude Code skills, plugins, and resources — organized by upstream source.
-**172 skills installed** across 7 groups. Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
+**174 skills installed** across 7 groups. Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
 
 ---
 
@@ -64,7 +64,7 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | pm-marketing-growth | 5 | North star metric, positioning, value props, product naming | ✅ |
 | pm-data-analytics | 3 | A/B test analysis, cohort analysis, SQL query generation | ✅ |
 | pm-toolkit | 4 | NDA drafting, privacy policy, grammar check, resume review | ✅ |
-| pm-ai-shipping | 2 | Ship-check, security/perf audit for AI-built code | 📦 |
+| pm-ai-shipping | 2 | Ship-check, security/perf audit for AI-built code | ✅ |
 
 📦 = in package, not yet installed as plugin
 
