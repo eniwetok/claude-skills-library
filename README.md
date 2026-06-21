@@ -8,17 +8,18 @@ Personal collection of Claude Code skills, organized by origin. Each skill is av
 
 | # | Origin | Author | URL | Skills / Packages |
 |---|--------|--------|-----|-------------------|
-| 1 | **kepano / Karpathy wiki stack** | Andrej Karpathy (pattern) · Steph Ango / kepano (Obsidian plugin) | [github.com/kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | wiki, wiki-ingest, wiki-query, wiki-lint, wiki-fold, save, canvas, autoresearch, obsidian-markdown, obsidian-bases, defuddle |
+| 1 | **AgriciDaniel / claude-obsidian** (Karpathy pattern · kepano foundation) | Agrici Daniel · pattern by Andrej Karpathy · foundation by kepano | [github.com/AgriciDaniel/claude-obsidian](https://github.com/AgriciDaniel/claude-obsidian) · foundation: [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | wiki, wiki-ingest, wiki-query, wiki-lint, wiki-fold, save, canvas, autoresearch, obsidian-markdown, obsidian-bases, defuddle |
 | 2 | **PM Skills Marketplace** | Paweł Huryn (Product Compass) | [github.com/phuryn/pm-skills](https://github.com/phuryn/pm-skills) | pm-skills-main (68 skills, 9 plugins) |
 | 3 | **Cowork Skills (YouTube)** | Brock | ["15 Claude Cowork Skills I Can't Live Without"](https://www.youtube.com/@brock) | 15-cowork-skills (15 skills) |
 | 4 | **Custom / Personal** | @eniwetok | this repo | pm-agent |
 
 ---
 
-## Group 1 — kepano / Karpathy Wiki Stack
+## Group 1 — AgriciDaniel / claude-obsidian (Karpathy pattern)
 
-> **Upstream:** [github.com/kepano/obsidian-skills](https://github.com/kepano/obsidian-skills)
-> Pattern originated by Andrej Karpathy's autoresearch loop. Obsidian integration and skill packaging by Steph Ango (kepano).
+> **Upstream:** [github.com/AgriciDaniel/claude-obsidian](https://github.com/AgriciDaniel/claude-obsidian)
+> Pattern originated by Andrej Karpathy's LLM wiki concept — compile knowledge once into interconnected markdown instead of re-asking the same questions. Packaged as Claude Code skills by Agrici Daniel. Low-level Obsidian skills (obsidian-markdown, obsidian-bases, defuddle) draw from [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills).
+> **Bundle:** [zips/claude-obsidian-skills.zip](zips/claude-obsidian-skills.zip) — installs all 11 skills at once.
 > These skills form a cohesive **wiki stack** — they work best installed together.
 
 | Skill | Description | Trigger |
@@ -35,9 +36,14 @@ Personal collection of Claude Code skills, organized by origin. Each skill is av
 | [obsidian-bases](skills/obsidian-bases/) | Create and edit Obsidian Bases (.base files) — dynamic tables, card views, filters | `create a base`, `obsidian bases`, `database view` |
 | [defuddle](skills/defuddle/) | Strip clutter from web pages before ingesting — saves 40-60% tokens | `defuddle`, `clean this page`, `strip this url` |
 
-**Install all wiki stack skills:**
+**Install all 11 skills at once (from bundle):**
 ```bash
-cp -r skills/wiki skills/wiki-ingest skills/wiki-query skills/wiki-lint skills/wiki-fold skills/save skills/canvas skills/autoresearch skills/obsidian-markdown skills/obsidian-bases skills/defuddle ~/.claude/skills/
+cd ~/.claude/skills && unzip ~/Documents/Skills/zips/claude-obsidian-skills.zip -d . && mv claude-obsidian-bundle/skills/* . && rm -rf claude-obsidian-bundle
+```
+
+**Or install from upstream:**
+```bash
+claude plugin marketplace add AgriciDaniel/claude-obsidian
 ```
 
 ---
