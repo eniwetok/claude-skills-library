@@ -31,6 +31,7 @@ claude-skills-library/
 | **4 — anthropics/skills** | [anthropics/skills](https://github.com/anthropics/skills) | `packages/anthropics-skills/` | `claude plugin marketplace add anthropics/skills` |
 | **5 — knowledge-work-plugins** | [anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) | `packages/knowledge-work-plugins/` | `claude plugin marketplace add anthropics/knowledge-work-plugins` |
 | **6 — custom** | this repo | `skills/pm-agent/` | `cp -r skills/<name> ~/.claude/skills/` |
+| **7 — superpowers** | [obra/superpowers](https://github.com/obra/superpowers) | `packages/superpowers/` | `cp -r packages/superpowers/skills/* ~/.claude/skills/` |
 
 ---
 
@@ -62,6 +63,7 @@ Upstreams to check:
 - `https://github.com/phuryn/pm-skills`
 - `https://github.com/anthropics/skills`
 - `https://github.com/anthropics/knowledge-work-plugins`
+- `https://github.com/obra/superpowers`
 
 ---
 

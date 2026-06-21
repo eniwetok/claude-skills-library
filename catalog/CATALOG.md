@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-06-20. **158 skills installed in `~/.claude/skills/`.**
+Last updated: 2026-06-21. **172 skills installed in `~/.claude/skills/`.**
 
 ---
 
@@ -344,6 +344,34 @@ A comprehensive suite for small business owners. Highlights:
 
 ---
 
+## Group 7 — obra/superpowers (Jesse Vincent)
+
+**Source:** [github.com/obra/superpowers](https://github.com/obra/superpowers)
+**Pattern:** Engineering discipline skills designed to be invoked *before* acting — TDD, systematic debugging, verification-first, parallel agents, worktrees. Each skill is a guard or process gate.
+**Install:** `cp -r packages/superpowers/skills/* ~/.claude/skills/`
+**Package:** [packages/superpowers/](../packages/superpowers/)
+
+| Skill | What it does | When to invoke |
+|-------|-------------|----------------|
+| **using-superpowers** | Meta-skill — establishes skill discovery and invocation protocol at session start | Start of any conversation |
+| **brainstorming** | Explore user intent, requirements, and design *before* implementation | Before any feature, component, or behavior change |
+| **writing-plans** | Write a structured multi-step implementation plan from a spec | Before touching code on a multi-step task |
+| **executing-plans** | Execute a written plan in a separate session with review checkpoints | When a plan is ready to run |
+| **test-driven-development** | Write failing tests before writing implementation code | Before any feature or bugfix implementation |
+| **systematic-debugging** | Structured reproduce → isolate → diagnose → fix loop | On any bug, test failure, or unexpected behavior |
+| **verification-before-completion** | Run verification commands and confirm output before claiming work is done | Before committing, before opening a PR |
+| **requesting-code-review** | Verify work meets requirements and prepare review request | After completing implementation |
+| **receiving-code-review** | Process review feedback with technical rigor — verify before implementing | When code review arrives |
+| **using-git-worktrees** | Set up isolated workspace via git worktree before feature work | Before starting isolated feature work |
+| **dispatching-parallel-agents** | Fan out 2+ independent tasks to parallel agents | When tasks have no shared state or sequential dependencies |
+| **subagent-driven-development** | Execute implementation plans with independent tasks in the current session | When a plan has parallelizable steps |
+| **finishing-a-development-branch** | Structured options for integrating completed work — merge, PR, or cleanup | When implementation is done and tests pass |
+| **writing-skills** | Create, edit, and verify skills before deployment | When building or improving skills |
+
+All 14 skills ✅ installed in `~/.claude/skills/`
+
+---
+
 ## Group 6 — Custom / Personal (this repo)
 
 **Source:** [github.com/eniwetok/claude-skills-library](https://github.com/eniwetok/claude-skills-library)
@@ -399,7 +427,7 @@ MCP servers accessible in Claude Code sessions. None permanently installed in gl
 
 | Resource | URL | What it has |
 |----------|-----|-------------|
-| obra/superpowers | https://github.com/obra/superpowers | 20+ skills: TDD, debugging, /brainstorm, /write-plan |
+| ~~obra/superpowers~~ | ✅ installed as Group 7 | 14 skills: TDD, debugging, brainstorming, parallel agents, worktrees |
 | daymade/claude-code-skills | https://github.com/daymade/claude-code-skills | 64+ skills: GitHub, audio, QA, DevOps |
 | alirezarezvani/claude-skills | https://github.com/alirezarezvani/claude-skills | 345 skills across 17 domains |
 | Trail of Bits Security Skills | https://github.com/trailofbits/skills | Security: CodeQL, Semgrep, auditing |

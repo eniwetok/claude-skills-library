@@ -1,7 +1,7 @@
 # Claude Skills Library
 
 Personal library of Claude Code skills, plugins, and resources — organized by upstream source.
-**158 skills installed** across 6 groups. Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
+**172 skills installed** across 7 groups. Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
 
 ---
 
@@ -15,6 +15,7 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 4 | **Official Anthropic Skills** | Anthropic | [github.com/anthropics/skills](https://github.com/anthropics/skills) |
 | 5 | **Knowledge Work Plugins** | Anthropic | [github.com/anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) |
 | 6 | **Custom / Personal** | @eniwetok | this repo |
+| 7 | **obra/superpowers** | Jesse Vincent | [github.com/obra/superpowers](https://github.com/obra/superpowers) |
 
 ---
 
@@ -150,6 +151,34 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | enterprise-search | 5 | search, knowledge-synthesis, digest, source-management | ✅ |
 | cowork-plugin-management | 2 | cowork-plugin-customizer, create-cowork-plugin | ✅ |
 | pdf-viewer | 1 | view-pdf | ✅ |
+
+---
+
+## Group 7 — obra/superpowers
+
+> **Upstream:** [github.com/obra/superpowers](https://github.com/obra/superpowers) · Jesse Vincent
+> Engineering discipline skills — TDD, systematic debugging, parallel agents, git worktrees, code review, and verification. Designed to be invoked before acting, not after.
+> **Package:** [packages/superpowers/](packages/superpowers/)
+> Install: `cp -r packages/superpowers/skills/* ~/.claude/skills/`
+
+| Skill | What it does | When to use |
+|-------|-------------|-------------|
+| [using-superpowers](packages/superpowers/skills/using-superpowers/) | Meta-skill — establishes how to find and invoke skills at conversation start | Start of any session |
+| [brainstorming](packages/superpowers/skills/brainstorming/) | Explore user intent, requirements, and design before implementation | Before any feature/component work |
+| [writing-plans](packages/superpowers/skills/writing-plans/) | Write a multi-step implementation plan from a spec or requirements | Before touching code |
+| [executing-plans](packages/superpowers/skills/executing-plans/) | Execute a written plan in a separate session with review checkpoints | When you have a plan ready |
+| [test-driven-development](packages/superpowers/skills/test-driven-development/) | Write failing tests before writing implementation code | Before any feature or bugfix |
+| [systematic-debugging](packages/superpowers/skills/systematic-debugging/) | Structured diagnosis before proposing fixes | On any bug, test failure, or unexpected behavior |
+| [verification-before-completion](packages/superpowers/skills/verification-before-completion/) | Run verification commands and confirm output before claiming work is done | Before committing or opening a PR |
+| [requesting-code-review](packages/superpowers/skills/requesting-code-review/) | Verify work meets requirements before merging | After completing a feature |
+| [receiving-code-review](packages/superpowers/skills/receiving-code-review/) | Process review feedback with rigor — verify before blindly implementing | When review feedback arrives |
+| [using-git-worktrees](packages/superpowers/skills/using-git-worktrees/) | Set up isolated workspace via git worktree before feature work | Before starting isolated work |
+| [dispatching-parallel-agents](packages/superpowers/skills/dispatching-parallel-agents/) | Fan out 2+ independent tasks to parallel agents | When tasks have no shared state |
+| [subagent-driven-development](packages/superpowers/skills/subagent-driven-development/) | Execute implementation plans with independent tasks in current session | When running a plan with parallelizable steps |
+| [finishing-a-development-branch](packages/superpowers/skills/finishing-a-development-branch/) | Decide how to integrate completed work — merge, PR, or cleanup | When implementation is done and tests pass |
+| [writing-skills](packages/superpowers/skills/writing-skills/) | Create, edit, and verify skills before deployment | When building new skills |
+
+All 14 skills ✅ installed in `~/.claude/skills/`
 
 ---
 
