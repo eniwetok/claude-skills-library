@@ -1,7 +1,7 @@
 # Claude Skills Library
 
 Personal library of Claude Code skills, plugins, and resources — organized by upstream source.
-Full inventory with install status: [catalog/CATALOG.md](catalog/CATALOG.md)
+**158 skills installed** across 6 groups. Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
 
 ---
 
@@ -37,12 +37,12 @@ Full inventory with install status: [catalog/CATALOG.md](catalog/CATALOG.md)
 | [obsidian-markdown](skills/obsidian-markdown/) | Reference for Obsidian Flavored Markdown syntax | ✅ |
 | [obsidian-bases](skills/obsidian-bases/) | Create/edit .base files — dynamic tables, card views, filters | ✅ |
 | [defuddle](skills/defuddle/) | Strip web page clutter before ingesting (saves 40-60% tokens) | ✅ |
-| [think](skills/think/) | 10-principle structured reasoning framework | 📁 |
-| [wiki-cli](skills/wiki-cli/) | Obsidian CLI interaction | 📁 |
-| [wiki-mode](skills/wiki-mode/) | Switch vault modes (LYT / PARA / Zettelkasten) | 📁 |
-| [wiki-retrieve](skills/wiki-retrieve/) | Hybrid retrieval from vault | 📁 |
+| [think](skills/think/) | 10-principle reasoning loop: OBSERVE·LISTEN·THINK·CONNECT·FEEL·ACCEPT·CREATE·GROW | ✅ |
+| [wiki-cli](skills/wiki-cli/) | Default vault-mutation transport (Obsidian CLI v1.12+); called by wiki internals | ✅ |
+| [wiki-mode](skills/wiki-mode/) | Switch vault organizational methodology: LYT / PARA / Zettelkasten / Generic | ✅ |
+| [wiki-retrieve](skills/wiki-retrieve/) | Hybrid retrieval primitive — replaces static hot→index→drill with contextual routing | ✅ |
 
-✅ = active in `~/.claude/skills/` · 📁 = in `skills/` here, not yet installed
+✅ = active in `~/.claude/skills/`
 
 ---
 
@@ -100,26 +100,27 @@ Full inventory with install status: [catalog/CATALOG.md](catalog/CATALOG.md)
 > **Upstream:** [github.com/anthropics/skills](https://github.com/anthropics/skills)
 > **Package:** [packages/anthropics-skills/](packages/anthropics-skills/)
 > Install: `claude plugin marketplace add anthropics/skills`
+> All 17 skills ✅ installed in `~/.claude/skills/`
 
-| Skill | Description |
-|-------|-------------|
-| docx | Create/edit/analyze Word docs — tracked changes, comments, formatting |
-| pdf | Extract text/tables, create/merge/split PDFs, handle forms |
-| pptx | Create/edit PowerPoint — layouts, templates, charts |
-| xlsx | Create/edit Excel — formulas, formatting, data analysis |
-| algorithmic-art | Generative art with p5.js, seeded randomness, flow fields |
-| canvas-design | Visual art in .png/.pdf using design philosophy |
-| slack-gif-creator | Animated GIFs optimized for Slack size constraints |
-| frontend-design | Bold design decisions for React/Tailwind; avoids AI-slop |
-| web-artifacts-builder | Complex claude.ai HTML artifacts with React/Tailwind/shadcn |
-| mcp-builder | Guide for building high-quality MCP servers |
-| webapp-testing | Test local web apps with Playwright |
-| brand-guidelines | Apply official brand colors and typography |
-| internal-comms | Write status reports, newsletters, FAQs |
-| skill-creator | Interactive guided skill builder |
-| claude-api | Claude API reference |
-| doc-coauthoring | Document co-authoring workflows |
-| theme-factory | Theme generation |
+| Skill | Description | Installed |
+|-------|-------------|-----------|
+| docx | Create/read/edit Word docs — tracked changes, comments, TOC, letterheads | ✅ |
+| pdf | Read/extract/merge/split/OCR PDFs, fill forms, add watermarks | ✅ |
+| pptx | Create/edit PowerPoint — layouts, templates, charts, speaker notes | ✅ |
+| xlsx | Create/edit Excel — formulas, formatting, data analysis, CSV cleaning | ✅ |
+| algorithmic-art | Generative art with p5.js, seeded randomness, flow fields, particle systems | ✅ |
+| canvas-design | Visual art in .png/.pdf using design philosophy; outputs posters and static designs | ✅ |
+| slack-gif-creator | Animated GIFs optimized for Slack size/color constraints with validation | ✅ |
+| frontend-design | Distinctive, non-templated UI design for React/Tailwind — avoids AI-slop aesthetics | ✅ |
+| web-artifacts-builder | Complex multi-component claude.ai HTML artifacts with React, Tailwind, shadcn/ui | ✅ |
+| mcp-builder | Guide for building high-quality MCP servers in Python (FastMCP) or Node/TypeScript | ✅ |
+| webapp-testing | Test local web apps with Playwright — UI behavior, screenshots, browser logs | ✅ |
+| brand-guidelines | Apply Anthropic's official brand colors and typography to any artifact | ✅ |
+| internal-comms | Write status reports, leadership updates, newsletters, FAQs, incident reports | ✅ |
+| skill-creator | Create, edit, evaluate, and benchmark skills; includes variance analysis evals | ✅ |
+| claude-api | Claude API reference — model IDs, pricing, streaming, tool use, MCP, caching | ✅ |
+| doc-coauthoring | Structured co-authoring workflow — context gathering, refinement, reader testing | ✅ |
+| theme-factory | Apply one of 10 preset themes (colors + fonts) to slides, docs, or HTML pages | ✅ |
 
 ---
 
@@ -128,26 +129,27 @@ Full inventory with install status: [catalog/CATALOG.md](catalog/CATALOG.md)
 > **Upstream:** [github.com/anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins)
 > **Package:** [packages/knowledge-work-plugins/](packages/knowledge-work-plugins/)
 > Install: `claude plugin marketplace add anthropics/knowledge-work-plugins`
+> **127 skills across 17 plugins** — all ✅ installed. Full per-skill breakdown in [catalog/CATALOG.md](catalog/CATALOG.md).
 
-| Plugin | Description |
-|--------|-------------|
-| productivity | General productivity workflows |
-| product-management | PM-focused skills (complements pm-skills) |
-| sales | Sales workflows and CRM |
-| marketing | Marketing campaign and copy skills |
-| customer-support | Support ticket and response skills |
-| engineering | Software engineering workflows |
-| finance | Financial analysis and reporting |
-| legal | Contract, policy, compliance skills |
-| human-resources | HR workflows and templates |
-| operations | Ops and process management |
-| enterprise-search | Search across org knowledge |
-| data | Data analysis and transformation |
-| design | Design workflows |
-| bio-research | Biomedical research skills |
-| cowork-plugin-management | Manage Cowork plugins |
-| small-business | SMB-focused skills |
-| pdf-viewer | PDF reading and annotation |
+| Plugin | Skills | Key capabilities | Installed |
+|--------|--------|-----------------|-----------|
+| engineering | 10 | code-review, debug, architecture, system-design, incident-response, tech-debt | ✅ |
+| sales | 9 | account-research, call-prep, pipeline-review, forecast, draft-outreach, competitive-intelligence | ✅ |
+| marketing | 8 | campaign-plan, seo-audit, email-sequence, brand-review, performance-report | ✅ |
+| finance | 8 | financial-statements, reconciliation, variance-analysis, journal-entry, sox-testing | ✅ |
+| legal | 9 | review-contract, triage-nda, compliance-check, legal-risk-assessment, signature-request | ✅ |
+| human-resources | 9 | interview-prep, draft-offer, performance-review, comp-analysis, org-planning | ✅ |
+| data | 10 | analyze, sql-queries, build-dashboard, statistical-analysis, explore-data, create-viz | ✅ |
+| design | 7 | design-critique, accessibility-review, user-research, ux-copy, design-handoff | ✅ |
+| bio-research | 6 | nextflow-development, scvi-tools, single-cell-rna-qc, instrument-data-to-allotrope | ✅ |
+| operations | 9 | process-doc, risk-assessment, capacity-plan, runbook, compliance-tracking | ✅ |
+| customer-support | 5 | ticket-triage, draft-response, kb-article, customer-escalation | ✅ |
+| productivity | 5 | memory-management, task-management, update | ✅ |
+| product-management | 8 | write-spec, sprint-planning, metrics-review, stakeholder-update, roadmap-update | ✅ |
+| small-business | 31 | close-month, monday-brief, plan-payroll, quarterly-review, crm-cleanup, run-campaign | ✅ |
+| enterprise-search | 5 | search, knowledge-synthesis, digest, source-management | ✅ |
+| cowork-plugin-management | 2 | cowork-plugin-customizer, create-cowork-plugin | ✅ |
+| pdf-viewer | 1 | view-pdf | ✅ |
 
 ---
 
@@ -168,22 +170,20 @@ Full inventory with install status: [catalog/CATALOG.md](catalog/CATALOG.md)
 ## Quick Install Reference
 
 ```bash
+# All groups from marketplace (preferred)
+claude plugin marketplace add AgriciDaniel/claude-obsidian    # Group 1: 15 wiki skills
+claude plugin marketplace add phuryn/pm-skills                 # Group 2: 68 PM skills
+claude plugin marketplace add anthropics/skills                # Group 4: 17 official skills
+claude plugin marketplace add anthropics/knowledge-work-plugins # Group 5: 127 skills
+
+# Group 3 (15-cowork-skills): manual only
+# Cowork → Plugin icon → Upload zips/cowork-skills-bundle.zip
+
+# Group 6 (custom skills)
+cp -r skills/pm-agent ~/.claude/skills/
+
 # Single skill from source
 cp -r skills/<name> ~/.claude/skills/
-
-# Full wiki stack (Group 1, 11 core skills)
-cp -r skills/wiki skills/wiki-ingest skills/wiki-query skills/wiki-lint \
-  skills/wiki-fold skills/save skills/canvas skills/autoresearch \
-  skills/obsidian-markdown skills/obsidian-bases skills/defuddle ~/.claude/skills/
-
-# All 4 additional claude-obsidian skills
-cp -r skills/think skills/wiki-cli skills/wiki-mode skills/wiki-retrieve ~/.claude/skills/
-
-# From marketplace (preferred for Groups 1, 2, 4, 5)
-claude plugin marketplace add AgriciDaniel/claude-obsidian
-claude plugin marketplace add phuryn/pm-skills
-claude plugin marketplace add anthropics/skills
-claude plugin marketplace add anthropics/knowledge-work-plugins
 ```
 
 ---
