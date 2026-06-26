@@ -1,7 +1,7 @@
 # Claude Skills Library
 
 Personal library of Claude Code skills, plugins, and resources — organized by upstream source.
-**174 skills installed** across 7 groups. Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
+**560 skills installed** across 9 groups. Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
 
 ---
 
@@ -16,6 +16,8 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 5 | **Knowledge Work Plugins** | Anthropic | [github.com/anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) |
 | 6 | **Custom / Personal** | @eniwetok | this repo |
 | 7 | **obra/superpowers** | Jesse Vincent | [github.com/obra/superpowers](https://github.com/obra/superpowers) |
+| 8 | **ruvnet/ruflo** | ruvnet | [github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
+| 9 | **nexu-io/open-design** | nexu-io | [github.com/nexu-io/open-design](https://github.com/nexu-io/open-design) |
 
 ---
 
@@ -193,6 +195,47 @@ All 14 skills ✅ installed in `~/.claude/skills/`
 | update-skills-library | Sync this repo from all upstream sources, rebuild zips, push | `update skills library` | ✅ local |
 
 *`pptx-from-template` and `update-skills-library` live in `~/.claude/skills/` locally but are not tracked in this repo's `skills/` folder.*
+
+---
+
+## Group 8 — ruvnet/ruflo (Multi-agent swarm)
+
+> **Upstream:** [github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)
+> SPARC multi-agent coordination framework — 134 agent skills for swarm orchestration, distributed systems, GitHub automation, performance analysis, and neural coordination.
+> **Package:** [packages/ruflo/](packages/ruflo/)
+> Install: `cp -r packages/ruflo/.agents/skills/* ~/.claude/skills/`
+
+| Category | Skills | What it covers |
+|----------|--------|----------------|
+| Agent orchestration | 90 | agent-*, coordinator, swarm, queen, worker, mesh, hive-mind |
+| AgentDB | 5 | agentdb-advanced, agentdb-learning, agentdb-memory-patterns, agentdb-optimization, agentdb-vector-search |
+| GitHub automation | 6 | github-automation, github-code-review, github-multi-repo, github-project-management, github-release-management, github-workflow-automation |
+| SPARC methodology | 1 | sparc-methodology |
+| Flow/Swarm | 9 | flow-nexus-*, swarm-advanced, swarm-orchestration, stream-chain, hive-mind, hive-mind-advanced |
+| Other | 23 | security-audit, performance-analysis, embeddings, neural-training, pair-programming, etc. |
+
+All 134 skills ✅ installed in `~/.claude/skills/`
+
+---
+
+## Group 9 — nexu-io/open-design (Design + templates)
+
+> **Upstream:** [github.com/nexu-io/open-design](https://github.com/nexu-io/open-design)
+> Massive design system — 155 design skills (FAL AI, Figma, GSAP, Venice, shadcn, frontend frameworks) + 109 HTML presentation templates in the zhangzara/orbit/taste series.
+> **Package:** [packages/open-design/](packages/open-design/)
+> Install: `cp -r packages/open-design/skills/* ~/.claude/skills/ && cp -r packages/open-design/design-templates/* ~/.claude/skills/`
+
+| Category | Skills | What it covers |
+|----------|--------|----------------|
+| FAL AI | 12 | fal-generate, fal-image-edit, fal-upscale, fal-video-edit, fal-tryon, fal-3d, fal-realtime, fal-restore, fal-train, fal-kling-o3, fal-lip-sync, fal-vision |
+| Figma | 7 | figma-use, figma-generate-design, figma-create-new-file, figma-generate-library, figma-implement-design, figma-code-connect-components, figma-create-design-system-rules |
+| GSAP animation | 8 | gsap-core, gsap-react, gsap-scrolltrigger, gsap-plugins, gsap-timeline, gsap-utils, gsap-frameworks, gsap-performance |
+| Venice AI | 5 | venice-image-generate, venice-image-edit, venice-audio-music, venice-audio-speech, venice-video |
+| Frontend | 7 | frontend-design, frontend-dev, frontend-skill, frontend-slides, shadcn-ui, threejs, shader-dev |
+| Presentation templates | 50+ | html-ppt-zhangzara-* series (30+ themes), orbit-*, html-ppt-pitch-deck, replit-deck, kami-deck, etc. |
+| Design tools | 70+ | brandkit, design-brief, d3-visualization, remotion, imagegen, pptx-generator, social cards, etc. |
+
+All 264 skills ✅ installed in `~/.claude/skills/`
 
 ---
 

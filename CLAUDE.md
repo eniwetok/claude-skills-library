@@ -32,6 +32,8 @@ claude-skills-library/
 | **5 — knowledge-work-plugins** | [anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) | `packages/knowledge-work-plugins/` | `claude plugin marketplace add anthropics/knowledge-work-plugins` |
 | **6 — custom** | this repo | `skills/pm-agent/` | `cp -r skills/<name> ~/.claude/skills/` |
 | **7 — superpowers** | [obra/superpowers](https://github.com/obra/superpowers) | `packages/superpowers/` | `cp -r packages/superpowers/skills/* ~/.claude/skills/` |
+| **8 — ruflo** | [ruvnet/ruflo](https://github.com/ruvnet/ruflo) | `packages/ruflo/` | `cp -r packages/ruflo/.agents/skills/* ~/.claude/skills/` |
+| **9 — open-design** | [nexu-io/open-design](https://github.com/nexu-io/open-design) | `packages/open-design/` | `cp -r packages/open-design/skills/* ~/.claude/skills/ && cp -r packages/open-design/design-templates/* ~/.claude/skills/` |
 
 ---
 
@@ -64,6 +66,8 @@ Upstreams to check:
 - `https://github.com/anthropics/skills`
 - `https://github.com/anthropics/knowledge-work-plugins`
 - `https://github.com/obra/superpowers`
+- `https://github.com/ruvnet/ruflo`
+- `https://github.com/nexu-io/open-design`
 
 ---
 

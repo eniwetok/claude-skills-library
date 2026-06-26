@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-06-21. **174 skills installed in `~/.claude/skills/`.**
+Last updated: 2026-06-23. **560 skills installed in `~/.claude/skills/`.**
 
 ---
 
@@ -344,6 +344,52 @@ A comprehensive suite for small business owners. Highlights:
 
 ---
 
+## Group 8 — ruvnet/ruflo (134 skills · multi-agent swarm)
+
+**Source:** [github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)
+**Pattern:** SPARC multi-agent framework — swarm coordination, distributed consensus (Raft/CRDT/Byzantine), GitHub automation, performance benchmarking, neural coordination.
+**Install:** `cp -r packages/ruflo/.agents/skills/* ~/.claude/skills/`
+**Package:** [packages/ruflo/](../packages/ruflo/)
+
+All 134 skills ✅ installed. Key categories:
+
+| Category | Skills |
+|----------|--------|
+| **Agent orchestration** | agent-agent, agent-orchestrator-task, agent-queen-coordinator, agent-mesh-coordinator, agent-hierarchical-coordinator, agent-swarm, agent-coordinator-swarm-init, agent-consensus-coordinator, agent-quorum-manager, agent-raft-manager, agent-byzantine-coordinator, agent-gossip-coordinator, agent-topology-optimizer, agent-sync-coordinator, agent-adaptive-coordinator, agent-collective-intelligence-coordinator, + more |
+| **Specialists** | agent-coder, agent-tester, agent-reviewer, agent-researcher, agent-planner, agent-architecture, agent-authentication, agent-dev-backend-api, agent-security-manager, agent-performance-analyzer, agent-performance-optimizer, agent-repo-architect, agent-scout-explorer |
+| **GitHub automation** | github-automation, github-code-review, github-multi-repo, github-project-management, github-release-management, github-workflow-automation, agent-github-modes, agent-github-pr-manager, agent-pr-manager, agent-release-manager, agent-release-swarm |
+| **AgentDB / memory** | agentdb-advanced, agentdb-learning, agentdb-memory-patterns, agentdb-optimization, agentdb-vector-search, embeddings, neural-training, reasoningbank-agentdb, reasoningbank-intelligence |
+| **SPARC / methodology** | sparc-methodology, agent-implementer-sparc-coder, agent-sparc-coordinator, agentic-jujutsu |
+| **Hive / swarm** | hive-mind, hive-mind-advanced, swarm-advanced, swarm-orchestration, flow-nexus-neural, flow-nexus-platform, flow-nexus-swarm, stream-chain |
+| **Engineering** | security-audit, performance-analysis, pair-programming, verification-quality, hooks-automation, worker-benchmarks, worker-integration |
+| **v3 architecture** | v3-cli-modernization, v3-core-implementation, v3-ddd-architecture, v3-integration-deep, v3-mcp-optimization, v3-memory-unification, v3-performance-optimization, v3-security-overhaul, v3-swarm-coordination |
+
+---
+
+## Group 9 — nexu-io/open-design (264 skills · design + templates)
+
+**Source:** [github.com/nexu-io/open-design](https://github.com/nexu-io/open-design)
+**Pattern:** Full design system — AI image/video generation (FAL, Venice, Sora, Replicate), Figma workflows, GSAP animation, frontend design, and 100+ HTML presentation templates.
+**Install:** `cp -r packages/open-design/skills/* ~/.claude/skills/ && cp -r packages/open-design/design-templates/* ~/.claude/skills/`
+**Package:** [packages/open-design/](../packages/open-design/)
+
+All 264 skills ✅ installed. Key categories:
+
+| Category | Skills |
+|----------|--------|
+| **FAL AI** | fal-generate, fal-image-edit, fal-upscale, fal-video-edit, fal-tryon, fal-3d, fal-realtime, fal-restore, fal-train, fal-kling-o3, fal-lip-sync, fal-vision |
+| **Figma** | figma-use, figma-generate-design, figma-create-new-file, figma-generate-library, figma-implement-design, figma-code-connect-components, figma-create-design-system-rules |
+| **GSAP animation** | gsap-core, gsap-react, gsap-scrolltrigger, gsap-plugins, gsap-timeline, gsap-utils, gsap-frameworks, gsap-performance |
+| **Venice AI** | venice-image-generate, venice-image-edit, venice-audio-music, venice-audio-speech, venice-video |
+| **Video / motion** | remotion, sora, hyperframes, video-hyperframes, emilkowalski-motion, vfx-text-cursor, stitch-skill, stitch-loop, gif-sticker-maker |
+| **Frontend** | frontend-dev, frontend-skill, frontend-slides, shadcn-ui, threejs, shader-dev, gsap-react, flutter-animating-apps, swiftui-design |
+| **Image gen** | imagegen, imagegen-frontend-web, imagegen-frontend-mobile, imagen, image-enhancer, fal-generate, replicate, venice-image-generate |
+| **Social cards** | card-twitter, card-xiaohongshu, social-spotify-card, social-reddit-card, social-x-post-card, social-carousel |
+| **Presentation templates** | html-ppt-zhangzara-* (30+ themes), orbit-general, orbit-github, orbit-gmail, orbit-linear, orbit-notion, replit-deck, kami-deck, nanobanana-ppt, guizang-ppt, html-ppt-pitch-deck, html-ppt-product-launch, and 60+ more |
+| **Design tools** | brandkit, design-brief, design-md, design-review, d3-visualization, color-expert, copywriting, creative-director, critique, enhance-prompt, resume-modern, pptx-generator, pptx-html-fidelity-audit |
+
+---
+
 ## Group 7 — obra/superpowers (Jesse Vincent)
 
 **Source:** [github.com/obra/superpowers](https://github.com/obra/superpowers)
@@ -402,6 +448,8 @@ Marketplace plugins installed via `claude plugin marketplace add`. State stored 
 | pm-toolkit | phuryn/pm-skills | 4 | ✅ installed |
 | pm-ai-shipping | phuryn/pm-skills | 2 | ✅ installed |
 | knowledge-work-plugins | anthropics/knowledge-work-plugins | 127 | ✅ installed |
+| learn-with-coursera | coursera/skills | 1 skill | ✅ installed |
+| learning-output-style | anthropics/claude-plugins-public | hook-based | ✅ installed |
 
 ---
 
