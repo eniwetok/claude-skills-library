@@ -1,7 +1,7 @@
 # Claude Skills Library
 
 Personal library of Claude Code skills, plugins, and resources — organized by upstream source.
-**897 skills installed** across 15 groups. Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
+**970 skills installed** across 17 groups. MCP servers: SocratiCode (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
 
 ---
 
@@ -24,6 +24,8 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 13 | **team-attention/agent-council** | team-attention | [github.com/team-attention/agent-council](https://github.com/team-attention/agent-council) |
 | 14 | **pablo-mano/Obsidian-CLI-skill** | pablo-mano | [github.com/pablo-mano/Obsidian-CLI-skill](https://github.com/pablo-mano/Obsidian-CLI-skill) |
 | 15 | **multica-ai/andrej-karpathy-skills** | multica-ai | [github.com/multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) |
+| 16 | **giancarloerra/SocratiCode** | giancarloerra | [github.com/giancarloerra/SocratiCode](https://github.com/giancarloerra/SocratiCode) |
+| 17 | **elementalsouls/Claude-BugHunter** | elementalsouls | [github.com/elementalsouls/Claude-BugHunter](https://github.com/elementalsouls/Claude-BugHunter) |
 
 ---
 
@@ -314,6 +316,37 @@ All 14 skills ✅ installed.
 > Install: `cp -r packages/multica-karpathy/skills/karpathy-guidelines ~/.claude/skills/`
 
 `karpathy-guidelines` ✅ installed.
+
+---
+
+## Group 16 — SocratiCode (2 skills + MCP server · codebase intelligence)
+
+> **Upstream:** [github.com/giancarloerra/SocratiCode](https://github.com/giancarloerra/SocratiCode) · 3,062 ⭐
+> Enterprise-grade codebase intelligence for 40M+ LOC repos. Hybrid semantic search, polyglot dependency graphs, symbol-level call-flow analysis, cross-project and branch-aware search. 61% fewer tokens, 84% fewer tool calls, 37× faster navigation.
+> **MCP:** `npx -y socraticode` (added to user config via `claude mcp add`)
+> **Package:** [packages/socraticode/](packages/socraticode/)
+
+| Component | What it does |
+|-----------|-------------|
+| MCP server | Semantic search, dependency graphs, call-flow, cross-repo search |
+| `codebase-exploration` skill | Guides structured exploration of unfamiliar codebases |
+| `codebase-management` skill | Manages codebase health, refactoring, cross-cutting changes |
+
+✅ MCP server added. ✅ 2 skills installed.
+
+---
+
+## Group 17 — Claude-BugHunter (71 skills + 15 commands · security)
+
+> **Upstream:** [github.com/elementalsouls/Claude-BugHunter](https://github.com/elementalsouls/Claude-BugHunter) · 2,806 ⭐
+> Enterprise security skill bundle — 681 disclosed vulnerability report patterns across 24 vulnerability classes (OWASP, CVE patterns), enterprise identity attack matrices, infrastructure attack matrices, bug bounty methodology.
+> **Package:** [packages/bughunter/](packages/bughunter/)
+> Install: `cp -r packages/bughunter/skills/* ~/.claude/skills/ && cp packages/bughunter/commands/* ~/.claude/commands/`
+
+Key skills: `hunt-sqli`, `hunt-xss`, `hunt-ato`, `hunt-api-misconfig`, `hunt-auth-bypass`, `hunt-cicd`, `hunt-cloud-misconfig`, `hunt-cors`, `hunt-csrf`, `hunt-deserialization`, `hunt-ssrf`, `hunt-xxe`, `cloud-iam-deep`, `enterprise-vpn-attack`, `bb-methodology`.
+Slash commands: `/hunt`, `/recon`, `/chain`, `/autopilot`, `/intel`, `/report`, `/surface`.
+
+All 71 skills + 15 commands ✅ installed.
 
 ---
 

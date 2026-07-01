@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-06-29. **897 skills installed in `~/.claude/skills/`.**
+Last updated: 2026-06-29. **970 skills installed in `~/.claude/skills/`.** MCP: SocratiCode.
 
 ---
 
