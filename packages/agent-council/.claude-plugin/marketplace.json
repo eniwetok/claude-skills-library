@@ -1,0 +1,16 @@
+{
+  "name": "team-attention-plugins",
+  "owner": {
+    "name": "Team Attention"
+  },
+  "plugins": [
+    {
+      "name": "agent-council",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/agent-council"
+      ]
+    }
+  ]
+}

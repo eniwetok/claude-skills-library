@@ -34,6 +34,12 @@ claude-skills-library/
 | **7 — superpowers** | [obra/superpowers](https://github.com/obra/superpowers) | `packages/superpowers/` | `cp -r packages/superpowers/skills/* ~/.claude/skills/` |
 | **8 — ruflo** | [ruvnet/ruflo](https://github.com/ruvnet/ruflo) | `packages/ruflo/` | `cp -r packages/ruflo/.agents/skills/* ~/.claude/skills/` |
 | **9 — open-design** | [nexu-io/open-design](https://github.com/nexu-io/open-design) | `packages/open-design/` | `cp -r packages/open-design/skills/* ~/.claude/skills/ && cp -r packages/open-design/design-templates/* ~/.claude/skills/` |
+| **10 — affaan-ecc** | [affaan-m/ECC](https://github.com/affaan-m/ECC) | `packages/affaan-ecc/` | `cp -r packages/affaan-ecc/skills/* ~/.claude/skills/` |
+| **11 — zhangzhang-skills** | [zhangzhang-111-i/claude-skills](https://github.com/zhangzhang-111-i/claude-skills) | `packages/zhangzhang-skills/` | see README Group 11 |
+| **12 — n8n-skills** | [n8n-io/skills](https://github.com/n8n-io/skills) | `packages/n8n-skills/` | `cp -r packages/n8n-skills/skills/* ~/.claude/skills/` |
+| **13 — agent-council** | [team-attention/agent-council](https://github.com/team-attention/agent-council) | `packages/agent-council/` | `cp -r packages/agent-council/skills/agent-council ~/.claude/skills/` |
+| **14 — pablo-obsidian** | [pablo-mano/Obsidian-CLI-skill](https://github.com/pablo-mano/Obsidian-CLI-skill) | `packages/pablo-obsidian/` | `cp -r packages/pablo-obsidian/skills/obsidian-cli ~/.claude/skills/` |
+| **15 — multica-karpathy** | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | `packages/multica-karpathy/` | `cp -r packages/multica-karpathy/skills/karpathy-guidelines ~/.claude/skills/` |
 
 ---
 
@@ -68,6 +74,12 @@ Upstreams to check:
 - `https://github.com/obra/superpowers`
 - `https://github.com/ruvnet/ruflo`
 - `https://github.com/nexu-io/open-design`
+- `https://github.com/affaan-m/ECC`
+- `https://github.com/zhangzhang-111-i/claude-skills`
+- `https://github.com/n8n-io/skills`
+- `https://github.com/team-attention/agent-council`
+- `https://github.com/pablo-mano/Obsidian-CLI-skill`
+- `https://github.com/multica-ai/andrej-karpathy-skills`
 
 ---
 

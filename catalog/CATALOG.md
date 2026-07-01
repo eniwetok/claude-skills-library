@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-06-23. **560 skills installed in `~/.claude/skills/`.**
+Last updated: 2026-06-29. **897 skills installed in `~/.claude/skills/`.**
 
 ---
 
@@ -429,6 +429,51 @@ All 14 skills ✅ installed in `~/.claude/skills/`
 | **update-skills-library** | Sync this repo from all upstream sources — clone, diff, copy changes, rebuild zips, update README/CATALOG, push | `update skills library`, `sync skills from upstream` | ✅ local only |
 
 *`pptx-from-template` and `update-skills-library` are in `~/.claude/skills/` locally but not tracked in this repo's `skills/` folder.*
+
+---
+
+## Group 10 — affaan-m/ECC (277 skills · Everything Claude Code)
+
+**Source:** [github.com/affaan-m/ECC](https://github.com/affaan-m/ECC)
+**Pattern:** "Agent harness performance optimization" — engineering stacks, agentic frameworks, cost-aware LLM pipelines, eval harnesses, healthcare, security, homelab, frontend/backend frameworks.
+**Install:** `cp -r packages/affaan-ecc/skills/* ~/.claude/skills/`
+**Package:** [packages/affaan-ecc/](../packages/affaan-ecc/)
+
+All 277 skills ✅ installed. Key skills: `agentic-engineering`, `ai-first-engineering`, `autonomous-agent-harness`, `eval-harness`, `benchmark`, `benchmark-optimization-loop`, `cost-aware-llm-pipeline`, `agent-eval`, `agent-harness-construction`, `agent-introspection-debugging`, `agent-self-evaluation`, `karpathy-guidelines` (bundled), `django-patterns`, `fastapi-patterns`, `laravel-patterns`, `react-patterns`, `flutter-dart-code-review`, `kotlin-patterns`, `rust-patterns`, `golang-patterns`, `hipaa-compliance`, `healthcare-cdss-patterns`, `homelab-wireguard-vpn`, `hookify-rules`, `security-bounty-hunter`.
+
+---
+
+## Group 11 — zhangzhang-111-i/claude-skills (~180 skills · Enterprise role bundle)
+
+**Source:** [github.com/zhangzhang-111-i/claude-skills](https://github.com/zhangzhang-111-i/claude-skills)
+**Pattern:** Role-based advisor skills for enterprise. Category bundles (e.g., `engineering`) contain both a top-level router SKILL.md and individual sub-skills.
+**Install:** copy category bundles + leaf skills (see README Group 11)
+**Package:** [packages/zhangzhang-skills/](../packages/zhangzhang-skills/)
+
+All ~180 skills ✅ installed. Key skills: `ceo-advisor`, `cto-advisor`, `ciso-advisor`, `cmo-advisor`, `cfo-advisor`, `cpo-advisor`, `coo-advisor`, `senior-architect`, `senior-backend`, `senior-frontend`, `senior-devops`, `senior-security`, `senior-pm`, `playwright-pro`, `agent-designer`, `agent-workflow-designer`, `mcp-server-builder`, `rag-architect`, `scrum-master`, `jira-expert`, `confluence-expert`, `atlassian-admin`, `gdpr-dsgvo-expert`, `fda-consultant-specialist`, `saas-scaffolder`, `saas-metrics-coach`, `marketing-skill` (bundle), `c-level-advisor` (bundle), `engineering` (bundle), `product-team` (bundle).
+
+---
+
+## Group 12 — n8n-io/skills (14 skills · n8n workflow automation)
+
+**Source:** [github.com/n8n-io/skills](https://github.com/n8n-io/skills)
+**Pattern:** Skills for building, debugging, and extending n8n automation workflows.
+**Install:** `cp -r packages/n8n-skills/skills/* ~/.claude/skills/`
+**Package:** [packages/n8n-skills/](../packages/n8n-skills/)
+
+All 14 skills ✅ installed: `n8n-agents`, `n8n-binary-and-data`, `n8n-code-nodes`, `n8n-credentials-and-security`, `n8n-data-tables`, `n8n-debugging`, `n8n-error-handling`, `n8n-expressions`, `n8n-extending-mcp`, `n8n-loops`, `n8n-node-configuration`, `n8n-subworkflows`, `n8n-workflow-lifecycle`, `using-n8n-skills`.
+
+---
+
+## Group 13 — Community singles (3 skills)
+
+Small single-skill repos from the community.
+
+| Skill | Source | Description | Status |
+|-------|--------|-------------|--------|
+| `agent-council` | [team-attention/agent-council](https://github.com/team-attention/agent-council) | Multi-AI consensus — "summon the council" to get opinions from multiple models synthesized into one answer | ✅ installed |
+| `obsidian-cli` | [pablo-mano/Obsidian-CLI-skill](https://github.com/pablo-mano/Obsidian-CLI-skill) | Read/write Obsidian vault notes via Obsidian CLI from Claude Code | ✅ installed |
+| `karpathy-guidelines` | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | CLAUDE.md guidelines derived from Karpathy's LLM coding observations — research-first, minimal code | ✅ installed |
 
 ---
 

@@ -1,7 +1,7 @@
 # Claude Skills Library
 
 Personal library of Claude Code skills, plugins, and resources — organized by upstream source.
-**560 skills installed** across 9 groups. Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
+**897 skills installed** across 15 groups. Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
 
 ---
 
@@ -18,6 +18,12 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 7 | **obra/superpowers** | Jesse Vincent | [github.com/obra/superpowers](https://github.com/obra/superpowers) |
 | 8 | **ruvnet/ruflo** | ruvnet | [github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
 | 9 | **nexu-io/open-design** | nexu-io | [github.com/nexu-io/open-design](https://github.com/nexu-io/open-design) |
+| 10 | **affaan-m/ECC** (Everything Claude Code) | affaan-m | [github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
+| 11 | **zhangzhang-111-i/claude-skills** | zhangzhang-111-i | [github.com/zhangzhang-111-i/claude-skills](https://github.com/zhangzhang-111-i/claude-skills) |
+| 12 | **n8n-io/skills** | n8n-io | [github.com/n8n-io/skills](https://github.com/n8n-io/skills) |
+| 13 | **team-attention/agent-council** | team-attention | [github.com/team-attention/agent-council](https://github.com/team-attention/agent-council) |
+| 14 | **pablo-mano/Obsidian-CLI-skill** | pablo-mano | [github.com/pablo-mano/Obsidian-CLI-skill](https://github.com/pablo-mano/Obsidian-CLI-skill) |
+| 15 | **multica-ai/andrej-karpathy-skills** | multica-ai | [github.com/multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) |
 
 ---
 
@@ -236,6 +242,78 @@ All 134 skills ✅ installed in `~/.claude/skills/`
 | Design tools | 70+ | brandkit, design-brief, d3-visualization, remotion, imagegen, pptx-generator, social cards, etc. |
 
 All 264 skills ✅ installed in `~/.claude/skills/`
+
+---
+
+## Group 10 — affaan-m/ECC (277 skills · Everything Claude Code)
+
+> **Upstream:** [github.com/affaan-m/ECC](https://github.com/affaan-m/ECC)
+> "The agent harness performance optimization system" — engineering patterns, AI agent frameworks, healthcare, security, homelab, frontend/backend stacks (Django, FastAPI, Laravel, Spring, React, Flutter, etc.), agentic loops, cost-aware LLM pipelines.
+> **Package:** [packages/affaan-ecc/](packages/affaan-ecc/)
+> Install: `cp -r packages/affaan-ecc/skills/* ~/.claude/skills/`
+
+Key categories: `agentic-engineering`, `ai-first-engineering`, `autonomous-agent-harness`, `eval-harness`, `benchmark`, cost-tracking, django/laravel/spring/react/flutter patterns, healthcare (HIPAA, CDSS), security, kubernetes, homelab.
+
+All 277 skills ✅ installed.
+
+---
+
+## Group 11 — zhangzhang-111-i/claude-skills (180+ skills · Enterprise roles)
+
+> **Upstream:** [github.com/zhangzhang-111-i/claude-skills](https://github.com/zhangzhang-111-i/claude-skills)
+> Production-ready role-based skills for enterprise teams — C-suite advisors (CEO/CFO/CTO/CMO/CISO/CPO), engineering teams, marketing, product, QA/regulatory, project management.
+> **Package:** [packages/zhangzhang-skills/](packages/zhangzhang-skills/)
+> Install: (copy category bundles + individual leaf skills from engineering/marketing/product/c-level etc.)
+
+Key skills: `ceo-advisor`, `cto-advisor`, `ciso-advisor`, `senior-architect`, `senior-backend`, `senior-frontend`, `playwright-pro`, `agent-designer`, `agent-workflow-designer`, `mcp-server-builder`, `rag-architect`, `saas-scaffolder`, `scrum-master`, `jira-expert`, `gdpr-dsgvo-expert`, `fda-consultant-specialist`.
+
+All ~180 skills ✅ installed.
+
+---
+
+## Group 12 — n8n-io/skills (14 skills · n8n workflow automation)
+
+> **Upstream:** [github.com/n8n-io/skills](https://github.com/n8n-io/skills)
+> Skills for building and debugging n8n workflows — code nodes, expressions, subworkflows, error handling, credentials, MCP extending, loops, data tables.
+> **Package:** [packages/n8n-skills/](packages/n8n-skills/)
+> Install: `cp -r packages/n8n-skills/skills/* ~/.claude/skills/`
+
+Skills: `n8n-agents`, `n8n-binary-and-data`, `n8n-code-nodes`, `n8n-credentials-and-security`, `n8n-data-tables`, `n8n-debugging`, `n8n-error-handling`, `n8n-expressions`, `n8n-extending-mcp`, `n8n-loops`, `n8n-node-configuration`, `n8n-subworkflows`, `n8n-workflow-lifecycle`, `using-n8n-skills`.
+
+All 14 skills ✅ installed.
+
+---
+
+## Group 13 — team-attention/agent-council (1 skill)
+
+> **Upstream:** [github.com/team-attention/agent-council](https://github.com/team-attention/agent-council)
+> Summons multiple AI agents in parallel and synthesizes their answers into a consensus response. Invoke with "summon the council" or "ask other AIs".
+> **Package:** [packages/agent-council/](packages/agent-council/)
+> Install: `cp -r packages/agent-council/skills/agent-council ~/.claude/skills/`
+
+`agent-council` ✅ installed.
+
+---
+
+## Group 14 — pablo-mano/Obsidian-CLI-skill (1 skill)
+
+> **Upstream:** [github.com/pablo-mano/Obsidian-CLI-skill](https://github.com/pablo-mano/Obsidian-CLI-skill)
+> Obsidian CLI integration skill — read and write Obsidian vault notes directly from Claude Code via the Obsidian CLI tool.
+> **Package:** [packages/pablo-obsidian/](packages/pablo-obsidian/)
+> Install: `cp -r packages/pablo-obsidian/skills/obsidian-cli ~/.claude/skills/`
+
+`obsidian-cli` ✅ installed.
+
+---
+
+## Group 15 — multica-ai/andrej-karpathy-skills (1 skill)
+
+> **Upstream:** [github.com/multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills)
+> CLAUDE.md-style behavioral guidelines derived from Andrej Karpathy's observations on LLM coding pitfalls — research-first, minimal code, honest uncertainty.
+> **Package:** [packages/multica-karpathy/](packages/multica-karpathy/)
+> Install: `cp -r packages/multica-karpathy/skills/karpathy-guidelines ~/.claude/skills/`
+
+`karpathy-guidelines` ✅ installed.
 
 ---
 
