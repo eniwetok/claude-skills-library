@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-06-29. **970 skills installed in `~/.claude/skills/`.** MCP: SocratiCode.
+Last updated: 2026-06-30. **935 skills installed in `~/.claude/skills/`.** MCP: SocratiCode.
 
 ---
 
@@ -424,6 +424,7 @@ All 14 skills ✅ installed in `~/.claude/skills/`
 
 | Skill | What it does | Triggers | Status |
 |-------|-------------|----------|--------|
+| **mission-control** | Master orchestrator — classifies task type, selects the right skills in order, resolves overlaps/conflicts among all 934 installed skills. The unifying glue across G1–G17. | `start working on`, `which skill should I use`, `new session`, `help me build` | ✅ installed |
 | **pm-agent** | Multi-product PM agent — orchestrates pm-skills, generates weekly product reports across a portfolio | `/pm-agent`, `weekly PM run`, `pm report` | ✅ installed |
 | **pptx-from-template** | Brand-faithful PowerPoint builder — unpack template → clone layouts → inject content → repack. Never regenerates from scratch. | `from my template`, `match our deck`, `use this pptx as template` | ✅ local only |
 | **update-skills-library** | Sync this repo from all upstream sources — clone, diff, copy changes, rebuild zips, update README/CATALOG, push | `update skills library`, `sync skills from upstream` | ✅ local only |

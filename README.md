@@ -1,7 +1,7 @@
 # Claude Skills Library
 
 Personal library of Claude Code skills, plugins, and resources — organized by upstream source.
-**970 skills installed** across 17 groups. MCP servers: SocratiCode (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
+**935 skills installed** across 17 groups. MCP servers: SocratiCode (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
 
 ---
 
@@ -198,6 +198,7 @@ All 14 skills ✅ installed in `~/.claude/skills/`
 
 | Skill | Description | Trigger | Installed |
 |-------|-------------|---------|-----------|
+| [mission-control](skills/mission-control/) | **Master orchestrator** — classifies task type, routes to the right skills in order, resolves all overlap conflicts across G1–G17 | `start working on`, `which skill`, `new session` | ✅ |
 | [pm-agent](skills/pm-agent/) | Multi-product PM agent — orchestrates pm-skills, writes weekly reports across a portfolio | `/pm-agent`, `weekly PM run` | ✅ |
 | pptx-from-template | Brand-faithful PowerPoint builder — edit from template, never regenerate from scratch | `from my template`, `match our deck` | ✅ local |
 | update-skills-library | Sync this repo from all upstream sources, rebuild zips, push | `update skills library` | ✅ local |
