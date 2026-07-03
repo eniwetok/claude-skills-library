@@ -15,6 +15,59 @@ description: >
 You have 934 skills installed across 17 groups. This skill tells you which ones
 to use, in what order, and how to resolve conflicts between overlapping skills.
 
+---
+
+## Mission-Critical Mode (default for production / enterprise work)
+
+**Routing is not enforcement.** This skill tells you WHICH skills to run, but for
+mission-critical software, being told is not enough — quality must be *harnessed*
+(deterministically gated), not merely recommended. Three layers work together:
+
+1. **Deterministic hooks** (cannot be skipped) — in `~/.claude/settings.json`:
+   - `branch-guard` (PreToolUse) — no edits on main/master; forces worktree-per-feature.
+   - `dod-gate` (Stop) — in any repo with `.claude/dod.json`, the session **cannot end**
+     while `verify` (lint + typecheck + tests) is red. This is the real backstop.
+2. **This skill** (routing) — picks the right skills in the right order.
+3. **The five pillars** (below) — each is a GATE that must be satisfied, not a suggestion.
+
+### The Five Pillars — each is a GATE, not advice
+
+| Pillar | Gate: what must be TRUE before "done" | Enforced by |
+|--------|----------------------------------------|-------------|
+| **Design** | A written plan/ADR existed and was approved BEFORE any code. No code from a blank design. | `brainstorming` / `writing-plans` / `architecture-decision-records` + review |
+| **Correctness** | Tests + typecheck + lint all green. Every new/changed behavior has a test. | `tdd-workflow` + `dod-gate` hook |
+| **Evaluation** | Any AI-generated or heuristic logic has *evidence* it works (eval/benchmark), not vibes. | `eval-harness` / `verification-before-completion` |
+| **Usability** | User-facing paths pass a11y + UX review; every error state is handled and legible. | `frontend-a11y` / `error-handling` / `receiving-code-review` |
+| **Maintainability** | Diff is minimal; names are clear; no dead code; no unexplained complexity; docs/ADR updated. | `karpathy-guidelines` + `simplify` + `code-review` |
+
+### The enforced outer loop (wraps EVERY workflow A–M)
+
+```
+DESIGN GATE  →  BUILD  →  VERIFY GATE  →  SHIP GATE
+  (pillar 1)     (A–M)    (pillars 2-4)   (pillar 5 + dod-gate hook)
+```
+
+**You do not advance past a gate until it is satisfied.** Workflows A–M are the BUILD
+phase only — they are always bracketed by the DESIGN gate before and the VERIFY/SHIP
+gates after. If `.claude/dod.json` exists, the SHIP gate is enforced by the machine,
+not by your judgment.
+
+### Definition of Done (mission-critical) — announce this checklist and complete it
+
+- [ ] **Design**: a written plan/ADR existed before code, and matches what was built
+- [ ] **Tests**: every new/changed behavior is covered; the suite is green
+- [ ] **Static**: typecheck + lint clean
+- [ ] **Evaluation**: AI/heuristic logic has eval or test evidence (not "looks right")
+- [ ] **Usability**: user-facing paths handle errors + pass a11y where applicable
+- [ ] **Maintainability**: minimal diff, clear names, no dead code, docs/ADR updated
+- [ ] **Verify**: `verify` passes locally (the `dod-gate` hook confirms this deterministically)
+
+To turn a repo mission-critical: drop [`references/dod.json.template`](references/dod.json.template)
+into `<repo>/.claude/dod.json` and set its `verify` to your real command
+(e.g. `npm run lint && npm run typecheck && npm test`).
+
+---
+
 ## Step 1 — Classify the Task
 
 Read the user's request and identify the primary task type:
@@ -341,6 +394,11 @@ These apply across ALL workflows, not just specific ones:
 3. **`agent-self-evaluation`** — run after completing any non-trivial task for a structured self-scorecard.
 
 4. **`hookify-rules`** — for recurring rules ("always do X"), encode them as hooks, not memory. Memory is lossy; hooks are deterministic.
+
+5. **Deterministic gates already installed** (`~/.claude/hooks/`) — these fire whether or not you remember them:
+   - `branch-guard` (PreToolUse) — blocks edits on main/master/trunk/develop in the main worktree.
+   - `dod-gate` (Stop) — blocks session end while `verify` is red, in any repo with `.claude/dod.json`.
+   When a gate blocks you, do not work around it — satisfy it. That is the point of Mission-Critical Mode.
 
 ---
 

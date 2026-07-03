@@ -1,0 +1,11 @@
+{
+  "_comment": "Copy to <repo>/.claude/dod.json to make this repo mission-critical. The dod-gate Stop hook runs `verify` when there are uncommitted non-doc changes and BLOCKS session end if it fails. Set `verify` to your real gate command.",
+  "verify": "echo 'set me: e.g. npm run lint && npm run typecheck && npm test' && false",
+  "examples": {
+    "node": "npm run lint && npm run typecheck && npm test",
+    "python": "ruff check . && mypy . && pytest -q",
+    "go": "go vet ./... && golangci-lint run && go test ./...",
+    "rust": "cargo clippy -- -D warnings && cargo test",
+    "django": "ruff check . && python manage.py test"
+  }
+}
