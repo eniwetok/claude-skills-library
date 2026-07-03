@@ -23,10 +23,13 @@ to use, in what order, and how to resolve conflicts between overlapping skills.
 mission-critical software, being told is not enough — quality must be *harnessed*
 (deterministically gated), not merely recommended. Three layers work together:
 
-1. **Deterministic hooks** (cannot be skipped) — in `~/.claude/settings.json`:
-   - `branch-guard` (PreToolUse) — no edits on main/master; forces worktree-per-feature.
-   - `dod-gate` (Stop) — in any repo with `.claude/dod.json`, the session **cannot end**
-     while `verify` (lint + typecheck + tests) is red. This is the real backstop.
+1. **Deterministic hooks** (cannot be skipped) — in `~/.claude/settings.json`, wired to `~/.claude/hooks/`:
+   - `branch-guard` (PreToolUse, **global**) — no edits on main/master/trunk/develop; forces worktree-per-feature.
+   - `design-gate` (PreToolUse, mission-critical) — blocks the FIRST code edit until a plan/ADR exists. Design-before-code.
+   - `format-on-save` (PostToolUse, mission-critical) — formats each file right after it's written; maintainability never drifts.
+   - `dod-gate` (Stop, mission-critical) — the session **cannot end** while `verify` (lint + typecheck + tests) is red. The real backstop.
+
+   The three mission-critical hooks activate together the moment a repo has `.claude/dod.json`.
 2. **This skill** (routing) — picks the right skills in the right order.
 3. **The five pillars** (below) — each is a GATE that must be satisfied, not a suggestion.
 
@@ -396,8 +399,10 @@ These apply across ALL workflows, not just specific ones:
 4. **`hookify-rules`** — for recurring rules ("always do X"), encode them as hooks, not memory. Memory is lossy; hooks are deterministic.
 
 5. **Deterministic gates already installed** (`~/.claude/hooks/`) — these fire whether or not you remember them:
-   - `branch-guard` (PreToolUse) — blocks edits on main/master/trunk/develop in the main worktree.
-   - `dod-gate` (Stop) — blocks session end while `verify` is red, in any repo with `.claude/dod.json`.
+   - `branch-guard` (PreToolUse, global) — blocks edits on main/master/trunk/develop in the main worktree.
+   - `design-gate` (PreToolUse, mission-critical) — blocks the first code edit until a plan/ADR exists.
+   - `format-on-save` (PostToolUse, mission-critical) — auto-formats each written file.
+   - `dod-gate` (Stop, mission-critical) — blocks session end while `verify` is red.
    When a gate blocks you, do not work around it — satisfy it. That is the point of Mission-Critical Mode.
 
 ---

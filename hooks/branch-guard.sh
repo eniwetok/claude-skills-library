@@ -11,6 +11,9 @@ print(d.get('tool_input', {}).get('file_path', ''))
 
 DIR="${FILE_PATH:+$(dirname "$FILE_PATH")}"
 DIR="${DIR:-.}"
+# New files may live in a not-yet-created dir; walk up to the nearest existing ancestor.
+while [ ! -d "$DIR" ] && [ "$DIR" != "/" ] && [ -n "$DIR" ]; do DIR=$(dirname "$DIR"); done
+DIR="${DIR:-.}"
 
 BRANCH=$(git -C "$DIR" branch --show-current 2>/dev/null || echo "")
 [ -z "$BRANCH" ] && exit 0
