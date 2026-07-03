@@ -59,11 +59,14 @@ Do NOT use both.
 
 ```
 1. systematic-debugging   → root cause FIRST, never patch symptoms
-2. [domain skill]         → specific fix guidance once root cause found
-3. verification-before-completion → confirm fix, no regressions
+2. caveman-debug          → when no debugger available: instrument with [CAVE] logs, run, read, strip
+3. [domain skill]         → specific fix guidance once root cause found
+4. verification-before-completion → confirm fix, no regressions
 ```
 
 **Overlap note:** For AI agent failures specifically, use `agent-introspection-debugging` instead of `systematic-debugging`. For general code bugs, always `systematic-debugging`.
+
+**caveman-debug vs systematic-debugging:** not a conflict — systematic-debugging is the methodology (think before acting); caveman-debug is the technique (print statements) used during step 2 when you need to observe live runtime state and no proper debugger is available. Use both together.
 
 ---
 
@@ -371,7 +374,7 @@ Complete disambiguation for skills that share similar descriptions:
 | G3 | Cowork | 15 | Workflow automation |
 | G4 | anthropics/skills | 30+ | `skill-creator`, `code-review`, `system-design` |
 | G5 | knowledge-work-plugins | 127 | `deep-research`, `brainstorming`, `docs-page` |
-| G6 | custom | 2 | `pptx-from-template`, `update-skills-library` |
+| G6 | custom | 4 | **`mission-control`**, **`caveman-debug`**, `pm-agent`, `pptx-from-template` |
 | G7 | obra/superpowers | 14 | **`using-superpowers`**, `brainstorming`, `systematic-debugging`, `writing-plans` |
 | G8 | ruvnet/ruflo | 134 | **`sparc-methodology`**, swarm, SPARC agents |
 | G9 | nexu-io/open-design | 264 | FAL AI, Figma, GSAP, 50+ html-ppt themes |
