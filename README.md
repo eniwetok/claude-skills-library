@@ -10,7 +10,7 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | # | Origin | Author | URL |
 |---|--------|--------|-----|
 | 1 | **AgriciDaniel / claude-obsidian** (Karpathy pattern · kepano foundation) | Agrici Daniel | [github.com/AgriciDaniel/claude-obsidian](https://github.com/AgriciDaniel/claude-obsidian) |
-| 2 | **PM Skills Marketplace** | Paweł Huryn (Product Compass) | [github.com/phuryn/pm-skills](https://github.com/phuryn/pm-skills) |
+| 2 | **PM Skills Marketplace** (v2.1.0) | Paweł Huryn (Product Compass) | [github.com/phuryn/pm-skills](https://github.com/phuryn/pm-skills) |
 | 3 | **Cowork Skills (YouTube)** | Brock | "15 Claude Cowork Skills I Can't Live Without" |
 | 4 | **Official Anthropic Skills** | Anthropic | [github.com/anthropics/skills](https://github.com/anthropics/skills) |
 | 5 | **Knowledge Work Plugins** | Anthropic | [github.com/anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) |
@@ -60,6 +60,7 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 ## Group 2 — PM Skills Marketplace
 
 > **Upstream:** [github.com/phuryn/pm-skills](https://github.com/phuryn/pm-skills) · Paweł Huryn · [productcompass.pm](https://www.productcompass.pm)
+> **Latest upstream release: v2.1.0** (2026-07-03) — hardened the two pm-ai-shipping audit skills (security + performance checks for AI-built code); no new skills or plugins added.
 > 68 PM skills and 42 chained workflows across 9 plugins. Companion: [pm-brain](https://github.com/phuryn/pm-brain).
 > **Package:** [packages/pm-skills-main/](packages/pm-skills-main/) · [zips/pm-skills-bundle.zip](zips/pm-skills-bundle.zip)
 > Install: `claude plugin marketplace add phuryn/pm-skills`
