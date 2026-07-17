@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-06-30. **935 skills installed in `~/.claude/skills/`.** MCP: SocratiCode.
+Last updated: 2026-07-17. **941 skills installed in `~/.claude/skills/`.** MCP: SocratiCode.
 
 ---
 
@@ -530,3 +530,24 @@ MCP servers accessible in Claude Code sessions. None permanently installed in gl
 | Expo skills | https://github.com/expo/skills | Official Expo dev skills |
 | ios-simulator-skill | https://github.com/conorluddy/ios-simulator-skill | iOS app building/testing |
 | TonsOfSkills | https://github.com/jeremylongshore/claude-code-plugins-plus-skills | 2810 skills, 425 plugins |
+
+
+---
+
+## Group 18 — ibelick/ui-skills (5 of 6 installed)
+
+**Source:** [github.com/ibelick/ui-skills](https://github.com/ibelick/ui-skills) · MIT · 4.5k stars
+**Package:** `packages/ui-skills-ibelick/`
+
+| Skill | What it does | Triggers | Status |
+|-------|-------------|----------|--------|
+| **baseline-ui** | Fast cleanup pass on AI-generated UI — spacing, hierarchy, typography | `/baseline-ui`, `deslop ui`, `polish this ui` | ✅ installed |
+| **fixing-accessibility** | Audit/fix HTML a11y — ARIA, keyboard nav, focus, contrast, form errors | `/fixing-accessibility`, `wcag`, `a11y audit` | ✅ installed |
+| **fixing-metadata** | Titles, meta descriptions, canonical, OG/Twitter cards, favicons, JSON-LD | `/fixing-metadata`, `open graph`, `social preview` | ✅ installed |
+| **fixing-motion-performance** | Fix animation jank — layout thrashing, compositor props, scroll motion | `/fixing-motion-performance`, `animation stutters` | ✅ installed |
+| **improve-ui** | READ-ONLY surface audit → writes implementation plan for another agent | `review this interface`, `design handoff`, `design-system drift` | ✅ installed |
+| ui-skills-root | Upstream CLI routing layer | — | ⬜ skipped (mission-control routes) |
+
+**Why these matter:** they are *fix* skills, complementing the *build* skills in Open Design.
+`improve-ui` is notable for Mission-Critical Mode — it never edits source, only writes a plan
+for a separate agent to execute (the "independent inspector" pattern).

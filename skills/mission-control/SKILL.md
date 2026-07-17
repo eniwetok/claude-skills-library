@@ -1,7 +1,7 @@
 ---
 name: mission-control
 description: >
-  Master orchestrator for all 934 installed skills. Invoke at session start,
+  Master orchestrator for all 941 installed skills. Invoke at session start,
   when starting any new task, or when you're unsure which skill to use.
   Classifies the task, selects the right skills in the right order, and resolves
   conflicts when multiple skills overlap. Use when: "start working on", "help me build",
@@ -12,7 +12,7 @@ description: >
 
 # Mission Control — Skill Orchestrator
 
-You have 934 skills installed across 17 groups. This skill tells you which ones
+You have 941 skills installed across 18 groups. This skill tells you which ones
 to use, in what order, and how to resolve conflicts between overlapping skills.
 
 ---
@@ -317,6 +317,29 @@ brainstorming → react-patterns → frontend-a11y → tdd-workflow
 brainstorming → shadcn-ui / design-system → impeccable-design-polish
 ```
 
+**Fixing UI that already exists** (ibelick's pack — these FIX, they don't build):
+```
+baseline-ui                → clean up AI-generated "slop": spacing, hierarchy, typography
+fixing-accessibility       → plain HTML/WCAG: ARIA, keyboard, focus, contrast, forms
+fixing-motion-performance  → animations stutter/jank: layout thrashing, compositor, blur
+fixing-metadata            → page titles, Open Graph, Twitter cards, favicons, JSON-LD
+improve-ui                 → READ-ONLY audit; writes a plan for ANOTHER agent to execute
+```
+
+**Build vs fix — pick the right one:**
+| Need | Use |
+|------|-----|
+| Build new animations | `motion-ui` / `gsap-*` |
+| Animations are janky | `fixing-motion-performance` |
+| Build accessible React components | `frontend-a11y` |
+| Audit/fix accessibility of existing HTML | `fixing-accessibility` |
+| SEO strategy, keywords, competitors | `seo-audit` |
+| The actual meta/OG/JSON-LD tags | `fixing-metadata` |
+| Polish a page you just built | `impeccable-design-polish` |
+| Audit someone else's surface without touching it | `improve-ui` |
+
+**`improve-ui` is the Mission-Critical-Mode choice for UI**: it never edits product source — it writes an implementation plan for a separate agent. That is the "independent inspector / plan-before-code" pattern, applied to interfaces.
+
 **Animation:**
 ```
 gsap-core → gsap-scrolltrigger / gsap-react → gsap-performance
@@ -403,7 +426,26 @@ These apply across ALL workflows, not just specific ones:
    - `design-gate` (PreToolUse, mission-critical) — blocks the first code edit until a plan/ADR exists.
    - `format-on-save` (PostToolUse, mission-critical) — auto-formats each written file.
    - `dod-gate` (Stop, mission-critical) — blocks session end while `verify` is red.
+   - `skill-self-eval` (UserPromptSubmit, global) — injects rule 6 below on every turn.
    When a gate blocks you, do not work around it — satisfy it. That is the point of Mission-Critical Mode.
+
+6. **Close the loop — skill-coverage check after every task.** Answer the user FIRST, then ask:
+   did this use case have a skill?
+
+   ```
+   already covered?          → say so, change nothing
+   NEW reusable capability?  → skill-scout (confirm nothing exists) → skill-creator (create)
+   extends existing skill?   → skill-creator (UPDATE it — never a near-duplicate)
+   trivial one-off?          → skip; do not spam the library
+   ```
+
+   Use `skill-scout` BEFORE creating — it searches local + marketplace + GitHub so you don't rebuild
+   what already exists. Use `skill-creator` for both create AND update (it explicitly covers "modify
+   and improve existing skills"). End with a one-line `Skill check:` verdict.
+
+   **Recurring behaviour is a hook, not a skill.** If the gap is *when* something should happen
+   ("always / after every X"), the artifact is a hook (`update-config`, see rule 4), not a skill.
+   Skills are capabilities you invoke; hooks are triggers that fire. Never model a trigger as a skill.
 
 ---
 

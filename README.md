@@ -1,7 +1,7 @@
 # Claude Skills Library
 
 Personal library of Claude Code skills, plugins, and resources — organized by upstream source.
-**935 skills installed** across 17 groups. MCP servers: SocratiCode (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
+**941 skills installed** across 18 groups. MCP servers: SocratiCode (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
 
 ---
 
@@ -26,6 +26,7 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 15 | **multica-ai/andrej-karpathy-skills** | multica-ai | [github.com/multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) |
 | 16 | **giancarloerra/SocratiCode** | giancarloerra | [github.com/giancarloerra/SocratiCode](https://github.com/giancarloerra/SocratiCode) |
 | 17 | **elementalsouls/Claude-BugHunter** | elementalsouls | [github.com/elementalsouls/Claude-BugHunter](https://github.com/elementalsouls/Claude-BugHunter) |
+| 18 | **ibelick/ui-skills** (Skills for Design Engineers) | ibelick | [github.com/ibelick/ui-skills](https://github.com/ibelick/ui-skills) |
 
 ---
 
@@ -412,3 +413,25 @@ claude-skills-library/
     ├── 15-cowork-skills.zip       ← G3 original
     └── *.zip                      ← individual skill zips (G1)
 ```
+
+
+---
+
+## Group 18 — ibelick/ui-skills (Skills for Design Engineers)
+
+> Fix-oriented UI skills from [@ibelick](https://github.com/ibelick) — these **fix existing interfaces**,
+> where most of the Open Design pack **builds** new ones. MIT licensed.
+
+**Source:** [github.com/ibelick/ui-skills](https://github.com/ibelick/ui-skills) · 4.5k stars
+**Install:** `cp -r packages/ui-skills-ibelick/skills/<name> ~/.claude/skills/`
+
+| Skill | Description | Installed |
+|-------|-------------|-----------|
+| baseline-ui | Deslop AI-generated UI — spacing, hierarchy, typography, layout | ✅ |
+| fixing-accessibility | Audit/fix plain HTML accessibility — ARIA, keyboard, focus, contrast | ✅ |
+| fixing-metadata | Page titles, Open Graph, Twitter cards, favicons, JSON-LD, robots | ✅ |
+| fixing-motion-performance | Fix janky animations — layout thrashing, compositor, blur | ✅ |
+| improve-ui | Read-only UI audit; writes an implementation plan for another agent | ✅ |
+| ui-skills-root | Upstream CLI router — **not installed** (mission-control already routes) | ⬜ by design |
+
+*Note: the pre-existing `ui-skills` skill (Open Design) is only a signpost to this repo, not the content.*
