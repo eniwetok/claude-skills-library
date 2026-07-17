@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-07-17. **941 skills installed in `~/.claude/skills/`.** MCP: SocratiCode.
+Last updated: 2026-07-17. **942 skills installed in `~/.claude/skills/`.** MCP: SocratiCode.
 
 ---
 
@@ -424,6 +424,7 @@ All 14 skills ✅ installed in `~/.claude/skills/`
 
 | Skill | What it does | Triggers | Status |
 |-------|-------------|----------|--------|
+| **cowork-package** | Package installed skills into Cowork-ready zips — one SKILL.md per zip (Cowork rejects bundles), verified before handoff | `install X into cowork`, `register skill in cowork`, `package for cowork` | ✅ installed |
 | **caveman-debug** | Print-statement debugging — instruments code with `[CAVE]` prefixed logs at every dark zone, then strips them after the bug is found. Covers 10 languages. | `caveman`, `caveman debug this`, `add print statements`, `log everything` | ✅ installed |
 | **mission-control** | Master orchestrator — classifies task type, selects the right skills in order, resolves overlaps/conflicts among all 934 installed skills. The unifying glue across G1–G17. | `start working on`, `which skill should I use`, `new session`, `help me build` | ✅ installed |
 | **pm-agent** | Multi-product PM agent — orchestrates pm-skills, generates weekly product reports across a portfolio | `/pm-agent`, `weekly PM run`, `pm report` | ✅ installed |
