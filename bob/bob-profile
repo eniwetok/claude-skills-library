@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# Swap which skills Bob loads, to keep context small.
+# Full library lives in ~/.bob/skills-vault (Bob does NOT read it).
+# Only the active profile is copied into ~/.bob/skills (Bob DOES read it).
+set -euo pipefail
+
+VAULT="$HOME/.bob/skills-vault"
+ACTIVE="$HOME/.bob/skills"
+PROF="$HOME/.bob/profiles"
+
+usage() {
+  echo "Usage: bob-profile <name> [name2 ...]   load profile(s)"
+  echo "       bob-profile list                 show profiles"
+  echo "       bob-profile status               show what's loaded now"
+  echo "       bob-profile all                  load ALL skills (heavy: ~67k tokens)"
+  echo ""
+  echo "Available:"
+  for f in "$PROF"/*.txt; do
+    n=$(basename "$f" .txt); [ "$n" = "_core" ] && continue
+    echo "  $n ($(grep -cve '^[[:space:]]*$' "$f") skills)"
+  done
+}
+
+cost() {  # rough token estimate of what's loaded
+  python3 - "$ACTIVE" << 'PY'
+import sys,os,re,glob
+tot=0;n=0
+for f in glob.glob(os.path.join(sys.argv[1],'*','SKILL.md')):
+    try:t=open(f,encoding='utf-8',errors='ignore').read()
+    except:continue
+    m=re.match(r'^---\s*\n(.*?)\n---',t,re.S)
+    if m: tot+=len(m.group(1)); n+=1
+print(f"  {n} skills loaded  ~= {tot//4:,} tokens of descriptions")
+PY
+}
+
+[ $# -eq 0 ] && { usage; exit 1; }
+
+case "${1:-}" in
+  list) usage; exit 0 ;;
+  status)
+    echo "Currently loaded in ~/.bob/skills:"; cost
+    [ -f "$ACTIVE/.profile" ] && echo "  profile: $(cat "$ACTIVE/.profile")" || echo "  profile: (unknown)"
+    exit 0 ;;
+  all)
+    rm -rf "$ACTIVE"; mkdir -p "$ACTIVE"
+    rsync -a "$VAULT"/ "$ACTIVE"/
+    echo "all" > "$ACTIVE/.profile"
+    echo "Loaded ALL skills."; cost; exit 0 ;;
+esac
+
+# Validate every requested profile BEFORE touching anything
+for p in "$@"; do
+  [ -f "$PROF/$p.txt" ] || { echo "ERROR: no profile '$p'"; echo; usage; exit 1; }
+done
+
+TMP=$(mktemp -d)
+copy_list() {
+  while read -r s; do
+    [ -z "$s" ] && continue
+    if [ -d "$VAULT/$s" ]; then cp -R "$VAULT/$s" "$TMP/$s" 2>/dev/null || true
+    else echo "  warn: '$s' not in vault (skipped)" >&2; fi
+  done < "$1"
+}
+copy_list "$PROF/_core.txt"          # core always
+for p in "$@"; do copy_list "$PROF/$p.txt"; done
+
+COUNT=$(ls -1 "$TMP" | wc -l | tr -d ' ')
+[ "$COUNT" -lt 5 ] && { echo "ERROR: only $COUNT skills resolved — aborting, nothing changed."; rm -rf "$TMP"; exit 1; }
+
+rm -rf "$ACTIVE"; mkdir -p "$ACTIVE"
+cp -R "$TMP"/. "$ACTIVE"/; rm -rf "$TMP"
+echo "core + $*" > "$ACTIVE/.profile"
+
+echo "Loaded: core + $*"
+cost
+echo ""
+echo "Restart your Bob conversation for the change to take effect."

@@ -1,0 +1,8 @@
+mission-control
+karpathy-guidelines
+brainstorming
+writing-plans
+systematic-debugging
+verification-before-completion
+caveman-debug
+code-review
