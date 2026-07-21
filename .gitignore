@@ -9,3 +9,6 @@ backups/*.tar.gz
 backups/*.json
 backups/*.sh
 backups/.latest-stamp
+
+# Built distributable package (65MB). Rebuild with: ./bob/build-package.sh
+dist/*.zip
