@@ -1,1 +1,11 @@
 .DS_Store
+
+# Local machine snapshots — restore points for ~/.bob and ~/.claude.
+# Not committed: they are large binaries (~41MB each), they duplicate content
+# already tracked under packages/, and new timestamped copies accumulate on
+# every backup, permanently bloating repo history.
+# backups/RESTORE.md IS tracked — the instructions matter, the archives don't.
+backups/*.tar.gz
+backups/*.json
+backups/*.sh
+backups/.latest-stamp
