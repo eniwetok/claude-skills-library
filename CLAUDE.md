@@ -40,6 +40,7 @@ claude-skills-library/
 | **13 — agent-council** | [team-attention/agent-council](https://github.com/team-attention/agent-council) | `packages/agent-council/` | `cp -r packages/agent-council/skills/agent-council ~/.claude/skills/` |
 | **14 — pablo-obsidian** | [pablo-mano/Obsidian-CLI-skill](https://github.com/pablo-mano/Obsidian-CLI-skill) | `packages/pablo-obsidian/` | `cp -r packages/pablo-obsidian/skills/obsidian-cli ~/.claude/skills/` |
 | **18 — ui-skills-ibelick** | [ibelick/ui-skills](https://github.com/ibelick/ui-skills) | `packages/ui-skills-ibelick/` | `cp -r packages/ui-skills-ibelick/skills/<name> ~/.claude/skills/` |
+| **19 — evals-skills-hamel** | [hamelsmu/evals-skills](https://github.com/hamelsmu/evals-skills) | `packages/evals-skills-hamel/` | `cp -r packages/evals-skills-hamel/skills/<name> ~/.claude/skills/` |
 | **15 — multica-karpathy** | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | `packages/multica-karpathy/` | `cp -r packages/multica-karpathy/skills/karpathy-guidelines ~/.claude/skills/` |
 
 ---
@@ -82,6 +83,7 @@ Upstreams to check:
 - `https://github.com/pablo-mano/Obsidian-CLI-skill`
 - `https://github.com/multica-ai/andrej-karpathy-skills`
 - `https://github.com/ibelick/ui-skills`
+- `https://github.com/hamelsmu/evals-skills`
 
 ---
 

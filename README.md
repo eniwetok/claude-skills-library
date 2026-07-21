@@ -1,7 +1,7 @@
 # Claude Skills Library
 
 Personal library of Claude Code skills, plugins, and resources — organized by upstream source.
-**942 skills installed** across 18 groups. MCP servers: SocratiCode (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
+**949 skills installed** across 19 groups. MCP servers: SocratiCode (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
 
 ---
 
@@ -27,6 +27,7 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 16 | **giancarloerra/SocratiCode** | giancarloerra | [github.com/giancarloerra/SocratiCode](https://github.com/giancarloerra/SocratiCode) |
 | 17 | **elementalsouls/Claude-BugHunter** | elementalsouls | [github.com/elementalsouls/Claude-BugHunter](https://github.com/elementalsouls/Claude-BugHunter) |
 | 18 | **ibelick/ui-skills** (Skills for Design Engineers) | ibelick | [github.com/ibelick/ui-skills](https://github.com/ibelick/ui-skills) |
+| 19 | **hamelsmu/evals-skills** (LLM eval methodology) | Hamel Husain | [github.com/hamelsmu/evals-skills](https://github.com/hamelsmu/evals-skills) |
 
 ---
 
@@ -436,3 +437,29 @@ claude-skills-library/
 | ui-skills-root | Upstream CLI router — **not installed** (mission-control already routes) | ⬜ by design |
 
 *Note: the pre-existing `ui-skills` skill (Open Design) is only a signpost to this repo, not the content.*
+
+
+---
+
+## Group 19 — hamelsmu/evals-skills (LLM Evaluation Methodology)
+
+> Hamel Husain's eval methodology as skills. These evaluate **an LLM pipeline's output
+> quality** — a different problem from `agent-eval` (which compares coding agents) or
+> `verification-quality` (which checks code). MIT licensed.
+> Post: [hamel.dev/blog/posts/evals-skills](https://hamel.dev/blog/posts/evals-skills/)
+
+**Source:** [github.com/hamelsmu/evals-skills](https://github.com/hamelsmu/evals-skills)
+**Install:** `cp -r packages/evals-skills-hamel/skills/<name> ~/.claude/skills/`
+
+| Skill | Description | Installed |
+|-------|-------------|-----------|
+| eval-audit | Audit an existing eval pipeline — missing error analysis, unvalidated judges, vanity metrics | ✅ |
+| error-analysis | Read real traces, categorize failures into a failure-mode vocabulary. **Start here.** | ✅ |
+| generate-synthetic-data | Create varied test inputs when real data is sparse (<100 traces) | ✅ |
+| write-judge-prompt | Design binary Pass/Fail LLM-as-Judge evaluators for subjective criteria | ✅ |
+| validate-evaluator | Calibrate a judge against human labels (TPR/TNR, bias correction) | ✅ |
+| evaluate-rag | Score retrieval quality and generation quality as **separate** concerns | ✅ |
+| build-review-interface | Generate a browser annotation tool for human trace review | ✅ |
+
+**The rule that matters:** never trust a judge you haven't calibrated against human labels.
+`write-judge-prompt` without `validate-evaluator` produces a number that means nothing.

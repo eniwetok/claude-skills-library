@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-07-17. **942 skills installed in `~/.claude/skills/`.** MCP: SocratiCode.
+Last updated: 2026-07-20. **949 skills installed in `~/.claude/skills/`.** MCP: SocratiCode.
 
 ---
 
@@ -552,3 +552,31 @@ MCP servers accessible in Claude Code sessions. None permanently installed in gl
 **Why these matter:** they are *fix* skills, complementing the *build* skills in Open Design.
 `improve-ui` is notable for Mission-Critical Mode — it never edits source, only writes a plan
 for a separate agent to execute (the "independent inspector" pattern).
+
+
+---
+
+## Group 19 — hamelsmu/evals-skills (7 skills · LLM eval methodology)
+
+**Source:** [github.com/hamelsmu/evals-skills](https://github.com/hamelsmu/evals-skills) · MIT
+**Post:** [hamel.dev/blog/posts/evals-skills](https://hamel.dev/blog/posts/evals-skills/)
+**Package:** `packages/evals-skills-hamel/`
+
+| Skill | What it does | Triggers | Status |
+|-------|-------------|----------|--------|
+| **eval-audit** | Audit an eval pipeline for missing error analysis, unvalidated judges, vanity metrics | `are my evals any good`, `inherited an eval system` | ✅ installed |
+| **error-analysis** | Read real traces, build a vocabulary of failure modes. The correct starting point. | `why is it failing`, `categorize failures`, `new eval project` | ✅ installed |
+| **generate-synthetic-data** | Dimension-based synthetic test inputs when real traces are sparse | `bootstrap eval dataset`, `not enough test data` | ✅ installed |
+| **write-judge-prompt** | Binary Pass/Fail LLM-as-Judge for subjective criteria (tone, faithfulness) | `llm as judge`, `evaluate subjective quality` | ✅ installed |
+| **validate-evaluator** | Calibrate a judge against human labels — TPR/TNR, bias correction | `is my judge trustworthy`, `calibrate evaluator` | ✅ installed |
+| **evaluate-rag** | Retrieval quality and generation quality scored separately | `evaluate rag`, `retrieval quality`, `chunking strategy` | ✅ installed |
+| **build-review-interface** | Browser annotation tool for collecting human labels on traces | `annotation tool`, `review traces`, `collect labels` | ✅ installed |
+
+**Why these are not duplicates:** `agent-eval` compares coding agents head-to-head;
+`verification-quality` scores code correctness; `benchmark` measures speed. These seven
+evaluate **the quality of what an LLM pipeline outputs** — answers, SQL, summaries.
+Directly applicable to the Cognos data-query-agent work (Task #7).
+
+**Core principle:** start with `error-analysis` on real traces, never with metrics.
+Metrics chosen before looking at failures are vanity metrics. And never trust an
+uncalibrated judge — `validate-evaluator` is not optional.

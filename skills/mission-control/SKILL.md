@@ -1,7 +1,7 @@
 ---
 name: mission-control
 description: >
-  Master orchestrator for all 941 installed skills. Invoke at session start,
+  Master orchestrator for all 949 installed skills. Invoke at session start,
   when starting any new task, or when you're unsure which skill to use.
   Classifies the task, selects the right skills in the right order, and resolves
   conflicts when multiple skills overlap. Use when: "start working on", "help me build",
@@ -12,7 +12,7 @@ description: >
 
 # Mission Control — Skill Orchestrator
 
-You have 941 skills installed across 18 groups. This skill tells you which ones
+You have 949 skills installed across 19 groups. This skill tells you which ones
 to use, in what order, and how to resolve conflicts between overlapping skills.
 
 ---
@@ -212,6 +212,34 @@ Choose the right level:
 2. benchmark              → performance measurement
 3. benchmark-optimization-loop → continuous improvement loop
 ```
+
+**Evaluating an LLM PIPELINE's output** (Hamel Husain's method — the rigorous path):
+```
+0. eval-audit              → START HERE if evals exist but you don't trust them
+1. error-analysis          → read real traces, build a vocabulary of failure modes
+2. generate-synthetic-data → only if real traces are sparse (<100)
+3. write-judge-prompt      → build a binary Pass/Fail LLM judge for subjective failures
+4. validate-evaluator      → calibrate that judge against HUMAN labels (TPR/TNR)
+5. build-review-interface  → annotation tool for human trace review
+   evaluate-rag            → if it's a retrieval system: score retrieval and generation SEPARATELY
+```
+
+**The non-negotiable rule:** never trust a judge you have not calibrated against human
+labels. `write-judge-prompt` without `validate-evaluator` is a vanity metric — it will
+happily report a number that means nothing. This is the "independent inspector" principle
+from Mission-Critical Mode, applied to AI output.
+
+**Which eval family do I want?**
+| Evaluating… | Use |
+|-------------|-----|
+| A coding agent's ability to complete tasks | `agent-eval` (head-to-head, pass rate, cost) |
+| Code quality / correctness of a change | `verification-quality`, `eval-harness` |
+| Speed and regressions | `benchmark` |
+| **An LLM pipeline's OUTPUT quality** (answers, SQL, summaries) | **the Hamel stack above** |
+| **A retrieval/RAG system** | **`evaluate-rag`** |
+
+Start with `error-analysis` on real traces, not with metrics. Metrics chosen before you
+have looked at failures are vanity metrics.
 
 **Overlap resolution — quality gate skills:**
 | Skill | When to use |
