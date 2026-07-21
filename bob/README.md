@@ -9,6 +9,18 @@ So the library is kept in a vault and only a small profile is loaded.
 | `~/.bob/skills-vault/` | No | Full library, 1015 skills |
 | `~/.bob/skills/` | **Yes** | Active profile only (~2-3k tokens) |
 
+## Install on another machine (or share with someone)
+
+```bash
+git clone https://github.com/eniwetok/claude-skills-library.git
+cd claude-skills-library
+./bob/install.sh
+```
+
+That builds `~/.bob/skills-vault` from this repo, installs the profile switcher,
+and activates the small `code` profile. It backs up any existing `~/.bob/skills`
+first, and never touches `~/.claude/skills`.
+
 ## Commands
 
 ```bash
