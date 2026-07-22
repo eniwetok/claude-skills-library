@@ -1,0 +1,29 @@
+{
+  "name": "skills-library",
+  "displayName": "Skills Library (Bob & Claude Code)",
+  "description": "Installs the skill library into IBM Bob and Claude Code, and switches skill profiles from the command palette to keep agent context small.",
+  "version": "1.0.0",
+  "publisher": "eniwetok",
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "skillsLibrary.install", "title": "Skills Library: Install / Update Skills", "category": "Skills Library" },
+      { "command": "skillsLibrary.loadProfile", "title": "Skills Library: Load Profile…", "category": "Skills Library" },
+      { "command": "skillsLibrary.status", "title": "Skills Library: Show Active Profile", "category": "Skills Library" }
+    ],
+    "configuration": {
+      "title": "Skills Library",
+      "properties": {
+        "skillsLibrary.targets": {
+          "type": "string",
+          "enum": ["both", "bob", "claude"],
+          "default": "both",
+          "description": "Which agent(s) to install skills into: IBM Bob, Claude Code, or both."
+        }
+      }
+    }
+  }
+}

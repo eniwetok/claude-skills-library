@@ -12,3 +12,7 @@ backups/.latest-stamp
 
 # Built distributable package (65MB). Rebuild with: ./bob/build-package.sh
 dist/*.zip
+
+vsix/extension/skills.zip
+
+dist/*.vsix
