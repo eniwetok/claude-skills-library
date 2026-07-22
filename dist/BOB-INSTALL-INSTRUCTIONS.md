@@ -1,4 +1,6 @@
-# Skills package for IBM Bob
+# Skills package for IBM Bob & Claude Code
+
+**Tested against: IBM Bob 2.0.1** · works with Claude Code (any recent version).
 
 A library of ~1,549 skills for IBM Bob, with a profile system that keeps them from
 flooding Bob's context.
@@ -8,10 +10,15 @@ flooding Bob's context.
 ```bash
 unzip bob-skills-package.zip
 cd bob-skills-package
-./install.sh
+./install.sh            # installs into BOTH Bob and Claude Code
+# or:  ./install.sh bob      (Bob only)
+#      ./install.sh claude   (Claude Code only)
 ```
 
-Then **restart Bob** (or start a new conversation). That's it.
+Then **restart Bob** and/or **start a new Claude Code session**. That's it.
+
+The installer picks the right `mission-control` for each tool automatically — the Bob
+copy explains Bob has no enforcement hooks; the Claude Code copy uses its real hooks.
 
 ## The problem this solves
 

@@ -1,48 +1,58 @@
 #!/usr/bin/env bash
-# Install this skills package into IBM Bob.
-# Usage:  ./install.sh            (recommended: small profile loaded)
-#         ./install.sh --all      (load every skill — heavy, ~67k tokens)
+# Install this skills package into IBM Bob and/or Claude Code.
+#
+#   ./install.sh              install into BOTH (default)
+#   ./install.sh bob          Bob only
+#   ./install.sh claude       Claude Code only
+#   ./install.sh both --all   (Bob) load every skill instead of a small profile
+#
+# Tested against: IBM Bob 2.0.1
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VAULT="$HOME/.bob/skills-vault"
-ACTIVE="$HOME/.bob/skills"
-PROF="$HOME/.bob/profiles"
+TARGET="${1:-both}"; FLAG="${2:-}"
 
-echo "Installing Bob skills..."
+backup() {  # $1 = dir to back up
+  if [ -d "$1" ] && [ -n "$(ls -A "$1" 2>/dev/null)" ]; then
+    local bk="$1-backup-$(date +%Y%m%d_%H%M%S)"; cp -R "$1" "$bk"
+    echo "  backed up existing skills -> $bk"
+  fi
+}
 
-# 1. Back up whatever is already installed
-if [ -d "$ACTIVE" ] && [ -n "$(ls -A "$ACTIVE" 2>/dev/null)" ]; then
-  BK="$HOME/.bob/skills-backup-$(date +%Y%m%d_%H%M%S)"
-  cp -R "$ACTIVE" "$BK"
-  echo "  Existing skills backed up to: $BK"
-fi
+install_bob() {
+  echo "── IBM Bob ──"
+  local VAULT="$HOME/.bob/skills-vault" ACTIVE="$HOME/.bob/skills" PROF="$HOME/.bob/profiles"
+  backup "$ACTIVE"
+  mkdir -p "$VAULT" "$PROF"
+  rsync -a "$HERE/skills"/ "$VAULT"/
+  # Bob gets the Bob-specific mission-control (explains Bob has no hooks)
+  mkdir -p "$VAULT/mission-control"; cp "$HERE/meta/mission-control.bob.md" "$VAULT/mission-control/SKILL.md"
+  cp "$HERE"/profiles/*.txt "$PROF"/
+  cp "$HERE/bob-profile" "$HOME/.bob/bob-profile"; chmod +x "$HOME/.bob/bob-profile"
+  echo "  vault: $(ls -1 "$VAULT" | wc -l | tr -d ' ') skills"
+  if [ "$FLAG" = "--all" ]; then "$HOME/.bob/bob-profile" all
+  else "$HOME/.bob/bob-profile" code >/dev/null 2>&1 || true; "$HOME/.bob/bob-profile" status; fi
+}
 
-# 2. Store the full library in a vault Bob does NOT read
-mkdir -p "$VAULT" "$PROF"
-rsync -a "$HERE/skills"/ "$VAULT"/
-echo "  Library stored: $(ls -1 "$VAULT" | wc -l | tr -d ' ') skills"
+install_claude() {
+  echo "── Claude Code ──"
+  local DEST="$HOME/.claude/skills"
+  backup "$DEST"
+  mkdir -p "$DEST"
+  rsync -a "$HERE/skills"/ "$DEST"/
+  # Claude Code gets the Claude mission-control (its hooks are real)
+  mkdir -p "$DEST/mission-control"; cp "$HERE/meta/mission-control.claude.md" "$DEST/mission-control/SKILL.md"
+  echo "  installed: $(ls -1 "$DEST" | wc -l | tr -d ' ') skills into ~/.claude/skills"
+  echo "  note: Claude Code loads no profile system — it surfaces skills on demand."
+}
 
-# 3. Install profiles + switcher
-cp "$HERE"/profiles/*.txt "$PROF"/
-cp "$HERE/bob-profile" "$HOME/.bob/bob-profile"
-chmod +x "$HOME/.bob/bob-profile"
-echo "  Profile switcher installed"
-
-# 4. Activate
-if [ "${1:-}" = "--all" ]; then
-  "$HOME/.bob/bob-profile" all
-else
-  "$HOME/.bob/bob-profile" code >/dev/null 2>&1 || true
-  echo ""
-  echo "Done. Started you on the 'code' profile to keep context small."
-  "$HOME/.bob/bob-profile" status
-fi
+case "$TARGET" in
+  bob)    install_bob ;;
+  claude) install_claude ;;
+  both)   install_bob; echo; install_claude ;;
+  *) echo "Usage: ./install.sh [bob|claude|both] [--all]"; exit 1 ;;
+esac
 
 echo ""
-echo "Next:"
-echo "  1. Restart IBM Bob (or start a new conversation)"
-echo "  2. Ask Bob: \"use mission control\" to see how it routes tasks"
-echo "  3. Switch profiles anytime:  ~/.bob/bob-profile data"
-echo ""
-echo "Profiles: code | data | pm | security | ui | research"
+echo "Done. Restart Bob / start a new Claude Code session so skills load."
+echo "Bob: switch context with  ~/.bob/bob-profile <code|data|pm|security|ui|research>"
