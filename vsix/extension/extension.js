@@ -1,4 +1,4 @@
-// Skills Library extension for VS Code-compatible IDEs (IBM Bob, VS Code + Claude Code).
+// SuperBob — installs best-practice skills into VS Code-compatible IDEs (IBM Bob, VS Code).
 //
 // A VS Code extension cannot "register" agent skills — skills are SKILL.md files that
 // Bob and Claude Code read from disk folders (~/.bob/skills, ~/.claude/skills). So this
@@ -57,7 +57,7 @@ function readList(file) {
 // Copy the given profile(s) + always-on core from the vault into the active dir.
 function applyProfile(names) {
   if (!fs.existsSync(BOB_VAULT)) {
-    vscode.window.showErrorMessage('Skills Library: not installed yet. Run "Install / Update Skills" first.');
+    vscode.window.showErrorMessage('SuperBob: not installed yet. Run "Install / Update Skills" first.');
     return false;
   }
   const wanted = new Set(readList(path.join(BOB_PROFILES, '_core.txt')));
@@ -69,7 +69,7 @@ function applyProfile(names) {
     if (fs.existsSync(src)) staged.push(skill);
   }
   if (staged.length < 5) {
-    vscode.window.showErrorMessage('Skills Library: only ' + staged.length + ' skills resolved — aborting, nothing changed.');
+    vscode.window.showErrorMessage('SuperBob: only ' + staged.length + ' skills resolved — aborting, nothing changed.');
     return false;
   }
   fs.rmSync(BOB_ACTIVE, { recursive: true, force: true });
@@ -88,14 +88,14 @@ function activeProfile() {
 function updateStatus() {
   if (!statusItem) return;
   const p = activeProfile();
-  if (p) { statusItem.text = '$(list-unordered) Skills: ' + p; statusItem.show(); }
-  else { statusItem.text = '$(list-unordered) Skills: not installed'; statusItem.show(); }
+  if (p) { statusItem.text = '$(list-unordered) SuperBob: ' + p; statusItem.show(); }
+  else { statusItem.text = '$(list-unordered) SuperBob: not installed'; statusItem.show(); }
 }
 
 async function doInstall(context) {
   const target = vscode.workspace.getConfiguration('skillsLibrary').get('targets', 'both');
   await vscode.window.withProgress(
-    { location: vscode.ProgressLocation.Notification, title: 'Skills Library: installing…', cancellable: false },
+    { location: vscode.ProgressLocation.Notification, title: 'SuperBob: installing…', cancellable: false },
     async (progress) => {
       const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'skills-'));
       try {
@@ -122,7 +122,7 @@ async function doInstall(context) {
         }
 
         if (target === 'both' || target === 'claude') {
-          progress.report({ message: 'Claude Code' });
+          progress.report({ message: 'VS Code (~/.claude/skills)' });
           backupIfPresent(CLAUDE_SKILLS);
           fs.mkdirSync(CLAUDE_SKILLS, { recursive: true });
           fs.cpSync(skillsSrc, CLAUDE_SKILLS, { recursive: true });
@@ -136,14 +136,14 @@ async function doInstall(context) {
   );
   updateStatus();
   vscode.window.showInformationMessage(
-    'Skills Library installed (' + target + '). Restart Bob / start a new Claude Code session so skills load.'
+    'SuperBob installed (' + target + '). Restart Bob / start a new VS Code session so skills load.'
   );
 }
 
 async function doLoadProfile() {
   const names = profileNames();
   if (names.length === 0) {
-    vscode.window.showErrorMessage('Skills Library: no profiles found. Run "Install / Update Skills" first.');
+    vscode.window.showErrorMessage('SuperBob: no profiles found. Run "Install / Update Skills" first.');
     return;
   }
   const pick = await vscode.window.showQuickPick(names, { placeHolder: 'Load which skill profile? (keeps Bob context small)' });
@@ -158,7 +158,7 @@ async function doLoadProfile() {
 function activate(context) {
   statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   statusItem.command = 'skillsLibrary.loadProfile';
-  statusItem.tooltip = 'Skills Library — click to switch profile';
+  statusItem.tooltip = 'SuperBob — click to switch profile';
   context.subscriptions.push(statusItem);
   updateStatus();
 
@@ -167,14 +167,14 @@ function activate(context) {
     vscode.commands.registerCommand('skillsLibrary.loadProfile', () => doLoadProfile()),
     vscode.commands.registerCommand('skillsLibrary.status', () => {
       const p = activeProfile();
-      vscode.window.showInformationMessage(p ? 'Active Bob profile: ' + p : 'Skills Library not installed yet.');
+      vscode.window.showInformationMessage(p ? 'Active Bob profile: ' + p : 'SuperBob not installed yet.');
     })
   );
 
   // First run: offer to install if nothing is there yet.
   if (!fs.existsSync(BOB_VAULT) && !fs.existsSync(CLAUDE_SKILLS)) {
     vscode.window.showInformationMessage(
-      'Skills Library is ready to install into Bob / Claude Code.',
+      'SuperBob is ready to install into Bob / VS Code.',
       'Install now'
     ).then(choice => { if (choice === 'Install now') doInstall(context); });
   }

@@ -1,27 +1,29 @@
 {
   "name": "skills-library",
-  "displayName": "Skills Library (Bob & Claude Code)",
-  "description": "Installs the skill library into IBM Bob and Claude Code, and switches skill profiles from the command palette to keep agent context small.",
-  "version": "1.0.0",
+  "displayName": "SuperBob — Best-Practice Skills for Bob & VS Code",
+  "description": "SuperBob gives IBM Bob (and VS Code) its superpowers: best-practice skills from 19 sources, loaded by task so context stays small.",
+  "version": "1.2.0",
   "publisher": "eniwetok",
+  "icon": "icon.png",
   "engines": { "vscode": "^1.75.0" },
-  "categories": ["Other"],
+  "categories": ["Machine Learning", "Programming Languages", "Other"],
+  "keywords": ["skills", "best practices", "agent", "bob", "productivity"],
   "activationEvents": ["onStartupFinished"],
   "main": "./extension.js",
   "contributes": {
     "commands": [
-      { "command": "skillsLibrary.install", "title": "Skills Library: Install / Update Skills", "category": "Skills Library" },
-      { "command": "skillsLibrary.loadProfile", "title": "Skills Library: Load Profile…", "category": "Skills Library" },
-      { "command": "skillsLibrary.status", "title": "Skills Library: Show Active Profile", "category": "Skills Library" }
+      { "command": "skillsLibrary.install", "title": "SuperBob: Install / Update Skills", "category": "SuperBob" },
+      { "command": "skillsLibrary.loadProfile", "title": "SuperBob: Load Profile…", "category": "SuperBob" },
+      { "command": "skillsLibrary.status", "title": "SuperBob: Show Active Profile", "category": "SuperBob" }
     ],
     "configuration": {
-      "title": "Skills Library",
+      "title": "SuperBob",
       "properties": {
         "skillsLibrary.targets": {
           "type": "string",
           "enum": ["both", "bob", "claude"],
           "default": "both",
-          "description": "Which agent(s) to install skills into: IBM Bob, Claude Code, or both."
+          "description": "Where to install skills: IBM Bob (~/.bob/skills), VS Code's agent (~/.claude/skills), or both."
         }
       }
     }
