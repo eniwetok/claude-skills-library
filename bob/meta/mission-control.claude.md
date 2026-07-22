@@ -10,6 +10,57 @@ description: >
   Also invoke when skills seem to conflict or give contradictory guidance.
 ---
 
+---
+
+## LEAN MODE — you are the router (read this first)
+
+**Only two skills are loaded right now: `mission-control` (this one) and
+`using-superpowers`.** Everything else — ~1,000 skills — sits UNLOADED in a vault:
+
+- IBM Bob: `~/.bob/skills-vault/<skill>/SKILL.md`
+- VS Code: `~/.claude/skills-vault/<skill>/SKILL.md`
+
+This keeps the starting context tiny (~500 tokens instead of ~67,000). The trade-off:
+the agent cannot auto-activate a vault skill, because its description isn't loaded. So
+**you** invoke them, deterministically, using the map below.
+
+### How to invoke a skill on demand
+1. Read the task and match it to an **intent** in the table below.
+2. For each skill that intent needs, **read its file** from the vault
+   (`~/.bob/skills-vault/<skill>/SKILL.md` or `~/.claude/skills-vault/<skill>/SKILL.md`)
+   and follow it as if it were active.
+3. Announce which skill you are applying and why.
+4. Do not guess a skill's contents — read the file. Do not apply a skill the intent
+   below does not call for.
+
+### Intent → skills (hardcoded routing)
+
+| If the task is… | Read & apply these vault skills |
+|-----------------|--------------------------------|
+| **Build a feature / write code** | `karpathy-guidelines`, `brainstorming` (if fuzzy) or `writing-plans`, the stack skill (`python-patterns`, `react-patterns`, …), `tdd-workflow`, `verification-before-completion` |
+| **Fix a bug** | `systematic-debugging`, then `caveman-debug` if no debugger, then `verification-before-completion` |
+| **Understand a codebase** | `codebase-exploration`, `karpathy-guidelines` |
+| **Design a system / architecture** | `brainstorming`, `architecture-decision-records`, `system-design`, `agent-council` |
+| **Evaluate an AI/data pipeline** (Cognos) | `error-analysis` first, then `write-judge-prompt` + `validate-evaluator`, `evaluate-rag`, `eval-audit` |
+| **Write SQL / analytics** | `sql-queries`, `write-query`, `statistical-analysis` |
+| **Security review / hunt** | `security-audit` (dev) or `bb-methodology` (engagement), the matching `hunt-*` skill |
+| **Build or fix UI** | `frontend-design` (build) / `baseline-ui` + `fixing-accessibility` (fix), `improve-ui` |
+| **Product work** | `create-prd`, `product-vision`, `outcome-roadmap`, `prioritization-frameworks` |
+| **Research a topic** | `deep-research`, then `save` / `wiki-ingest` to keep findings |
+| **Review quality before done** | `code-review`, `verification-before-completion`, `simplify` |
+| **Make a new skill** | `skill-creator` |
+
+If no intent matches, ask the user, or scan the vault directory listing for a skill
+whose folder name fits, then read that skill's file.
+
+### Loading a batch instead (optional)
+For a long session on one kind of work, pre-load a whole profile so its skills
+auto-activate normally:
+`~/.bob/bob-profile <code|data|pm|security|ui|research>` (then restart the conversation).
+Lean mode (this router) is the default and needs no reload.
+
+---
+
 # Mission Control — Skill Orchestrator
 
 You have 949 skills installed across 19 groups. This skill tells you which ones

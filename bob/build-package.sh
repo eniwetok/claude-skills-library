@@ -6,7 +6,17 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT="$REPO/dist"
 STAGE="$(mktemp -d)/skills-package"
-EXCLUDE=(codebase-exploration codebase-management mission-control)  # AGPL + target-specific
+# EXCLUDED from the shareable package for licensing compliance:
+#   AGPL (SocratiCode); source-available (Anthropic docx/pdf/pptx/xlsx);
+#   unlicensed (15-cowork-skills, from a video); no formal license (pablo obsidian-cli).
+#   mission-control is target-specific (shipped via meta/).
+EXCLUDE=(mission-control \
+  codebase-exploration codebase-management \
+  docx pdf pptx xlsx \
+  obsidian-cli \
+  animated-website budget-dashboard contract-reviewer customize difficult-conversation-prep \
+  email-drafter explainer-graphic invoice-generator learning-path-generator morning-briefing \
+  quick-research receipt-scanner slide-deck-builder visual-page-builder workflow-visualizer)
 
 mkdir -p "$STAGE/skills" "$STAGE/profiles" "$STAGE/meta" "$OUT"
 

@@ -47,6 +47,12 @@ case "${1:-}" in
     rsync -a "$VAULT"/ "$ACTIVE"/
     echo "all" > "$ACTIVE/.profile"
     echo "Loaded ALL skills."; cost; exit 0 ;;
+  lean|core)
+    TMP=$(mktemp -d)
+    while read -r s; do [ -z "$s" ] && continue; [ -d "$VAULT/$s" ] && cp -R "$VAULT/$s" "$TMP/$s"; done < "$PROF/_core.txt"
+    rm -rf "$ACTIVE"; mkdir -p "$ACTIVE"; cp -R "$TMP"/. "$ACTIVE"/; rm -rf "$TMP"
+    echo "lean (core only)" > "$ACTIVE/.profile"
+    echo "Loaded lean core — mission-control routes the rest from the vault on demand."; cost; exit 0 ;;
 esac
 
 # Validate every requested profile BEFORE touching anything
@@ -66,7 +72,7 @@ copy_list "$PROF/_core.txt"          # core always
 for p in "$@"; do copy_list "$PROF/$p.txt"; done
 
 COUNT=$(ls -1 "$TMP" | wc -l | tr -d ' ')
-[ "$COUNT" -lt 5 ] && { echo "ERROR: only $COUNT skills resolved — aborting, nothing changed."; rm -rf "$TMP"; exit 1; }
+[ "$COUNT" -lt 2 ] && { echo "ERROR: only $COUNT skills resolved — aborting, nothing changed."; rm -rf "$TMP"; exit 1; }
 
 rm -rf "$ACTIVE"; mkdir -p "$ACTIVE"
 cp -R "$TMP"/. "$ACTIVE"/; rm -rf "$TMP"
