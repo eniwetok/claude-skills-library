@@ -13,6 +13,21 @@ needs.
 > MIT; that does **not** cover the bundled skills. Full attribution for all
 > sources is in **[LICENSES.md](LICENSES.md)**.
 
+## Getting started
+
+1. **Open the SuperBob panel.** Click the **SuperBob robot icon in the left sidebar**
+   (the activity bar). The Skills panel opens right there — no terminal needed.
+2. **Leave Auto mode on.** SuperBob reads each task and pulls in the right skills
+   automatically. For most people, that's the whole setup.
+3. **Or pick a mode.** Turn Auto off and click a mode — `rag`, `code`, `data`,
+   `ship-it`, and so on. Each card says what it's for and which skills it loads.
+4. **Start a new conversation** after switching, so the agent re-reads its skills.
+5. **You can also just ask in chat.** Tell Bob *"use the rag mode"* (or any mode name)
+   and it loads that mode's skills on the spot — no panel, no restart.
+6. **Make your own.** Click **+ Create your own mode**, give it a name and a short
+   "what it's for" description, tick the skills you want, and save. It becomes a
+   one-click mode of your own.
+
 ## What this solves
 
 An agent loads every installed skill's name and description at the start of a

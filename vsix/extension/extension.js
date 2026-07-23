@@ -126,16 +126,17 @@ function updateStatus() {
   const p = activeProfile();
   statusItem.text = '$(rocket) SuperBob: ' + (p || 'not installed');
   statusItem.show();
-  if (panel) postState();
+  postState();
 }
 
 // ---- the control panel (webview) ------------------------------------------
-function postState() {
-  if (!panel) return;
-  const skills = listVaultSkills();
+// Two surfaces share one webview UI: the sidebar view (activity bar) and an
+// optional editor-tab panel. Both get the same HTML and the same messages.
+const webviews = new Set();
+function stateMessage() {
   const profs = {};
   for (const p of profileNames()) profs[p] = readList(path.join(BOB_PROFILES, p + '.txt'));
-  panel.webview.postMessage({
+  return {
     type: 'state',
     installed: fs.existsSync(BOB_VAULT),
     active: activeProfile(),
@@ -144,34 +145,52 @@ function postState() {
     builtin: BUILTIN,
     profiles: profs,
     meta: readMeta(),
-    skills
-  });
+    skills: listVaultSkills()
+  };
 }
+function postState() { const msg = stateMessage(); webviews.forEach(w => { try { w.postMessage(msg); } catch (e) {} }); }
+
+async function handleMessage(m, context) {
+  if (m.type === 'ready') { postState(); return; }
+  if (m.type === 'applyProfile') {
+    if (applyProfile([m.name])) vscode.window.showInformationMessage('Loaded "' + m.name + '". Start a new conversation to apply.');
+    postState(); return;
+  }
+  if (m.type === 'applyLean') { applyProfile([]); vscode.window.showInformationMessage('Auto mode on — SuperBob picks skills per task. Start a new conversation.'); postState(); return; }
+  if (m.type === 'applyCustom') {
+    if (applySkillSet(m.skills, 'custom (' + m.skills.length + ' skills)')) vscode.window.showInformationMessage('Custom set applied. Start a new conversation.');
+    postState(); return;
+  }
+  if (m.type === 'saveMode') {
+    const saved = saveCustomProfile(m.name, m.skills, m.desc);
+    if (saved) vscode.window.showInformationMessage('Saved mode "' + saved + '".');
+    else vscode.window.showErrorMessage('Give the mode a valid name.');
+    postState(); return;
+  }
+  if (m.type === 'deleteMode') { deleteCustomProfile(m.name); postState(); return; }
+  if (m.type === 'install') { await doInstall(context); postState(); return; }
+}
+
+// Sidebar view in the activity bar (the leftmost strip).
+class SuperBobViewProvider {
+  constructor(context) { this.context = context; }
+  resolveWebviewView(view) {
+    view.webview.options = { enableScripts: true };
+    view.webview.html = getWebviewHtml();
+    webviews.add(view.webview);
+    view.webview.onDidReceiveMessage(m => handleMessage(m, this.context));
+    view.onDidDispose(() => webviews.delete(view.webview));
+  }
+}
+
+// Optional: also open the panel as a full editor tab.
 function openPanel(context) {
   if (panel) { panel.reveal(); return; }
   panel = vscode.window.createWebviewPanel('superbob', 'SuperBob — Skills', vscode.ViewColumn.One, { enableScripts: true, retainContextWhenHidden: true });
-  panel.onDidDispose(() => { panel = null; }, null, context.subscriptions);
   panel.webview.html = getWebviewHtml();
-  panel.webview.onDidReceiveMessage(async (m) => {
-    if (m.type === 'ready') { postState(); return; }
-    if (m.type === 'applyProfile') {
-      if (applyProfile([m.name])) vscode.window.showInformationMessage('Loaded "' + m.name + '". Restart the conversation to apply.');
-      postState(); return;
-    }
-    if (m.type === 'applyLean') { applyProfile([]); vscode.window.showInformationMessage('Auto mode on — SuperBob picks skills per task. Restart the conversation.'); postState(); return; }
-    if (m.type === 'applyCustom') {
-      if (applySkillSet(m.skills, 'custom (' + m.skills.length + ' skills)')) vscode.window.showInformationMessage('Custom set applied (' + (m.skills.length + CORE.length) + ' skills). Restart the conversation.');
-      postState(); return;
-    }
-    if (m.type === 'saveMode') {
-      const saved = saveCustomProfile(m.name, m.skills, m.desc);
-      if (saved) vscode.window.showInformationMessage('Saved mode "' + saved + '". It is now in your mode list.');
-      else vscode.window.showErrorMessage('Give the mode a valid name.');
-      postState(); return;
-    }
-    if (m.type === 'deleteMode') { deleteCustomProfile(m.name); postState(); return; }
-    if (m.type === 'install') { await doInstall(context); postState(); return; }
-  }, null, context.subscriptions);
+  webviews.add(panel.webview);
+  panel.webview.onDidReceiveMessage(m => handleMessage(m, context));
+  panel.onDidDispose(() => { webviews.delete(panel.webview); panel = null; }, null, context.subscriptions);
 }
 
 function getWebviewHtml() {
@@ -274,7 +293,18 @@ function getWebviewHtml() {
     if(S.active.indexOf('core + ')===0) return S.active.slice(7).split(' ')[0]; return '__custom__'; }
   function curated(){ const set=new Set(); Object.values(S.profiles).forEach(a=>a.forEach(n=>set.add(n))); S.core.forEach(n=>set.delete(n)); return [...set].sort(); }
   function descOf(n){ const s=S.skills.find(x=>x.name===n); return s?s.desc:''; }
-  const DESCR={__lean__:'Just the 2 core skills. SuperBob reads each task and pulls in the exact skills it needs.',code:'Build software: tests-first (tdd-workflow), codebase-exploration, API & system design, stack patterns, docker/kubernetes.',data:'Data & AI evaluation: error-analysis, LLM-as-judge (write-judge-prompt + validate-evaluator), evaluate-rag, SQL, embeddings, statistics.',pm:'Product: PRDs (create-prd), product-vision, roadmaps, prioritization, user stories.',security:'Security: the bb-methodology playbook, security-audit, hunt-* vulnerability skills, redteam-mindset, reporting.',ui:'Interfaces: frontend-design, fixing-accessibility, motion, design systems, improve-ui audits.',research:'Research & knowledge: deep-research, the wiki knowledge base, autoresearch, note-taking.',rag:'Evaluate a RAG / retrieval agent: evaluate-rag, error-analysis, LLM judges (write-judge-prompt + validate-evaluator), SQL checks, statistics.',\'ship-it\':'Quality gate before shipping: code-review, verification-before-completion, security-audit, tests, clean-code habits.',\'quick-fix\':'Fast debugging: systematic-debugging (root cause first), caveman-debug (print statements), error-handling.'};
+  const DESCR={
+    __lean__:'Only the 2 core skills stay loaded. Best when you want SuperBob to read each task and pull in exactly the right skills on the fly — the safest default for mixed work.',
+    code:'Writing or changing software. Includes tests-first (tdd-workflow), codebase-exploration, API & system design, your stack patterns (python/react/…), and docker/kubernetes. Pick this when building or refactoring a feature.',
+    data:'Working with data and judging AI output. Includes error-analysis, LLM-as-judge (write-judge-prompt + validate-evaluator), evaluate-rag, SQL, embeddings and statistics. Pick this for analytics or measuring how good an AI pipeline is.',
+    pm:'Product management. Includes PRDs (create-prd), product-vision, outcome roadmaps, prioritization frameworks and user stories. Pick this for planning and strategy, not coding.',
+    security:'Finding and fixing security problems. Includes the bb-methodology playbook, security-audit, the hunt-* vulnerability skills, redteam-mindset and reporting. Pick this for an audit or a pen-test.',
+    ui:'Building and polishing interfaces. Includes frontend-design, fixing-accessibility, motion, design systems and read-only improve-ui audits. Pick this for anything users see on screen.',
+    research:'Digging into a topic and keeping what you learn. Includes deep-research, the wiki knowledge base, autoresearch and note-taking. Pick this for investigation and knowledge work.',
+    rag:'Evaluating a RAG or retrieval agent. Includes evaluate-rag (scores search and answer separately), error-analysis, LLM judges (write-judge-prompt + validate-evaluator), SQL checks and statistics. Pick this to measure and improve a retrieval agent.',
+    'ship-it':'A quality gate to run before shipping. Includes code-review, verification-before-completion, security-audit, tests and clean-code habits (karpathy-guidelines). Pick this right before you merge or release.',
+    'quick-fix':'Fast, focused debugging. Includes systematic-debugging (find the root cause first), caveman-debug (print statements) and error-handling. Pick this when something is broken and you need it fixed.'
+  };
   function descFor(id){ return (S.meta&&S.meta[id]) || DESCR[id] || 'Custom mode.'; }
 
   function render(){
@@ -419,6 +449,7 @@ function activate(context) {
   updateStatus();
 
   context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider('superbob.panel', new SuperBobViewProvider(context), { webviewOptions: { retainContextWhenHidden: true } }),
     vscode.commands.registerCommand('superBobSkills.openPanel', () => openPanel(context)),
     vscode.commands.registerCommand('superBobSkills.install', () => doInstall(context)),
     vscode.commands.registerCommand('superBobSkills.loadProfile', () => doLoadProfile()),

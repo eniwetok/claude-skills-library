@@ -53,6 +53,17 @@ the agent cannot auto-activate a vault skill, because its description isn't load
 If no intent matches, ask the user, or scan the vault directory listing for a skill
 whose folder name fits, then read that skill's file.
 
+### Selecting a mode straight from chat
+If the user says "use the <name> mode", "load <name> mode", "switch to <name>", or
+"activate <name>", treat it as a request to load that mode's skills right now:
+1. Read `~/.claude/profiles/<name>.txt` (or `~/.bob/profiles/<name>.txt`) — each line is a skill name.
+2. Read each of those skills' `SKILL.md` from the vault and apply them.
+3. Tell the user which mode and skills you loaded.
+This works mid-conversation with no restart and no panel — you are reading the mode's
+skills on demand. Known modes: the built-ins (code, data, pm, security, ui, research)
+plus any the user created (the `.txt` files in the profiles folder; their descriptions
+are in `_meta.json`).
+
 ### Loading a batch instead (optional)
 For a long session on one kind of work, pre-load a whole profile so its skills
 auto-activate normally:

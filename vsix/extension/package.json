@@ -21,11 +21,30 @@
     "productivity"
   ],
   "activationEvents": [
+    "onView:superbob.panel",
     "onCommand:superBobSkills.openPanel",
     "onStartupFinished"
   ],
   "main": "./extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "superbobContainer",
+          "title": "SuperBob",
+          "icon": "icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "superbobContainer": [
+        {
+          "id": "superbob.panel",
+          "name": "Skills",
+          "type": "webview"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "superBobSkills.openPanel",
