@@ -461,56 +461,12 @@ async function doLoadProfile() {
   if (ok) vscode.window.showInformationMessage('Loaded "' + pick + '". Restart the conversation to apply.');
 }
 
-// @superbob chat participant — switch modes from the chat pane.
-function registerChatParticipant(context) {
-  if (!vscode.chat || !vscode.chat.createChatParticipant) return; // host without chat API
-  const handler = async (request, chatContext, stream) => {
-    const modes = profileNames();
-    const say = (md) => stream.markdown(md);
-    // target mode: slash command, else parse the prompt ("use the rag mode")
-    let target = (request.command || '').toLowerCase();
-    if (!target) {
-      target = (request.prompt || '').toLowerCase()
-        .replace(/^(please\s+)?(use|load|switch to|activate|turn on)\s+/, '')
-        .replace(/\s*(the\s+)?mode\s*$/, '').replace(/[^a-z0-9-]/g, '').trim();
-    }
-    if (target === 'list' || (!target && !request.command)) {
-      say('**SuperBob modes** — type `@superbob /<mode>` to load one:\n\n' +
-          '- **/auto** — SuperBob picks skills per task (recommended)\n' +
-          modes.map(m => '- **/' + m + '**').join('\n') +
-          '\n\nAfter switching, start a new conversation so the skills load.');
-      return;
-    }
-    if (target === 'auto' || target === 'lean') {
-      applyProfile([]); postState();
-      say('✅ **Auto mode** on — I\'ll pull in the right skills per task. Start a new conversation to apply.');
-      return;
-    }
-    if (modes.includes(target)) {
-      applyProfile([target]); postState();
-      const skills = readList(path.join(BOB_PROFILES, target + '.txt'));
-      say('✅ Loaded the **' + target + '** mode (' + skills.length + ' skills): ' +
-          skills.map(s => '`' + s + '`').join(', ') +
-          '.\n\nStart a new conversation so they load.');
-      return;
-    }
-    say('I don\'t know a mode called "' + target + '". Type `@superbob /list` to see the modes.');
-  };
-  try {
-    const p = vscode.chat.createChatParticipant('superbob.chat', handler);
-    const svg = path.join(context.extensionPath, 'icon.svg');
-    if (fs.existsSync(svg)) p.iconPath = vscode.Uri.file(svg);
-    context.subscriptions.push(p);
-  } catch (e) { log('chat participant not registered: ' + e); }
-}
-
 function activate(context) {
   statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   statusItem.command = 'superBobSkills.openPanel';
   statusItem.tooltip = 'SuperBob — open the skills control panel';
   context.subscriptions.push(statusItem);
   updateStatus();
-  registerChatParticipant(context);
 
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider('superbob.panel', new SuperBobViewProvider(context), { webviewOptions: { retainContextWhenHidden: true } }),

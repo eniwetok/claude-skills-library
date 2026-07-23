@@ -27,28 +27,6 @@
   ],
   "main": "./extension.js",
   "contributes": {
-    "chatParticipants": [
-      {
-        "id": "superbob.chat",
-        "name": "superbob",
-        "fullName": "SuperBob",
-        "description": "Switch skill modes — try /list, /auto, or /rag",
-        "isSticky": true,
-        "commands": [
-          { "name": "list", "description": "List available modes" },
-          { "name": "auto", "description": "Auto mode — SuperBob picks skills per task" },
-          { "name": "rag", "description": "Evaluate a RAG / retrieval agent" },
-          { "name": "code", "description": "Build software" },
-          { "name": "data", "description": "Data & AI evaluation" },
-          { "name": "pm", "description": "Product management" },
-          { "name": "security", "description": "Security audits & hunting" },
-          { "name": "ui", "description": "Interfaces & design" },
-          { "name": "research", "description": "Research & notes" },
-          { "name": "ship-it", "description": "Quality gate before shipping" },
-          { "name": "quick-fix", "description": "Fast debugging" }
-        ]
-      }
-    ],
     "viewsContainers": {
       "activitybar": [
         {
