@@ -1,13 +1,13 @@
 ---
 name: mission-control
 description: >
-  Master orchestrator for all 949 installed skills. Invoke at session start,
-  when starting any new task, or when you're unsure which skill to use.
-  Classifies the task, selects the right skills in the right order, and resolves
-  conflicts when multiple skills overlap. Use when: "start working on", "help me build",
-  "let's begin", "where do I start", "which skill should I use for", "new session",
-  "new project", or any task where the right skill isn't obvious.
-  Also invoke when skills seem to conflict or give contradictory guidance.
+  Master orchestrator and SuperBob mode selector. Invoke at session start, when starting
+  any task, when unsure which skill to use, and ESPECIALLY when the user asks to change
+  SuperBob modes. Trigger on: "use the X mode", "load X mode", "switch to X mode",
+  "activate X mode", "turn on X mode", "SuperBob mode", "which mode", plus "start working
+  on", "help me build", "where do I start", "which skill should I use", "new project", or
+  any task where the right skill isn't obvious. Picks the right skills in order and loads
+  a mode's skills on request.
 ---
 
 ---

@@ -1,12 +1,13 @@
 ---
 name: mission-control
 description: >
-  Master orchestrator for the full skill library installed in Bob. Invoke at the start
-  of any significant task, or when unsure which skill to use. Classifies the task,
-  picks the right skills in the right order, and resolves conflicts when skills overlap.
-  Use when: "start working on", "help me build", "where do I start", "which skill should
-  I use", "new project", or any task where the right skill is not obvious. Also use when
-  skills seem to conflict. Note: Claude Code's automatic hooks do NOT run in Bob.
+  Master orchestrator and SuperBob mode selector. Invoke at the start of any task, when
+  unsure which skill to use, and ESPECIALLY whenever the user asks to change SuperBob
+  modes. Trigger on: "use the X mode", "load X mode", "switch to X mode", "activate X
+  mode", "turn on X mode", "SuperBob mode", "which mode", as well as "start working on",
+  "help me build", "where do I start", "which skill should I use", "new project", or any
+  task where the right skill is not obvious. Picks the right skills in order and loads a
+  mode's skills on request. Note: Claude Code's automatic hooks do NOT run in Bob.
 ---
 
 ---
