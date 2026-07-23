@@ -20,7 +20,7 @@ const CLAUDE_SKILLS = path.join(HOME, '.claude', 'skills');
 
 // Lean mode: only these two skills stay loaded; mission-control routes to the rest
 // from the vault on demand. Keeps starting context tiny (~200 tokens vs ~67,000).
-const CORE = ['mission-control', 'using-superpowers'];
+const CORE = ['using-superpowers', 'mission-control']; // superpowers first — always check for a skill before acting
 const BUILTIN = ['code', 'data', 'pm', 'security', 'ui', 'research'];
 
 let statusItem;
@@ -207,6 +207,14 @@ function getWebviewHtml() {
   .active-card .now{font-weight:600;font-size:1rem}
   .active-card .skills{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
   .pill{font-size:11px;background:var(--vscode-badge-background,#333);color:var(--vscode-badge-foreground,#ccc);border-radius:10px;padding:2px 9px}
+  .sklist{margin-top:8px}
+  .skrow{padding:6px 0;border-top:1px solid var(--vscode-widget-border,#2a2a2a)}
+  .skrow:first-child{border-top:0}
+  .skrow .sh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+  .skrow .sn{font-weight:600}
+  .skrow .sn .ao{font-size:9px;color:var(--vscode-charts-blue,#4aa8d8);border:1px solid currentColor;border-radius:7px;padding:0 5px;margin-left:5px;text-transform:uppercase}
+  .skrow .stk{color:var(--vscode-descriptionForeground);font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .skrow .sd{color:var(--vscode-descriptionForeground);font-size:11.5px;margin-top:1px;line-height:1.4}
   .mode{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:8px;padding:10px 12px;margin-bottom:7px}
   .mode.on{border-color:var(--vscode-focusBorder,#0e639c)}
   .mode-top{display:flex;align-items:center;gap:10px}
@@ -306,6 +314,16 @@ function getWebviewHtml() {
     'quick-fix':'Fast, focused debugging. Includes systematic-debugging (find the root cause first), caveman-debug (print statements) and error-handling. Pick this when something is broken and you need it fixed.'
   };
   function descFor(id){ return (S.meta&&S.meta[id]) || DESCR[id] || 'Custom mode.'; }
+  function skillInfo(n){ return S.skills.find(x=>x.name===n) || {name:n,tokens:60,desc:''}; }
+  function fmtTok(t){ return t>=1000?'~'+(t/1000).toFixed(1)+'k tokens':'~'+t+' tokens'; }
+  function skillRows(names){
+    const d=document.createElement('div'); d.className='sklist';
+    names.forEach(n=>{ const s=skillInfo(n); const core=S.core.includes(n);
+      const r=document.createElement('div'); r.className='skrow';
+      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">always on</span>':'')+'</span><span class="stk">'+fmtTok(s.tokens)+'</span></div>'+(s.desc?'<div class="sd">'+s.desc+'</div>':'');
+      d.appendChild(r); });
+    return d;
+  }
 
   function render(){
     document.getElementById('notinstalled').style.display=S.installed?'none':'block';
@@ -316,10 +334,10 @@ function getWebviewHtml() {
     document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode': am==='__custom__'?'custom set': (am||'—'));
     document.getElementById('autoToggle').checked = (am==='__lean__');
     document.getElementById('activeDesc').textContent = (am && am!=='__custom__') ? descFor(am) : (am==='__custom__'?'A custom set of skills you picked.':'');
-    const loaded=S.activeSet.filter(n=>!S.core.includes(n));
+    const extras=S.activeSet.filter(n=>!S.core.includes(n));
+    const ordered=[...S.core, ...extras];   // superpowers + mission-control first (always on)
     const cont=document.getElementById('activeSkills'); cont.innerHTML='';
-    if(!loaded.length){ const p=document.createElement('span'); p.className='muted'; p.textContent='Just the 2 core skills — the router pulls anything else in as needed.'; cont.appendChild(p); }
-    else loaded.forEach(n=>{ const p=document.createElement('span'); p.className='pill'; p.textContent=n; cont.appendChild(p); });
+    cont.appendChild(skillRows(ordered));
 
     // your modes = Lean + custom modes
     const your=document.getElementById('yourModes'); your.innerHTML='';
@@ -343,8 +361,10 @@ function getWebviewHtml() {
     const count = id==='__lean__' ? 'essentials only' : skills.length+' skills';
     top.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'');
     const sp=document.createElement('span'); sp.className='sp';
-    const use=document.createElement('button'); use.textContent=isActive?'Loaded':'Use'; use.disabled=isActive;
-    use.onclick=()=> vscode.postMessage(id==='__lean__'?{type:'applyLean'}:{type:'applyProfile',name:id});
+    const use=document.createElement('button');
+    if(isActive && id!=='__lean__'){ use.textContent='Unload'; use.title='turn this mode off (back to Auto)'; use.onclick=()=>vscode.postMessage({type:'applyLean'}); }
+    else if(isActive){ use.textContent='On'; use.disabled=true; }
+    else { use.textContent='Use'; use.onclick=()=> vscode.postMessage(id==='__lean__'?{type:'applyLean'}:{type:'applyProfile',name:id}); }
     sp.appendChild(use);
     if(id!=='__lean__'){ const sk=document.createElement('button'); sk.className='linkbtn'; sk.textContent='skills';
       sk.onclick=()=>{ const el=d.querySelector('.mode-skills'); el.style.display = el.style.display==='none'?'block':'none'; }; sp.appendChild(sk); }
@@ -353,7 +373,7 @@ function getWebviewHtml() {
     top.appendChild(sp); d.appendChild(top);
     const md=document.createElement('div'); md.className='mode-desc'; md.textContent=descFor(id); d.appendChild(md);
     if(id!=='__lean__'){ const s=document.createElement('div'); s.className='mode-skills'; s.style.display='none';
-      s.textContent = skills.join('  ·  '); d.appendChild(s); }
+      s.appendChild(skillRows(skills)); d.appendChild(s); }
     return d;
   }
 
