@@ -609,11 +609,11 @@ mode, and the Maintainability pillar in `mission-control`.
 ## Group 21 — BehiSecc/VibeSec (1 skill · proactive secure coding)
 
 **Source:** [github.com/BehiSecc/VibeSec-Skill](https://github.com/BehiSecc/VibeSec-Skill) · Apache-2.0
-**Package:** 
+**Package:** `packages/vibesec/`
 
 | Skill | What it does | Triggers | Status |
 |-------|-------------|----------|--------|
-| **vibesec** | Write secure web code proactively (bug-hunter mindset): access control, XSS/CSRF, SQLi/SSRF, auth, API security | , ,  | ✅ installed |
+| **vibesec** | Write secure web code proactively (bug-hunter mindset): access control, XSS/CSRF, SQLi/SSRF, auth, API security | `secure code`, `security scan`, `audit for vulnerabilities` | ✅ installed |
 
 Complements BugHunter (which *hunts* existing vulns) — vibesec *prevents* them at write time. Wired into the SuperBob **security** mode.
 
