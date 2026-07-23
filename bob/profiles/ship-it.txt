@@ -1,0 +1,5 @@
+code-review
+verification-before-completion
+security-audit
+tdd-workflow
+karpathy-guidelines
