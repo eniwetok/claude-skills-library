@@ -169,6 +169,11 @@ async function handleMessage(m, context) {
   }
   if (m.type === 'deleteMode') { deleteCustomProfile(m.name); postState(); return; }
   if (m.type === 'install') { await doInstall(context); postState(); return; }
+  if (m.type === 'openDocs') {
+    try { await vscode.commands.executeCommand('extension.open', 'felipe-campo.super-bob-skills'); }
+    catch (e) { vscode.commands.executeCommand('workbench.extensions.search', 'SuperBob'); }
+    return;
+  }
 }
 
 // Sidebar view in the activity bar (the leftmost strip).
@@ -231,6 +236,13 @@ function getWebviewHtml() {
   .mode-skills{margin-top:8px;padding-top:8px;border-top:1px solid var(--vscode-widget-border,#2a2a2a);color:var(--vscode-descriptionForeground);font-size:12px;line-height:1.7}
   details.builtins{margin-top:4px}
   details.builtins summary{cursor:pointer;color:var(--vscode-descriptionForeground);font-size:12px;padding:4px 0}
+  details.help{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:8px;padding:8px 12px;margin:12px 0}
+  details.help summary{cursor:pointer;font-weight:600}
+  .helpbody{margin-top:8px;color:var(--vscode-descriptionForeground);font-size:12.5px}
+  .helpbody ol{margin:6px 0;padding-left:18px}
+  .helpbody li{margin:4px 0}
+  .helpbody b{color:var(--vscode-foreground)}
+  .helpbody code{background:var(--vscode-textCodeBlock-background,#2a2a2a);padding:0 5px;border-radius:4px}
   #createBtn{margin-top:14px}
   #builder{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:8px;padding:14px;margin-top:12px}
   input[type=text]{background:var(--vscode-input-background);color:var(--vscode-input-foreground);border:1px solid var(--vscode-input-border,#3c3c3c);border-radius:5px;padding:7px 10px;font-size:13px;width:100%;box-sizing:border-box;margin-bottom:8px}
@@ -255,6 +267,21 @@ function getWebviewHtml() {
 <div id="main" style="display:none">
   <h1>SuperBob</h1>
   <div class="muted">One click picks the skills for what you're doing. Everything else stays out of the way.</div>
+
+  <details class="help">
+    <summary>❔ How to use SuperBob</summary>
+    <div class="helpbody">
+      <p>Pick a <b>mode</b> for what you're doing — SuperBob loads just those skills so the agent stays fast.</p>
+      <ol>
+        <li>Leave <b>Auto mode</b> on → SuperBob picks the skills for each task. That's the whole setup.</li>
+        <li>Or turn Auto off and click a mode's <b>Use</b> button. Click <b>skills</b> to see what's inside and what it costs.</li>
+        <li>Or, in the Bob chat, type <code>/superbob rag</code> (or any mode). <code>/superbob</code> alone lists them.</li>
+        <li>After switching, <b>start a new conversation</b> so the skills load.</li>
+        <li>Use <b>+ Create your own mode</b> to save your own set of skills.</li>
+      </ol>
+      <button class="sec" id="docsBtn">Open full guide ↗</button>
+    </div>
+  </details>
 
   <label class="autobar"><input type="checkbox" id="autoToggle"/><span><span class="t">Auto mode</span> — let SuperBob pick the right skills for each task automatically <span class="muted">(recommended)</span></span></label>
 
@@ -397,6 +424,7 @@ function getWebviewHtml() {
     if(e.target.id==='createBtn') openBuilder();
     if(e.target.id==='bcancel') closeBuilder();
     if(e.target.id==='installBtn') vscode.postMessage({type:'install'});
+    if(e.target.id==='docsBtn') vscode.postMessage({type:'openDocs'});
     if(e.target.id==='bsave'){ const name=document.getElementById('bname').value; vscode.postMessage({type:'saveMode',name:name,desc:document.getElementById('bdesc').value,skills:[...sel]}); closeBuilder(); }
   });
   document.addEventListener('input',e=>{ if(e.target.id==='bsearch') renderBuilder(); });
