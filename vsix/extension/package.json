@@ -21,11 +21,17 @@
     "productivity"
   ],
   "activationEvents": [
+    "onCommand:superBobSkills.openPanel",
     "onStartupFinished"
   ],
   "main": "./extension.js",
   "contributes": {
     "commands": [
+      {
+        "command": "superBobSkills.openPanel",
+        "title": "SuperBob: Open Control Panel",
+        "category": "SuperBob"
+      },
       {
         "command": "superBobSkills.install",
         "title": "SuperBob: Install / Update Skills",
