@@ -9,5 +9,5 @@
   "ship-it": "A quality gate to run before shipping. Includes code-review, verification-before-completion, security-audit, tests, clean-code habits, and ponytail (cut over-engineering).",
   "quick-fix": "Fast, focused debugging. Includes systematic-debugging (root cause first), caveman-debug (print statements) and error-handling.",
   "declutter": "Strip out over-engineering. The ponytail 'lazy senior engineer' skills \u2014 audit the repo for bloat, review a diff for what to delete, track deferred shortcuts \u2014 plus karpathy-guidelines and code-review.",
-  "writing": "Writing and editing prose. Includes no-ai-slop (strip AI-slop patterns / detect them), plus copywriting, article-writing, ux-copy, brand-voice and draft-content. Pick this for docs, posts, and any writing you want sharp and human."
+  "writing": "Everything for writing and editing prose. no-ai-slop (strip AI-slop / detect it), writing-skills, copywriting, article-writing, blog-post, content-creation & strategy, ux-copy, brand-voice, email (sequence + marketing), seo, report-writing, doc-coauthoring, documentation, kb-article, grammar-check and process-doc. Pick this for any docs, posts, or copy."
 }
