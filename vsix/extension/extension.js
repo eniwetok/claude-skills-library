@@ -100,17 +100,23 @@ function applyProfile(names) {
   for (const n of names) readList(path.join(BOB_PROFILES, n + '.txt')).forEach(s => skills.push(s));
   return applySkillSet(skills, names.length ? 'core + ' + names.join(' ') : 'lean (core only)');
 }
-function saveCustomProfile(name, skills) {
+const META = () => path.join(BOB_PROFILES, '_meta.json');
+function readMeta() { try { return JSON.parse(fs.readFileSync(META(), 'utf8')); } catch (e) { return {}; } }
+function writeMeta(m) { try { fs.writeFileSync(META(), JSON.stringify(m, null, 2)); } catch (e) {} }
+
+function saveCustomProfile(name, skills, desc) {
   const clean = name.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '');
   if (!clean) return null;
   fs.mkdirSync(BOB_PROFILES, { recursive: true });
   const body = skills.filter(s => !CORE.includes(s)).join('\n') + '\n';
   fs.writeFileSync(path.join(BOB_PROFILES, clean + '.txt'), body);
+  if (desc && desc.trim()) { const m = readMeta(); m[clean] = desc.trim(); writeMeta(m); }
   return clean;
 }
 function deleteCustomProfile(name) {
   if (BUILTIN.includes(name)) return false;   // never delete built-ins
   const f = path.join(BOB_PROFILES, name + '.txt');
+  const m = readMeta(); if (m[name]) { delete m[name]; writeMeta(m); }
   if (fs.existsSync(f)) { fs.unlinkSync(f); return true; }
   return false;
 }
@@ -137,6 +143,7 @@ function postState() {
     core: CORE,
     builtin: BUILTIN,
     profiles: profs,
+    meta: readMeta(),
     skills
   });
 }
@@ -151,13 +158,13 @@ function openPanel(context) {
       if (applyProfile([m.name])) vscode.window.showInformationMessage('Loaded "' + m.name + '". Restart the conversation to apply.');
       postState(); return;
     }
-    if (m.type === 'applyLean') { applyProfile([]); vscode.window.showInformationMessage('Lean mode loaded (core only). Restart the conversation.'); postState(); return; }
+    if (m.type === 'applyLean') { applyProfile([]); vscode.window.showInformationMessage('Auto mode on — SuperBob picks skills per task. Restart the conversation.'); postState(); return; }
     if (m.type === 'applyCustom') {
       if (applySkillSet(m.skills, 'custom (' + m.skills.length + ' skills)')) vscode.window.showInformationMessage('Custom set applied (' + (m.skills.length + CORE.length) + ' skills). Restart the conversation.');
       postState(); return;
     }
     if (m.type === 'saveMode') {
-      const saved = saveCustomProfile(m.name, m.skills);
+      const saved = saveCustomProfile(m.name, m.skills, m.desc);
       if (saved) vscode.window.showInformationMessage('Saved mode "' + saved + '". It is now in your mode list.');
       else vscode.window.showErrorMessage('Give the mode a valid name.');
       postState(); return;
@@ -172,140 +179,182 @@ function getWebviewHtml() {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/>
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';"/>
 <style>
-  body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);padding:14px 18px;font-size:13px}
-  h2{font-size:1.05rem;margin:18px 0 6px}
+  body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);padding:16px 20px;font-size:13px;line-height:1.5}
+  h1{font-size:1.1rem;margin:0 0 2px;font-weight:600}
+  h2{font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;color:var(--vscode-descriptionForeground);margin:22px 0 8px;font-weight:600}
   .muted{color:var(--vscode-descriptionForeground)}
-  .meter{display:flex;align-items:center;gap:10px;margin:2px 0 14px}
-  .bar{flex:0 0 200px;height:7px;border-radius:4px;background:var(--vscode-editorWidget-background);overflow:hidden}
-  .fill{height:100%;background:var(--vscode-charts-green,#3fb950);width:0%}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
-  .chip{border:1px solid var(--vscode-widget-border,#3c3c3c);background:var(--vscode-button-secondaryBackground,#33333a);color:var(--vscode-button-secondaryForeground,#ccc);border-radius:14px;padding:5px 12px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px}
-  .chip:hover{filter:brightness(1.15)}
-  .chip.active{background:var(--vscode-button-background,#0e639c);color:var(--vscode-button-foreground,#fff);border-color:transparent}
-  .chip .x{opacity:.7;font-weight:700}
-  .chip .x:hover{opacity:1}
-  .toolbar{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
-  input[type=text]{background:var(--vscode-input-background);color:var(--vscode-input-foreground);border:1px solid var(--vscode-input-border,#3c3c3c);border-radius:4px;padding:6px 9px;font-size:13px}
-  select{background:var(--vscode-dropdown-background);color:var(--vscode-dropdown-foreground);border:1px solid var(--vscode-dropdown-border,#3c3c3c);border-radius:4px;padding:6px 8px;font-size:12px}
-  #search{flex:1;min-width:180px}
-  button.act{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border:0;border-radius:4px;padding:6px 14px;cursor:pointer;font-size:13px}
-  button.act.sec{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground)}
-  button.act:hover{filter:brightness(1.1)}
-  .list{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:6px;max-height:46vh;overflow:auto;margin-top:8px}
-  .row{display:flex;gap:10px;align-items:flex-start;padding:7px 11px;border-bottom:1px solid var(--vscode-widget-border,#2a2a2a)}
-  .row:last-child{border-bottom:0}
-  .row:hover{background:var(--vscode-list-hoverBackground)}
-  .row.locked{opacity:.8}
-  .row input{margin-top:2px}
-  .nm{font-weight:600}
-  .nm .core{font-size:10px;color:var(--vscode-charts-blue,#4aa8d8);border:1px solid currentColor;border-radius:8px;padding:0 6px;margin-left:6px}
-  .dsc{color:var(--vscode-descriptionForeground);font-size:12px;margin-top:1px}
-  .tags{margin-top:3px}
-  .tag{font-size:10px;color:var(--vscode-descriptionForeground);border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:8px;padding:0 6px;margin-right:4px}
-  .tok{margin-left:auto;color:var(--vscode-descriptionForeground);font-variant-numeric:tabular-nums;font-size:11px;white-space:nowrap}
-  .empty{padding:22px;text-align:center}
+  .active-card{border:1px solid var(--vscode-focusBorder,#0e639c);background:var(--vscode-editorWidget-background);border-radius:8px;padding:12px 14px;margin:12px 0 4px}
+  .active-card .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--vscode-charts-green,#3fb950);margin-right:7px}
+  .active-card .now{font-weight:600;font-size:1rem}
+  .active-card .skills{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
+  .pill{font-size:11px;background:var(--vscode-badge-background,#333);color:var(--vscode-badge-foreground,#ccc);border-radius:10px;padding:2px 9px}
+  .mode{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:8px;padding:10px 12px;margin-bottom:7px}
+  .mode.on{border-color:var(--vscode-focusBorder,#0e639c)}
+  .mode-top{display:flex;align-items:center;gap:10px}
+  .mode-name{font-weight:600}
+  .mode-top .cnt{color:var(--vscode-descriptionForeground);font-size:12px}
+  .mode-top .badge{font-size:10px;color:var(--vscode-charts-green,#3fb950);border:1px solid currentColor;border-radius:8px;padding:0 7px}
+  .mode-top .sp{margin-left:auto}
+  button{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border:0;border-radius:5px;padding:5px 13px;cursor:pointer;font-size:12px}
+  button.sec{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground)}
+  button:hover{filter:brightness(1.12)}
+  .linkbtn{background:none;color:var(--vscode-textLink-foreground,#4aa8d8);padding:4px 6px}
+  .del{background:none;color:var(--vscode-descriptionForeground);padding:4px 6px;font-size:13px}
+  .del:hover{color:var(--vscode-errorForeground,#e05561)}
+  .mode-skills{margin-top:8px;padding-top:8px;border-top:1px solid var(--vscode-widget-border,#2a2a2a);color:var(--vscode-descriptionForeground);font-size:12px;line-height:1.7}
+  details.builtins{margin-top:4px}
+  details.builtins summary{cursor:pointer;color:var(--vscode-descriptionForeground);font-size:12px;padding:4px 0}
+  #createBtn{margin-top:14px}
+  #builder{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:8px;padding:14px;margin-top:12px}
+  input[type=text]{background:var(--vscode-input-background);color:var(--vscode-input-foreground);border:1px solid var(--vscode-input-border,#3c3c3c);border-radius:5px;padding:7px 10px;font-size:13px;width:100%;box-sizing:border-box;margin-bottom:8px}
+  .blist{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:6px;max-height:38vh;overflow:auto}
+  .brow{display:flex;gap:9px;align-items:baseline;padding:6px 10px;border-bottom:1px solid var(--vscode-widget-border,#2a2a2a)}
+  .brow:last-child{border-bottom:0}
+  .brow:hover{background:var(--vscode-list-hoverBackground)}
+  .brow .bn{font-weight:600}
+  .brow .bd{color:var(--vscode-descriptionForeground);font-size:12px}
+  .brow-actions{display:flex;gap:8px;margin-top:10px}
+  .foot{margin-top:18px;color:var(--vscode-descriptionForeground);font-size:12px;border-top:1px solid var(--vscode-widget-border,#2a2a2a);padding-top:10px}
+  .empty{padding:24px;text-align:center}
+  .autobar{display:flex;align-items:center;gap:9px;border:1px solid var(--vscode-focusBorder,#0e639c);border-radius:8px;padding:11px 13px;margin:14px 0 6px;cursor:pointer}
+  .autobar input{width:auto;margin:0}
+  .autobar .t{font-weight:600}
+  .mode-desc{color:var(--vscode-descriptionForeground);font-size:12px;margin-top:4px}
+  #activeDesc{color:var(--vscode-descriptionForeground);font-size:12px;margin-top:4px}
 </style></head><body>
-<div id="app">
-  <div id="notinstalled" class="empty" style="display:none">
-    <p>SuperBob isn't installed yet.</p>
-    <button class="act" id="installBtn">Install skills</button>
-  </div>
-  <div id="main" style="display:none">
-    <h2>Mode</h2>
-    <div class="muted" id="activeLine">—</div>
-    <div class="meter"><span class="muted">context</span><div class="bar"><div class="fill" id="fill"></div></div><span id="tok" class="muted"></span></div>
-    <div class="chips" id="modeChips"></div>
+<div id="notinstalled" class="empty" style="display:none">
+  <p>SuperBob isn't set up yet.</p><button id="installBtn">Set up skills</button>
+</div>
+<div id="main" style="display:none">
+  <h1>SuperBob</h1>
+  <div class="muted">One click picks the skills for what you're doing. Everything else stays out of the way.</div>
 
-    <h2>Build / adjust a mode</h2>
-    <div class="muted">Tick skills to activate them. The two core skills are always on. Apply now, or save your selection as a reusable mode.</div>
-    <div class="toolbar">
-      <input type="text" id="search" placeholder="Filter skills…"/>
-      <select id="sort" title="Sort skills">
-        <option value="cost">Context: heaviest first</option>
-        <option value="cost-asc">Context: lightest first</option>
-        <option value="name">Name (A–Z)</option>
-      </select>
-      <span class="muted" id="selCount"></span>
-    </div>
-    <div class="toolbar">
-      <button class="act" id="applyBtn">Apply selection now</button>
-      <button class="act sec" id="saveBtn">Save as mode…</button>
-      <input type="text" id="modeName" placeholder="new mode name" style="max-width:150px"/>
-      <button class="act sec" id="clearBtn">Clear</button>
-    </div>
-    <div class="list" id="list"></div>
-    <p class="muted">After applying, <b>restart the Bob / VS Code conversation</b> so it re-reads the skills. Changes apply to your IBM Bob skill set.</p>
+  <label class="autobar"><input type="checkbox" id="autoToggle"/><span><span class="t">Auto mode</span> — let SuperBob pick the right skills for each task automatically <span class="muted">(recommended)</span></span></label>
+
+  <div class="active-card">
+    <div><span class="dot"></span><span class="now" id="activeNow">—</span></div>
+    <div id="activeDesc"></div>
+    <div class="skills" id="activeSkills"></div>
   </div>
+
+  <h2>Your modes</h2>
+  <div id="yourModes"></div>
+
+  <details class="builtins">
+    <summary id="builtinSummary">Starter modes (built-in)</summary>
+    <div id="builtinModes" style="margin-top:8px"></div>
+  </details>
+
+  <button id="createBtn">+ Create your own mode</button>
+
+  <div id="builder" style="display:none">
+    <div style="font-weight:600;margin-bottom:8px">New mode</div>
+    <input type="text" id="bname" placeholder="Name it (e.g. my-evals)"/>
+    <input type="text" id="bdesc" placeholder="What's it for? When should it be used? (e.g. 'Evaluating our SQL agent')"/>
+    <div class="muted" style="margin-bottom:6px">Start from an existing mode, then tick or untick skills:</div>
+    <select id="bstart"></select>
+    <input type="text" id="bsearch" placeholder="Search skills…" style="margin-top:8px"/>
+    <div class="blist" id="blist"></div>
+    <div class="muted" style="margin-top:6px" id="bcount"></div>
+    <div class="brow-actions">
+      <button id="bsave">Save mode</button>
+      <button class="sec" id="bcancel">Cancel</button>
+    </div>
+  </div>
+
+  <div class="foot">The 2 core skills are always on. After switching a mode, <b>start a new conversation</b> so it loads.</div>
 </div>
 <script nonce="${nonce}">
   const vscode = acquireVsCodeApi();
-  let S = null, selected = new Set();
+  let S=null; let sel=new Set();
   vscode.postMessage({type:'ready'});
-  window.addEventListener('message', e => { if (e.data.type==='state'){ S=e.data; render(); }});
+  window.addEventListener('message', e=>{ if(e.data.type==='state'){ S=e.data; render(); }});
 
-  const TOK={}; // name -> tokens, rebuilt on each state
-  function fmt(t){ return t>=1000 ? '~'+(t/1000).toFixed(1)+'k' : '~'+t+'t'; }
-  function tokOf(n){ return TOK[n]||60; }
-  function coreCost(){ return S.core.reduce((a,n)=>a+tokOf(n),0); }
-  function modeCost(skills){ return coreCost() + skills.filter(n=>!S.core.includes(n)).reduce((a,n)=>a+tokOf(n),0); }
-  function estTotal(){ let t=coreCost(); selected.forEach(n=>{ if(!S.core.includes(n)) t+=tokOf(n); }); return t; }
+  function activeMode(){ if(!S.active) return null; if(S.active.indexOf('lean')===0) return '__lean__';
+    if(S.active.indexOf('core + ')===0) return S.active.slice(7).split(' ')[0]; return '__custom__'; }
+  function curated(){ const set=new Set(); Object.values(S.profiles).forEach(a=>a.forEach(n=>set.add(n))); S.core.forEach(n=>set.delete(n)); return [...set].sort(); }
+  function descOf(n){ const s=S.skills.find(x=>x.name===n); return s?s.desc:''; }
+  const DESCR={__lean__:'Just the essentials — SuperBob pulls in skills as each task needs them.',code:'Building software — features, tests, APIs, infrastructure.',data:'Data, SQL, and evaluating AI output.',pm:'Product work — PRDs, roadmaps, strategy.',security:'Security audits and vulnerability hunting.',ui:'Interfaces — UI, accessibility, design.',research:'Research, notes, and knowledge base.',cognos:'Evaluate a data/RAG agent (your Cognos work).','ship-it':'Final quality check before shipping.','quick-fix':'Fast debugging.'};
+  function descFor(id){ return (S.meta&&S.meta[id]) || DESCR[id] || 'Custom mode.'; }
+
   function render(){
-    document.getElementById('notinstalled').style.display = S.installed?'none':'block';
-    document.getElementById('main').style.display = S.installed?'block':'none';
+    document.getElementById('notinstalled').style.display=S.installed?'none':'block';
+    document.getElementById('main').style.display=S.installed?'block':'none';
     if(!S.installed) return;
-    S.skills.forEach(s=>TOK[s.name]=s.tokens);
-    document.getElementById('activeLine').textContent = 'Active: ' + (S.active||'—');
-    // seed selection from active set on first load
-    if(selected.size===0 && S.activeSet.length) S.activeSet.forEach(n=>{ if(!S.core.includes(n)) selected.add(n); });
-    // mode chips — each shows the context cost it brings
-    const chips = document.getElementById('modeChips'); chips.innerHTML='';
-    const mk=(label,onclick,extra)=>{const c=document.createElement('span');c.className='chip'+(extra||'');c.onclick=onclick;c.innerHTML=label;return c;};
-    chips.appendChild(mk('⚡ Lean <span class="muted">'+fmt(coreCost())+'</span>', ()=>vscode.postMessage({type:'applyLean'})));
-    Object.keys(S.profiles).forEach(p=>{
-      const isB = S.builtin.includes(p);
-      const c = mk(p+' <span class="muted">('+S.profiles[p].length+' · '+fmt(modeCost(S.profiles[p]))+')</span>', ()=>vscode.postMessage({type:'applyProfile',name:p}));
-      if(!isB){ const x=document.createElement('span'); x.className='x'; x.textContent='✕'; x.title='delete mode';
-        x.onclick=(ev)=>{ev.stopPropagation(); vscode.postMessage({type:'deleteMode',name:p});}; c.appendChild(x); }
-      chips.appendChild(c);
+    const am=activeMode();
+    // active card
+    document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode': am==='__custom__'?'custom set': (am||'—'));
+    document.getElementById('autoToggle').checked = (am==='__lean__');
+    document.getElementById('activeDesc').textContent = (am && am!=='__custom__') ? descFor(am) : (am==='__custom__'?'A custom set of skills you picked.':'');
+    const loaded=S.activeSet.filter(n=>!S.core.includes(n));
+    const cont=document.getElementById('activeSkills'); cont.innerHTML='';
+    if(!loaded.length){ const p=document.createElement('span'); p.className='muted'; p.textContent='Just the 2 core skills — the router pulls anything else in as needed.'; cont.appendChild(p); }
+    else loaded.forEach(n=>{ const p=document.createElement('span'); p.className='pill'; p.textContent=n; cont.appendChild(p); });
+
+    // your modes = Lean + custom modes
+    const your=document.getElementById('yourModes'); your.innerHTML='';
+    your.appendChild(modeCard('__lean__','Lean', ['just the essentials'], am==='__lean__', false));
+    Object.keys(S.profiles).filter(p=>!S.builtin.includes(p)).forEach(p=>{
+      your.appendChild(modeCard(p, p, S.profiles[p], am===p, true));
     });
-    renderList(); updateMeter();
+    // built-in modes
+    const bi=document.getElementById('builtinModes'); bi.innerHTML='';
+    S.builtin.forEach(p=>{ if(S.profiles[p]) bi.appendChild(modeCard(p, p, S.profiles[p], am===p, false)); });
+    document.getElementById('builtinSummary').textContent='Starter modes (built-in · '+S.builtin.filter(p=>S.profiles[p]).length+')';
+    // builder start-from options
+    const bs=document.getElementById('bstart'); if(bs && bs.options.length===0){
+      bs.innerHTML='<option value="">(blank — pick your own)</option>'+Object.keys(S.profiles).map(p=>'<option value="'+p+'">'+p+'</option>').join('');
+    }
   }
-  function renderList(){
-    const q=(document.getElementById('search').value||'').toLowerCase();
-    const sort=document.getElementById('sort').value;
-    const list=document.getElementById('list'); list.innerHTML='';
-    const rows=S.skills.slice();
-    if(sort==='cost') rows.sort((a,b)=>b.tokens-a.tokens || a.name.localeCompare(b.name));
-    else if(sort==='cost-asc') rows.sort((a,b)=>a.tokens-b.tokens || a.name.localeCompare(b.name));
-    else rows.sort((a,b)=>a.name.localeCompare(b.name));
-    rows.forEach(s=>{
-      if(q && !(s.name.toLowerCase().includes(q)||(s.desc||'').toLowerCase().includes(q))) return;
-      const row=document.createElement('div'); row.className='row'+(s.core?' locked':'');
-      const cb=document.createElement('input'); cb.type='checkbox';
-      cb.checked = s.core || selected.has(s.name); cb.disabled = s.core;
-      cb.onchange=()=>{ if(cb.checked) selected.add(s.name); else selected.delete(s.name); updateMeter(); };
-      const mid=document.createElement('div'); mid.style.flex='1';
-      mid.innerHTML='<div class="nm">'+s.name+(s.core?'<span class="core">always on</span>':'')+'</div>'+
-                    (s.desc?'<div class="dsc">'+s.desc+'</div>':'')+
-                    (s.inProfiles&&s.inProfiles.length?'<div class="tags">'+s.inProfiles.map(p=>'<span class="tag">'+p+'</span>').join('')+'</div>':'');
-      const tok=document.createElement('div'); tok.className='tok'; tok.textContent=fmt(s.tokens);
-      row.appendChild(cb); row.appendChild(mid); row.appendChild(tok); list.appendChild(row);
+
+  function modeCard(id,label,skills,isActive,deletable){
+    const d=document.createElement('div'); d.className='mode'+(isActive?' on':'');
+    const top=document.createElement('div'); top.className='mode-top';
+    const count = id==='__lean__' ? 'essentials only' : skills.length+' skills';
+    top.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'');
+    const sp=document.createElement('span'); sp.className='sp';
+    const use=document.createElement('button'); use.textContent=isActive?'Loaded':'Use'; use.disabled=isActive;
+    use.onclick=()=> vscode.postMessage(id==='__lean__'?{type:'applyLean'}:{type:'applyProfile',name:id});
+    sp.appendChild(use);
+    if(id!=='__lean__'){ const sk=document.createElement('button'); sk.className='linkbtn'; sk.textContent='skills';
+      sk.onclick=()=>{ const el=d.querySelector('.mode-skills'); el.style.display = el.style.display==='none'?'block':'none'; }; sp.appendChild(sk); }
+    if(deletable){ const del=document.createElement('button'); del.className='del'; del.textContent='🗑'; del.title='delete this mode';
+      del.onclick=()=> vscode.postMessage({type:'deleteMode',name:id}); sp.appendChild(del); }
+    top.appendChild(sp); d.appendChild(top);
+    const md=document.createElement('div'); md.className='mode-desc'; md.textContent=descFor(id); d.appendChild(md);
+    if(id!=='__lean__'){ const s=document.createElement('div'); s.className='mode-skills'; s.style.display='none';
+      s.textContent = skills.join('  ·  '); d.appendChild(s); }
+    return d;
+  }
+
+  // ---- builder ----
+  function openBuilder(){ document.getElementById('builder').style.display='block'; document.getElementById('createBtn').style.display='none'; sel=new Set(); renderBuilder(); }
+  function closeBuilder(){ document.getElementById('builder').style.display='none'; document.getElementById('createBtn').style.display='inline-block'; }
+  function renderBuilder(){
+    const q=(document.getElementById('bsearch').value||'').toLowerCase();
+    const list=document.getElementById('blist'); list.innerHTML='';
+    curated().forEach(n=>{
+      if(q && !(n.toLowerCase().includes(q)||(descOf(n)||'').toLowerCase().includes(q))) return;
+      const row=document.createElement('label'); row.className='brow';
+      const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=sel.has(n);
+      cb.onchange=()=>{ cb.checked?sel.add(n):sel.delete(n); document.getElementById('bcount').textContent=(sel.size+2)+' skills (incl. 2 core)'; };
+      const mid=document.createElement('div'); mid.innerHTML='<div class="bn">'+n+'</div>'+(descOf(n)?'<div class="bd">'+descOf(n)+'</div>':'');
+      row.appendChild(cb); row.appendChild(mid); list.appendChild(row);
     });
+    document.getElementById('bcount').textContent=(sel.size+2)+' skills (incl. 2 core)';
   }
-  function updateMeter(){
-    const t=estTotal(); const pct=Math.min(100,(t/67000*100));
-    document.getElementById('fill').style.width=pct.toFixed(1)+'%';
-    document.getElementById('tok').textContent='~'+t.toLocaleString()+' / 67,000 tokens';
-    document.getElementById('selCount').textContent=(selected.size+S.core.length)+' skills selected';
-  }
-  document.getElementById('search').addEventListener('input', renderList);
-  document.getElementById('sort').addEventListener('change', renderList);
-  document.getElementById('applyBtn').onclick=()=>vscode.postMessage({type:'applyCustom',skills:[...selected]});
-  document.getElementById('saveBtn').onclick=()=>{const n=document.getElementById('modeName').value; vscode.postMessage({type:'saveMode',name:n,skills:[...selected]});};
-  document.getElementById('clearBtn').onclick=()=>{selected.clear(); renderList(); updateMeter();};
-  const ib=document.getElementById('installBtn'); if(ib) ib.onclick=()=>vscode.postMessage({type:'install'});
+  document.addEventListener('click',e=>{
+    if(e.target.id==='createBtn') openBuilder();
+    if(e.target.id==='bcancel') closeBuilder();
+    if(e.target.id==='installBtn') vscode.postMessage({type:'install'});
+    if(e.target.id==='bsave'){ const name=document.getElementById('bname').value; vscode.postMessage({type:'saveMode',name:name,desc:document.getElementById('bdesc').value,skills:[...sel]}); closeBuilder(); }
+  });
+  document.addEventListener('input',e=>{ if(e.target.id==='bsearch') renderBuilder(); });
+  document.addEventListener('change',e=>{ if(e.target.id==='autoToggle'){ if(e.target.checked) vscode.postMessage({type:'applyLean'}); }
+    if(e.target.id==='bstart'){ const p=e.target.value; sel=new Set(p&&S.profiles[p]?S.profiles[p].filter(n=>!S.core.includes(n)):[]); renderBuilder(); } });
 </script></body></html>`;
 }
+
 
 // ---- install (unchanged behaviour) ----------------------------------------
 async function doInstall(context) {
