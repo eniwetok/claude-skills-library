@@ -65,6 +65,11 @@
         "command": "superBobSkills.status",
         "title": "SuperBob: Show Active Profile",
         "category": "SuperBob"
+      },
+      {
+        "command": "superBobSkills.installCrg",
+        "title": "SuperBob: Install code-review-graph (MCP tool)",
+        "category": "SuperBob"
       }
     ],
     "configuration": {

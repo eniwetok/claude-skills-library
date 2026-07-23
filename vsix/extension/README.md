@@ -127,6 +127,15 @@ The status-bar item (bottom-left) also shows the active mode; click it to open t
 
 ---
 
+## Optional: code-review-graph (code-map MCP tool)
+
+SuperBob loads *skills*. **code-review-graph** is a separate *tool* (an MCP server) that
+builds a map of your codebase so the agent reviews only the files a change affects — it
+pairs well with the `code`, `ship-it`, and `declutter` modes. To deploy it into Bob and
+Claude Code, run the command **"SuperBob: Install code-review-graph (MCP tool)"** from the
+palette (needs Python: uv, pipx, or pip3). Then restart Bob. It's optional and always-on
+once installed, independent of which mode you're in.
+
 ## Good to know
 
 - **Always start a new conversation after switching a mode** — skills are read at the start
