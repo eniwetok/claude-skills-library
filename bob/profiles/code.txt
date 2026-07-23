@@ -1,6 +1,5 @@
 tdd-workflow
 test-driven-development
-codebase-exploration
 architecture-decision-records
 error-handling
 debug

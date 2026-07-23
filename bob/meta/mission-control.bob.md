@@ -39,7 +39,7 @@ the agent cannot auto-activate a vault skill, because its description isn't load
 |-----------------|--------------------------------|
 | **Build a feature / write code** | `karpathy-guidelines`, `brainstorming` (if fuzzy) or `writing-plans`, the stack skill (`python-patterns`, `react-patterns`, …), `tdd-workflow`, `verification-before-completion` |
 | **Fix a bug** | `systematic-debugging`, then `caveman-debug` if no debugger, then `verification-before-completion` |
-| **Understand a codebase** | `codebase-exploration`, `karpathy-guidelines` |
+| **Understand a codebase** | `code-review-graph` (MCP), `karpathy-guidelines` |
 | **Design a system / architecture** | `brainstorming`, `architecture-decision-records`, `system-design`, `agent-council` |
 | **Evaluate an AI/data pipeline** (Cognos) | `error-analysis` first, then `write-judge-prompt` + `validate-evaluator`, `evaluate-rag`, `eval-audit` |
 | **Write SQL / analytics** | `sql-queries`, `write-query`, `statistical-analysis` |
@@ -246,17 +246,17 @@ Do NOT use both.
 ## Workflow C — Codebase Intelligence
 
 ```
-1. codebase-exploration   → semantic search, dependency graph, call-flow (SocratiCode MCP)
+1. code-review-graph   → semantic search, dependency graph, call-flow (code-review-graph MCP)
 2. karpathy-guidelines    → research-first, understand before changing
 3. [domain skill]         → once oriented, apply relevant patterns
 ```
 
-**Overlap resolution — Karpathy vs SocratiCode:**
+**Overlap resolution — Karpathy vs code-review-graph:**
 These are NOT in conflict. They operate on different layers:
 - `karpathy-guidelines` = **behavioral principles** (HOW to think: research-first, minimal changes, honest uncertainty, verifiable success criteria)
-- `codebase-exploration` = **tooling layer** (WHAT to use: semantic search, dependency graphs, call-flow analysis via SocratiCode MCP)
+- `code-review-graph` (MCP) = **tooling layer** (WHAT to use: semantic search, dependency graphs, call-flow analysis via code-review-graph MCP)
 
-Use both together. Karpathy shapes your mindset; SocratiCode gives you the tools to execute that mindset on a real codebase.
+Use both together. Karpathy shapes your mindset; code-review-graph gives you the tools to execute that mindset on a real codebase.
 
 ---
 
@@ -265,7 +265,7 @@ Use both together. Karpathy shapes your mindset; SocratiCode gives you the tools
 ```
 1. agent-council          → get multi-AI perspectives on the approach (consensus)
 2. sparc-methodology      → Spec → Pseudocode → Architecture → Refinement → Completion
-3. codebase-exploration   → understand existing system before designing additions
+3. code-review-graph   → understand existing system before designing additions
 4. karpathy-guidelines    → minimal, verifiable, no over-engineering
 5. architecture-decision-records → document the decisions made
 6. eval-harness           → validate the design before implementation
@@ -599,7 +599,7 @@ Complete disambiguation for skills that share similar descriptions:
 
 | Pair | How they differ | Use A when | Use B when |
 |------|----------------|-----------|-----------|
-| `karpathy-guidelines` vs `codebase-exploration` | Mindset vs tooling | Need to set behavioral principles | Need to navigate actual code |
+| `karpathy-guidelines` vs `code-review-graph` (MCP) | Mindset vs tooling | Need to set behavioral principles | Need to navigate actual code |
 | `brainstorming` vs `sparc-methodology` | Exploratory vs structured | Requirements unclear, need discovery | Requirements clear, need structured methodology |
 | `writing-plans` vs `sparc-methodology` | Plan doc vs full process | After brainstorming, need a plan doc | Starting complex work from scratch |
 | `security-audit` vs `bb-methodology` | Dev-time vs red-team | Reviewing code you wrote | Running a dedicated security engagement |
@@ -633,5 +633,5 @@ Complete disambiguation for skills that share similar descriptions:
 | G13 | team-attention | 1 | **`agent-council`** |
 | G14 | pablo-mano | 1 | `obsidian-cli` |
 | G15 | multica-ai | 1 | **`karpathy-guidelines`** |
-| G16 | SocratiCode | 2+MCP | **`codebase-exploration`**, semantic search, dep graphs |
+| G16 | code-review-graph | 2+MCP | **`code-review-graph` (MCP)**, semantic search, dep graphs |
 | G17 | Claude-BugHunter | 71+15cmd | **`bb-methodology`**, 71 `hunt-*` skills |

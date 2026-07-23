@@ -1,7 +1,7 @@
 # Claude Skills Library
 
 Personal library of Claude Code skills, plugins, and resources — organized by upstream source.
-**949 skills installed** across 19 groups. MCP servers: SocratiCode (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
+**953 skills installed** across 19 groups (+ 1 MCP). MCP servers: code-review-graph (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
 
 ---
 
@@ -24,7 +24,7 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 13 | **team-attention/agent-council** | team-attention | [github.com/team-attention/agent-council](https://github.com/team-attention/agent-council) |
 | 14 | **pablo-mano/Obsidian-CLI-skill** | pablo-mano | [github.com/pablo-mano/Obsidian-CLI-skill](https://github.com/pablo-mano/Obsidian-CLI-skill) |
 | 15 | **multica-ai/andrej-karpathy-skills** | multica-ai | [github.com/multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) |
-| 16 | **giancarloerra/SocratiCode** | giancarloerra | [github.com/giancarloerra/SocratiCode](https://github.com/giancarloerra/SocratiCode) |
+| 16 | **tirth8205/code-review-graph** (MCP · code intelligence, not skills) | tirth8205 | [github.com/tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph) |
 | 17 | **elementalsouls/Claude-BugHunter** | elementalsouls | [github.com/elementalsouls/Claude-BugHunter](https://github.com/elementalsouls/Claude-BugHunter) |
 | 18 | **ibelick/ui-skills** (Skills for Design Engineers) | ibelick | [github.com/ibelick/ui-skills](https://github.com/ibelick/ui-skills) |
 | 19 | **hamelsmu/evals-skills** (LLM eval methodology) | Hamel Husain | [github.com/hamelsmu/evals-skills](https://github.com/hamelsmu/evals-skills) |
@@ -324,17 +324,17 @@ All 14 skills ✅ installed.
 
 ---
 
-## Group 16 — SocratiCode (2 skills + MCP server · codebase intelligence)
+## Group 16 — code-review-graph (2 skills + MCP server · codebase intelligence)
 
-> **Upstream:** [github.com/giancarloerra/SocratiCode](https://github.com/giancarloerra/SocratiCode) · 3,062 ⭐
+> **Upstream:** [github.com/tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph) · 3,062 ⭐
 > Enterprise-grade codebase intelligence for 40M+ LOC repos. Hybrid semantic search, polyglot dependency graphs, symbol-level call-flow analysis, cross-project and branch-aware search. 61% fewer tokens, 84% fewer tool calls, 37× faster navigation.
-> **MCP:** `npx -y socraticode` (added to user config via `claude mcp add`)
-> **Package:** [packages/socraticode/](packages/socraticode/)
+> **MCP:** `npx -y code-review-graph` (added to user config via `claude mcp add`)
+> **Package:** [packages/code-review-graph/](packages/code-review-graph/)
 
 | Component | What it does |
 |-----------|-------------|
 | MCP server | Semantic search, dependency graphs, call-flow, cross-repo search |
-| `codebase-exploration` skill | Guides structured exploration of unfamiliar codebases |
+| `code-review-graph` (MCP) skill | Guides structured exploration of unfamiliar codebases |
 | `codebase-management` skill | Manages codebase health, refactoring, cross-cutting changes |
 
 ✅ MCP server added. ✅ 2 skills installed.
