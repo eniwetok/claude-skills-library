@@ -186,6 +186,7 @@ function getWebviewHtml() {
   .chip .x:hover{opacity:1}
   .toolbar{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
   input[type=text]{background:var(--vscode-input-background);color:var(--vscode-input-foreground);border:1px solid var(--vscode-input-border,#3c3c3c);border-radius:4px;padding:6px 9px;font-size:13px}
+  select{background:var(--vscode-dropdown-background);color:var(--vscode-dropdown-foreground);border:1px solid var(--vscode-dropdown-border,#3c3c3c);border-radius:4px;padding:6px 8px;font-size:12px}
   #search{flex:1;min-width:180px}
   button.act{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border:0;border-radius:4px;padding:6px 14px;cursor:pointer;font-size:13px}
   button.act.sec{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground)}
@@ -219,6 +220,11 @@ function getWebviewHtml() {
     <div class="muted">Tick skills to activate them. The two core skills are always on. Apply now, or save your selection as a reusable mode.</div>
     <div class="toolbar">
       <input type="text" id="search" placeholder="Filter skills…"/>
+      <select id="sort" title="Sort skills">
+        <option value="cost">Context: heaviest first</option>
+        <option value="cost-asc">Context: lightest first</option>
+        <option value="name">Name (A–Z)</option>
+      </select>
       <span class="muted" id="selCount"></span>
     </div>
     <div class="toolbar">
@@ -237,22 +243,27 @@ function getWebviewHtml() {
   vscode.postMessage({type:'ready'});
   window.addEventListener('message', e => { if (e.data.type==='state'){ S=e.data; render(); }});
 
-  function estTotal(){ let t=0; const byName={}; S.skills.forEach(s=>byName[s.name]=s.tokens);
-    S.core.forEach(n=>t+=byName[n]||60); selected.forEach(n=>{ if(!S.core.includes(n)) t+=byName[n]||60; }); return t; }
+  const TOK={}; // name -> tokens, rebuilt on each state
+  function fmt(t){ return t>=1000 ? '~'+(t/1000).toFixed(1)+'k' : '~'+t+'t'; }
+  function tokOf(n){ return TOK[n]||60; }
+  function coreCost(){ return S.core.reduce((a,n)=>a+tokOf(n),0); }
+  function modeCost(skills){ return coreCost() + skills.filter(n=>!S.core.includes(n)).reduce((a,n)=>a+tokOf(n),0); }
+  function estTotal(){ let t=coreCost(); selected.forEach(n=>{ if(!S.core.includes(n)) t+=tokOf(n); }); return t; }
   function render(){
     document.getElementById('notinstalled').style.display = S.installed?'none':'block';
     document.getElementById('main').style.display = S.installed?'block':'none';
     if(!S.installed) return;
+    S.skills.forEach(s=>TOK[s.name]=s.tokens);
     document.getElementById('activeLine').textContent = 'Active: ' + (S.active||'—');
     // seed selection from active set on first load
     if(selected.size===0 && S.activeSet.length) S.activeSet.forEach(n=>{ if(!S.core.includes(n)) selected.add(n); });
-    // mode chips
+    // mode chips — each shows the context cost it brings
     const chips = document.getElementById('modeChips'); chips.innerHTML='';
     const mk=(label,onclick,extra)=>{const c=document.createElement('span');c.className='chip'+(extra||'');c.onclick=onclick;c.innerHTML=label;return c;};
-    chips.appendChild(mk('⚡ Lean (core only)', ()=>vscode.postMessage({type:'applyLean'})));
+    chips.appendChild(mk('⚡ Lean <span class="muted">'+fmt(coreCost())+'</span>', ()=>vscode.postMessage({type:'applyLean'})));
     Object.keys(S.profiles).forEach(p=>{
       const isB = S.builtin.includes(p);
-      const c = mk(p+' <span class="muted">('+S.profiles[p].length+')</span>', ()=>vscode.postMessage({type:'applyProfile',name:p}));
+      const c = mk(p+' <span class="muted">('+S.profiles[p].length+' · '+fmt(modeCost(S.profiles[p]))+')</span>', ()=>vscode.postMessage({type:'applyProfile',name:p}));
       if(!isB){ const x=document.createElement('span'); x.className='x'; x.textContent='✕'; x.title='delete mode';
         x.onclick=(ev)=>{ev.stopPropagation(); vscode.postMessage({type:'deleteMode',name:p});}; c.appendChild(x); }
       chips.appendChild(c);
@@ -261,8 +272,13 @@ function getWebviewHtml() {
   }
   function renderList(){
     const q=(document.getElementById('search').value||'').toLowerCase();
+    const sort=document.getElementById('sort').value;
     const list=document.getElementById('list'); list.innerHTML='';
-    S.skills.forEach(s=>{
+    const rows=S.skills.slice();
+    if(sort==='cost') rows.sort((a,b)=>b.tokens-a.tokens || a.name.localeCompare(b.name));
+    else if(sort==='cost-asc') rows.sort((a,b)=>a.tokens-b.tokens || a.name.localeCompare(b.name));
+    else rows.sort((a,b)=>a.name.localeCompare(b.name));
+    rows.forEach(s=>{
       if(q && !(s.name.toLowerCase().includes(q)||(s.desc||'').toLowerCase().includes(q))) return;
       const row=document.createElement('div'); row.className='row'+(s.core?' locked':'');
       const cb=document.createElement('input'); cb.type='checkbox';
@@ -272,7 +288,7 @@ function getWebviewHtml() {
       mid.innerHTML='<div class="nm">'+s.name+(s.core?'<span class="core">always on</span>':'')+'</div>'+
                     (s.desc?'<div class="dsc">'+s.desc+'</div>':'')+
                     (s.inProfiles&&s.inProfiles.length?'<div class="tags">'+s.inProfiles.map(p=>'<span class="tag">'+p+'</span>').join('')+'</div>':'');
-      const tok=document.createElement('div'); tok.className='tok'; tok.textContent='~'+s.tokens+'t';
+      const tok=document.createElement('div'); tok.className='tok'; tok.textContent=fmt(s.tokens);
       row.appendChild(cb); row.appendChild(mid); row.appendChild(tok); list.appendChild(row);
     });
   }
@@ -283,6 +299,7 @@ function getWebviewHtml() {
     document.getElementById('selCount').textContent=(selected.size+S.core.length)+' skills selected';
   }
   document.getElementById('search').addEventListener('input', renderList);
+  document.getElementById('sort').addEventListener('change', renderList);
   document.getElementById('applyBtn').onclick=()=>vscode.postMessage({type:'applyCustom',skills:[...selected]});
   document.getElementById('saveBtn').onclick=()=>{const n=document.getElementById('modeName').value; vscode.postMessage({type:'saveMode',name:n,skills:[...selected]});};
   document.getElementById('clearBtn').onclick=()=>{selected.clear(); renderList(); updateMeter();};
