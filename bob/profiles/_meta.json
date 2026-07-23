@@ -8,5 +8,6 @@
   "research": "Digging into a topic and keeping what you learn. Includes deep-research, the wiki knowledge base, autoresearch, Obsidian notes and research synthesis.",
   "ship-it": "A quality gate to run before shipping. Includes code-review, verification-before-completion, security-audit, tests, clean-code habits, and ponytail (cut over-engineering).",
   "quick-fix": "Fast, focused debugging. Includes systematic-debugging (root cause first), caveman-debug (print statements) and error-handling.",
-  "declutter": "Strip out over-engineering. The ponytail 'lazy senior engineer' skills \u2014 audit the repo for bloat, review a diff for what to delete, track deferred shortcuts \u2014 plus karpathy-guidelines and code-review."
+  "declutter": "Strip out over-engineering. The ponytail 'lazy senior engineer' skills \u2014 audit the repo for bloat, review a diff for what to delete, track deferred shortcuts \u2014 plus karpathy-guidelines and code-review.",
+  "writing": "Writing and editing prose. Includes no-ai-slop (strip AI-slop patterns / detect them), plus copywriting, article-writing, ux-copy, brand-voice and draft-content. Pick this for docs, posts, and any writing you want sharp and human."
 }

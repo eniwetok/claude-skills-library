@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-07-24. **954 skills installed in `~/.claude/skills/`.** MCP: code-review-graph (local, MIT).
+Last updated: 2026-07-24. **958 skills installed in `~/.claude/skills/`.** MCP: code-review-graph (local, MIT).
 
 ---
 
@@ -621,3 +621,15 @@ Complements BugHunter (which *hunts* existing vulns) — vibesec *prevents* them
 
 - **code-review-graph** (MIT, MCP) — blast-radius code review graph; registered as a Claude MCP.
 - **rtk** (Apache-2.0, CLI) — Rust Token Killer; compresses bash output 60-90% via a PreToolUse hook.
+
+
+## Group 22 — petergyang/no-ai-slop (1 skill · sharper, more human writing)
+
+**Source:** [github.com/petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) - MIT
+**Package:** packages/no-ai-slop/
+
+| Skill | What it does | Triggers | Status |
+|-------|-------------|----------|--------|
+| **no-ai-slop** | Edit drafts to remove 20+ AI-slop patterns while keeping the writer's voice; or detect (name each pattern, no rewrite) | 'less AI-sounding', 'make this clearer', 'is this AI slop', 'audit my writing' | installed |
+
+Distinct from the generate/style writing skills - this one strips slop and detects it. Wired into the SuperBob **writing** mode.
