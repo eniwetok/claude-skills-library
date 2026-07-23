@@ -41,6 +41,7 @@ claude-skills-library/
 | **14 — pablo-obsidian** | [pablo-mano/Obsidian-CLI-skill](https://github.com/pablo-mano/Obsidian-CLI-skill) | `packages/pablo-obsidian/` | `cp -r packages/pablo-obsidian/skills/obsidian-cli ~/.claude/skills/` |
 | **18 — ui-skills-ibelick** | [ibelick/ui-skills](https://github.com/ibelick/ui-skills) | `packages/ui-skills-ibelick/` | `cp -r packages/ui-skills-ibelick/skills/<name> ~/.claude/skills/` |
 | **19 — evals-skills-hamel** | [hamelsmu/evals-skills](https://github.com/hamelsmu/evals-skills) | `packages/evals-skills-hamel/` | `cp -r packages/evals-skills-hamel/skills/<name> ~/.claude/skills/` |
+| **20 — ponytail** | [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) | `packages/ponytail/` | `cp -r packages/ponytail/skills/* ~/.claude/skills/` |
 | **15 — multica-karpathy** | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | `packages/multica-karpathy/` | `cp -r packages/multica-karpathy/skills/karpathy-guidelines ~/.claude/skills/` |
 
 ---
@@ -84,6 +85,7 @@ Upstreams to check:
 - `https://github.com/multica-ai/andrej-karpathy-skills`
 - `https://github.com/ibelick/ui-skills`
 - `https://github.com/hamelsmu/evals-skills`
+- `https://github.com/dietrichgebert/ponytail`
 
 ---
 

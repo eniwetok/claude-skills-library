@@ -1,13 +1,13 @@
 ---
 name: mission-control
 description: >
-  Master orchestrator for all 949 installed skills. Invoke at session start,
-  when starting any new task, or when you're unsure which skill to use.
-  Classifies the task, selects the right skills in the right order, and resolves
-  conflicts when multiple skills overlap. Use when: "start working on", "help me build",
-  "let's begin", "where do I start", "which skill should I use for", "new session",
-  "new project", or any task where the right skill isn't obvious.
-  Also invoke when skills seem to conflict or give contradictory guidance.
+  Master orchestrator and SuperBob mode selector. Invoke at session start, when starting
+  any task, when unsure which skill to use, and ESPECIALLY when the user asks to change
+  SuperBob modes. Trigger on: "use the X mode", "load X mode", "switch to X mode",
+  "activate X mode", "turn on X mode", "SuperBob mode", "which mode", plus "start working
+  on", "help me build", "where do I start", "which skill should I use", "new project", or
+  any task where the right skill isn't obvious. Picks the right skills in order and loads
+  a mode's skills on request.
 ---
 
 ---
@@ -47,11 +47,22 @@ the agent cannot auto-activate a vault skill, because its description isn't load
 | **Build or fix UI** | `frontend-design` (build) / `baseline-ui` + `fixing-accessibility` (fix), `improve-ui` |
 | **Product work** | `create-prd`, `product-vision`, `outcome-roadmap`, `prioritization-frameworks` |
 | **Research a topic** | `deep-research`, then `save` / `wiki-ingest` to keep findings |
-| **Review quality before done** | `code-review`, `verification-before-completion`, `simplify` |
+| **Review quality before done** | `code-review`, `verification-before-completion`, `ponytail` |
 | **Make a new skill** | `skill-creator` |
 
 If no intent matches, ask the user, or scan the vault directory listing for a skill
 whose folder name fits, then read that skill's file.
+
+### Selecting a mode straight from chat
+If the user says "use the <name> mode", "load <name> mode", "switch to <name>", or
+"activate <name>", treat it as a request to load that mode's skills right now:
+1. Read `~/.claude/profiles/<name>.txt` (or `~/.bob/profiles/<name>.txt`) — each line is a skill name.
+2. Read each of those skills' `SKILL.md` from the vault and apply them.
+3. Tell the user which mode and skills you loaded.
+This works mid-conversation with no restart and no panel — you are reading the mode's
+skills on demand. Known modes: the built-ins (code, data, pm, security, ui, research)
+plus any the user created (the `.txt` files in the profiles folder; their descriptions
+are in `_meta.json`).
 
 ### Loading a batch instead (optional)
 For a long session on one kind of work, pre-load a whole profile so its skills
@@ -63,8 +74,8 @@ Lean mode (this router) is the default and needs no reload.
 
 # Mission Control — Skill Orchestrator
 
-You have 949 skills installed across 19 groups. This skill tells you which ones
-to use, in what order, and how to resolve conflicts between overlapping skills.
+You have a large library of best-practice skills available. This skill tells you
+which to use, in what order, and how to resolve conflicts when several overlap.
 
 ---
 
@@ -92,7 +103,7 @@ mission-critical software, being told is not enough — quality must be *harness
 | **Correctness** | Tests + typecheck + lint all green. Every new/changed behavior has a test. | `tdd-workflow` + `dod-gate` hook |
 | **Evaluation** | Any AI-generated or heuristic logic has *evidence* it works (eval/benchmark), not vibes. | `eval-harness` / `verification-before-completion` |
 | **Usability** | User-facing paths pass a11y + UX review; every error state is handled and legible. | `frontend-a11y` / `error-handling` / `receiving-code-review` |
-| **Maintainability** | Diff is minimal; names are clear; no dead code; no unexplained complexity; docs/ADR updated. | `karpathy-guidelines` + `simplify` + `code-review` |
+| **Maintainability** | Diff is minimal; names are clear; no dead code; no unexplained complexity; docs/ADR updated. | `karpathy-guidelines` + `ponytail` (cut over-engineering) + `code-review` |
 
 ### The enforced outer loop (wraps EVERY workflow A–M)
 
@@ -353,8 +364,6 @@ swarm-orchestration → or hive-mind for consensus-driven swarms
 2. skill-builder          → quick scaffolding (ruflo)
 ```
 
-See [SKILLS-GUIDE.md](../../Documents/Skills/SKILLS-GUIDE.md) for the full creation process.
-
 ---
 
 ## Workflow J — Research / Learning
@@ -570,5 +579,3 @@ Complete disambiguation for skills that share similar descriptions:
 | G15 | multica-ai | 1 | **`karpathy-guidelines`** |
 | G16 | SocratiCode | 2+MCP | **`codebase-exploration`**, semantic search, dep graphs |
 | G17 | Claude-BugHunter | 71+15cmd | **`bb-methodology`**, 71 `hunt-*` skills |
-
-Full catalog: see `catalog/CATALOG.md` in the skills library repo.

@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-07-20. **949 skills installed in `~/.claude/skills/`.** MCP: SocratiCode.
+Last updated: 2026-07-24. **955 skills installed in `~/.claude/skills/`.** MCP: SocratiCode.
 
 ---
 
@@ -580,3 +580,27 @@ Directly applicable to the Cognos data-query-agent work (Task #7).
 **Core principle:** start with `error-analysis` on real traces, never with metrics.
 Metrics chosen before looking at failures are vanity metrics. And never trust an
 uncalibrated judge — `validate-evaluator` is not optional.
+
+
+---
+
+## Group 20 — dietrichgebert/ponytail (6 skills · "lazy senior engineer")
+
+**Source:** [github.com/dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) · MIT · 44k+ stars
+**Package:** `packages/ponytail/`
+
+Biases the agent toward minimal code — "the best code is the code you don't write."
+Reportedly cuts ~50% of the lines an agent would otherwise write. Complements
+`karpathy-guidelines` (broad coding hygiene) with an aggressive delete/YAGNI instinct.
+
+| Skill | What it does | Triggers | Status |
+|-------|-------------|----------|--------|
+| **ponytail** | Forces the laziest working solution — YAGNI, stdlib before custom, one line before fifty. Levels: lite/full/ultra | `ponytail`, `be lazy`, `simplest solution`, `yagni`, `do less` | ✅ installed |
+| **ponytail-review** | Reviews a diff only for over-engineering — what to delete | `review for over-engineering`, `/ponytail-review` | ✅ installed |
+| **ponytail-audit** | Whole-repo bloat audit — ranked list of what to cut | `audit for over-engineering`, `find bloat`, `/ponytail-audit` | ✅ installed |
+| **ponytail-debt** | Harvests `ponytail:` shortcut comments into a debt ledger | `ponytail debt`, `list the shortcuts` | ✅ installed |
+| **ponytail-gain** | Scoreboard of ponytail's measured impact | `/ponytail-gain`, `what does ponytail save` | ✅ installed |
+| **ponytail-help** | Quick-reference card for the ponytail skills | `/ponytail-help`, `ponytail help` | ✅ installed |
+
+Wired into SuperBob: added to the **code** and **ship-it** modes, a new **declutter**
+mode, and the Maintainability pillar in `mission-control`.

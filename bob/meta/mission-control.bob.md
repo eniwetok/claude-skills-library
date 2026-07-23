@@ -47,7 +47,7 @@ the agent cannot auto-activate a vault skill, because its description isn't load
 | **Build or fix UI** | `frontend-design` (build) / `baseline-ui` + `fixing-accessibility` (fix), `improve-ui` |
 | **Product work** | `create-prd`, `product-vision`, `outcome-roadmap`, `prioritization-frameworks` |
 | **Research a topic** | `deep-research`, then `save` / `wiki-ingest` to keep findings |
-| **Review quality before done** | `code-review`, `verification-before-completion`, `simplify` |
+| **Review quality before done** | `code-review`, `verification-before-completion`, `ponytail` |
 | **Make a new skill** | `skill-creator` |
 
 If no intent matches, ask the user, or scan the vault directory listing for a skill
@@ -107,7 +107,7 @@ where the guardrails exist, or run the checks by hand and show the output.
 | **Correctness** | Tests + typecheck + lint green. Every new behavior has a test. | `tdd-workflow`, `verification-before-completion` |
 | **Evaluation** | AI-generated or heuristic logic has *evidence*, not vibes. | `error-analysis`, `write-judge-prompt`, `validate-evaluator`, `eval-harness` |
 | **Usability** | User-facing paths handle errors; a11y where it applies. | `fixing-accessibility`, `frontend-a11y`, `error-handling` |
-| **Maintainability** | Minimal diff, clear names, no dead code, docs updated. | `karpathy-guidelines`, `simplify`, `code-review` |
+| **Maintainability** | Minimal diff, clear names, no dead code, docs updated. | `karpathy-guidelines`, `ponytail`, `code-review` |
 
 ### The loop (wraps every workflow below)
 

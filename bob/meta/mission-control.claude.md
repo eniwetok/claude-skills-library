@@ -47,7 +47,7 @@ the agent cannot auto-activate a vault skill, because its description isn't load
 | **Build or fix UI** | `frontend-design` (build) / `baseline-ui` + `fixing-accessibility` (fix), `improve-ui` |
 | **Product work** | `create-prd`, `product-vision`, `outcome-roadmap`, `prioritization-frameworks` |
 | **Research a topic** | `deep-research`, then `save` / `wiki-ingest` to keep findings |
-| **Review quality before done** | `code-review`, `verification-before-completion`, `simplify` |
+| **Review quality before done** | `code-review`, `verification-before-completion`, `ponytail` |
 | **Make a new skill** | `skill-creator` |
 
 If no intent matches, ask the user, or scan the vault directory listing for a skill
@@ -103,7 +103,7 @@ mission-critical software, being told is not enough — quality must be *harness
 | **Correctness** | Tests + typecheck + lint all green. Every new/changed behavior has a test. | `tdd-workflow` + `dod-gate` hook |
 | **Evaluation** | Any AI-generated or heuristic logic has *evidence* it works (eval/benchmark), not vibes. | `eval-harness` / `verification-before-completion` |
 | **Usability** | User-facing paths pass a11y + UX review; every error state is handled and legible. | `frontend-a11y` / `error-handling` / `receiving-code-review` |
-| **Maintainability** | Diff is minimal; names are clear; no dead code; no unexplained complexity; docs/ADR updated. | `karpathy-guidelines` + `simplify` + `code-review` |
+| **Maintainability** | Diff is minimal; names are clear; no dead code; no unexplained complexity; docs/ADR updated. | `karpathy-guidelines` + `ponytail` (cut over-engineering) + `code-review` |
 
 ### The enforced outer loop (wraps EVERY workflow A–M)
 
