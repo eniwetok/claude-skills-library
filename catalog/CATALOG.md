@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-07-24. **953 skills installed in `~/.claude/skills/`.** MCP: code-review-graph (local, MIT).
+Last updated: 2026-07-24. **954 skills installed in `~/.claude/skills/`.** MCP: code-review-graph (local, MIT).
 
 ---
 
@@ -604,3 +604,20 @@ Reportedly cuts ~50% of the lines an agent would otherwise write. Complements
 
 Wired into SuperBob: added to the **code** and **ship-it** modes, a new **declutter**
 mode, and the Maintainability pillar in `mission-control`.
+
+
+## Group 21 — BehiSecc/VibeSec (1 skill · proactive secure coding)
+
+**Source:** [github.com/BehiSecc/VibeSec-Skill](https://github.com/BehiSecc/VibeSec-Skill) · Apache-2.0
+**Package:** 
+
+| Skill | What it does | Triggers | Status |
+|-------|-------------|----------|--------|
+| **vibesec** | Write secure web code proactively (bug-hunter mindset): access control, XSS/CSRF, SQLi/SSRF, auth, API security | , ,  | ✅ installed |
+
+Complements BugHunter (which *hunts* existing vulns) — vibesec *prevents* them at write time. Wired into the SuperBob **security** mode.
+
+## Tools (not skills)
+
+- **code-review-graph** (MIT, MCP) — blast-radius code review graph; registered as a Claude MCP.
+- **rtk** (Apache-2.0, CLI) — Rust Token Killer; compresses bash output 60-90% via a PreToolUse hook.

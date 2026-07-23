@@ -1,7 +1,7 @@
 # Claude Skills Library
 
 Personal library of Claude Code skills, plugins, and resources — organized by upstream source.
-**953 skills installed** across 19 groups (+ 1 MCP). MCP servers: code-review-graph (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
+**954 skills installed** across 21 groups (+ code-review-graph MCP + rtk output compressor). MCP servers: code-review-graph (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
 
 ---
 

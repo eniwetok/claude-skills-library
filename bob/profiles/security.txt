@@ -15,3 +15,4 @@ hunt-llm-ai
 hunt-api-misconfig
 evidence-hygiene
 report-writing
+vibesec
