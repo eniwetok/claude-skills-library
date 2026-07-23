@@ -429,6 +429,13 @@ async function doInstall(context) {
           fs.copyFileSync(bobMeta, path.join(BOB_VAULT, 'mission-control', 'SKILL.md'));
           fs.mkdirSync(BOB_PROFILES, { recursive: true });
           for (const f of fs.readdirSync(path.join(pkg, 'profiles'))) fs.copyFileSync(path.join(pkg, 'profiles', f), path.join(BOB_PROFILES, f));
+          // Bob chat slash commands (e.g. /superbob) go in ~/.bob/commands/
+          const cmdSrc = path.join(pkg, 'commands');
+          if (fs.existsSync(cmdSrc)) {
+            const cmdDest = path.join(HOME, '.bob', 'commands');
+            fs.mkdirSync(cmdDest, { recursive: true });
+            for (const f of fs.readdirSync(cmdSrc)) fs.copyFileSync(path.join(cmdSrc, f), path.join(cmdDest, f));
+          }
           applyProfile([]);
           if (bk) log('Bob skills backed up to ' + bk);
         }

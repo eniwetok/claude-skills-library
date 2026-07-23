@@ -22,8 +22,9 @@ needs.
 3. **Or pick a mode.** Turn Auto off and click a mode — `rag`, `code`, `data`,
    `ship-it`, and so on. Each card says what it's for and which skills it loads.
 4. **Start a new conversation** after switching, so the agent re-reads its skills.
-5. **You can also just ask in chat.** Tell Bob *"use the rag mode"* (or any mode name)
-   and it loads that mode's skills on the spot — no panel, no restart.
+5. **Or use the `/superbob` slash command in chat.** Type `/` in the Bob chat and pick
+   **`/superbob`**, then a mode — e.g. `/superbob rag`. It loads that mode's skills.
+   (`/superbob` on its own lists the modes.) You can also just say *"use the rag mode"*.
 6. **Make your own.** Click **+ Create your own mode**, give it a name and a short
    "what it's for" description, tick the skills you want, and save. It becomes a
    one-click mode of your own.

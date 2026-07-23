@@ -18,7 +18,7 @@ EXCLUDE=(mission-control \
   email-drafter explainer-graphic invoice-generator learning-path-generator morning-briefing \
   quick-research receipt-scanner slide-deck-builder visual-page-builder workflow-visualizer)
 
-mkdir -p "$STAGE/skills" "$STAGE/profiles" "$STAGE/meta" "$OUT"
+mkdir -p "$STAGE/skills" "$STAGE/profiles" "$STAGE/meta" "$STAGE/commands" "$OUT"
 
 while IFS= read -r f; do
   d="$(dirname "$f")"; name="$(basename "$d")"
@@ -31,6 +31,7 @@ cp "$REPO/bob/meta/mission-control.bob.md"    "$STAGE/meta/"
 cp "$REPO/bob/meta/mission-control.claude.md" "$STAGE/meta/"
 
 cp "$REPO"/bob/profiles/*.txt "$STAGE/profiles/"
+cp "$REPO"/bob/commands/*.md "$STAGE/commands/" 2>/dev/null || true
 cp "$REPO/bob/bob-profile"          "$STAGE/bob-profile"
 cp "$REPO/bob/package-install.sh"   "$STAGE/install.sh"
 cp "$REPO/dist/BOB-INSTALL-INSTRUCTIONS.md" "$STAGE/README.md"
