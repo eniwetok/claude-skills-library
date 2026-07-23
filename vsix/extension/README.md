@@ -1,187 +1,138 @@
-# SuperBob 🦸  —  Best-Practice Skills for Bob & VS Code
+# SuperBob 🦸 — Best-Practice Skills for Bob & VS Code
 
-**SuperBob gives IBM Bob (and VS Code) its superpowers.** It installs a curated library
-of **best-practice skills** — gathered from 19 open-source sources — and switches skill
-**profiles** from the command palette so the agent only ever loads what the task at hand
-needs.
+**SuperBob gives IBM Bob (and VS Code) its superpowers.** It installs a big library of
+best-practice skills and lets you load only the ones a task needs — so the agent stays
+fast and focused instead of drowning in a thousand skills at once.
 
----
-
-> **Credits & licensing.** SuperBob is an **aggregation** — it does not claim ownership
-> of these skills. Each was created by other people and remains under its author's own
-> license. SuperBob's own code (installer, profile system, mission-control router) is
-> MIT; that does **not** cover the bundled skills. Full attribution for all
-> sources is in **[LICENSES.md](LICENSES.md)**.
-
-## Getting started
-
-1. **Open the SuperBob panel.** Click the **SuperBob robot icon in the left sidebar**
-   (the activity bar). The Skills panel opens right there — no terminal needed.
-2. **Leave Auto mode on.** SuperBob reads each task and pulls in the right skills
-   automatically. For most people, that's the whole setup.
-3. **Or pick a mode.** Turn Auto off and click a mode — `rag`, `code`, `data`,
-   `ship-it`, and so on. Each card says what it's for and which skills it loads.
-4. **Start a new conversation** after switching, so the agent re-reads its skills.
-5. **Or use the `/superbob` slash command in chat.** Type `/` in the Bob chat and pick
-   **`/superbob`**, then a mode — e.g. `/superbob rag`. It loads that mode's skills.
-   (`/superbob` on its own lists the modes.) You can also just say *"use the rag mode"*.
-6. **Make your own.** Click **+ Create your own mode**, give it a name and a short
-   "what it's for" description, tick the skills you want, and save. It becomes a
-   one-click mode of your own.
-
-## What this solves
-
-An agent loads every installed skill's name and description at the start of a
-conversation. The full library is about **67,000 tokens** before you type anything —
-it crowds out the room the agent needs to think.
-
-This extension keeps the full library in a vault the agent does not read, and loads
-only a small **task profile** (about **2,000 tokens**). You pick a profile for the job
-in front of you; everything else stays out of the way. **Roughly a 97% cut in context.**
-
-## Commands  (Cmd / Ctrl + Shift + P)
-
-- **SuperBob: Install / Update Skills** — puts the library in place
-- **SuperBob: Load Profile…** — choose the task you're doing
-- **SuperBob: Show Active Profile** — see what's loaded
-
-A status-bar item (bottom-left) shows the active profile. Click it to switch. After
-switching, **restart the conversation** so the agent re-reads its skills.
+> **Credits & licensing.** SuperBob is an **aggregation** — it does not claim ownership of
+> these skills. Each was created by other people and remains under its author's own
+> license. SuperBob's own code is MIT; that does not cover the bundled skills. Full
+> attribution is in **[LICENSES.md](LICENSES.md)**.
 
 ---
 
-## The categories, and when to use each skill
+## Why it exists (30-second version)
 
-Every profile also loads a small **Always-on core** (below). Counts show how many skills
-each profile loads.
+An AI agent loads a one-line summary of **every** installed skill when a conversation
+starts. With ~1,500 skills that's about **67,000 tokens before you type a word** — it
+crowds out the space the agent needs to think.
 
-### Always on — loaded with every task
-| Skill | Use it when |
-|-------|-------------|
-| **mission-control** | Starting any real task — it picks the right skills, in order |
-| **using-superpowers** | Always: it forces a check for a relevant skill before acting |
-| **karpathy-guidelines** | Writing any code — keeps changes minimal and honest |
-| **brainstorming** | The requirements are still fuzzy and need exploring |
-| **writing-plans** | You have a design and need a concrete plan before coding |
-| **systematic-debugging** | Anything is broken — find the root cause before patching |
-| **verification-before-completion** | Before calling any task "done" |
-| **caveman-debug** | No debugger available — instrument with print statements |
-
-### Build software  (24 skills)
-> Features, tests, APIs, and infrastructure.
-
-| Skill | Use it when |
-|-------|-------------|
-| **tdd-workflow** | Building a new behavior — write the test first |
-| **codebase-exploration** | Landing in unfamiliar code and need the map |
-| **architecture-decision-records** | You made a design decision worth recording |
-| **error-handling** | Deciding how failures should surface and recover |
-| **api-design / system-design** | Shaping a new service or endpoint |
-| **hexagonal-architecture** | Keeping business logic independent of frameworks |
-| **python / golang / rust / react / django / fastapi patterns** | Working in that stack |
-| **postgres-patterns / database-migrations** | Touching the database or its schema |
-| **docker / kubernetes / deployment patterns** | Packaging or shipping the app |
-| **performance-analysis** | It works but it's slow |
-
-### Data & evaluation  (21 skills)  — the Cognos work
-> Evaluations, SQL, retrieval, and analytics.
-
-| Skill | Use it when |
-|-------|-------------|
-| **error-analysis** | Starting any eval — read real traces, name the failure modes. Start here. |
-| **eval-audit** | You inherited evals and don't trust them |
-| **write-judge-prompt** | A failure needs judgment code can't check (tone, faithfulness) |
-| **validate-evaluator** | Always after a judge — calibrate it against human labels |
-| **generate-synthetic-data** | Real test data is too thin |
-| **evaluate-rag** | Grading a retrieval system — score search and answer separately |
-| **build-review-interface** | You need humans to label traces |
-| **sql-queries / write-query** | Writing or reviewing SQL |
-| **iterative-retrieval / embeddings / agentdb-vector-search** | Building retrieval |
-| **mle-workflow** | Running an ML training/eval loop |
-| **statistical-analysis / data-visualization / explore-data** | Making sense of a dataset |
-
-### Product  (20 skills)
-> PRDs, roadmaps, strategy, user stories.
-
-| Skill | Use it when |
-|-------|-------------|
-| **create-prd** | Writing a product requirements doc |
-| **product-vision / product-strategy** | Setting direction |
-| **outcome-roadmap** | Planning what ships and in what order |
-| **prioritization-frameworks** | Too many things to do, need to choose |
-| **user-stories / job-stories** | Turning needs into buildable units |
-| **opportunity-solution-tree** | Mapping problems to possible solutions |
-| **competitor-analysis / market-sizing** | Researching the market |
-| **user-personas** | Defining who you're building for |
-| **lean-canvas / swot-analysis** | Framing a business or a bet |
-| **gtm-strategy / north-star-metric** | Planning a launch and how you'll measure it |
-| **stakeholder-map / summarize-meeting / retro / release-notes** | Running the process |
-
-### Security  (17 skills)
-> Audits and vulnerability hunting.
-
-| Skill | Use it when |
-|-------|-------------|
-| **security-audit** | Reviewing your own code for weaknesses (during development) |
-| **bb-methodology** | Running a dedicated security engagement (the orchestrator) |
-| **redteam-mindset** | You need to think like an attacker |
-| **hunt-sqli / xss / auth-bypass / idor / ssrf / rce** | Hunting that specific class of bug |
-| **hunt-cloud-misconfig / hunt-k8s** | Auditing cloud or Kubernetes |
-| **hunt-llm-ai** | Testing an AI/LLM feature for abuse |
-| **evidence-hygiene / report-writing** | Documenting and disclosing findings |
-
-### Interfaces  (14 skills)
-> UI, accessibility, design, motion.
-
-| Skill | Use it when |
-|-------|-------------|
-| **frontend-design** | Building a new interface from scratch |
-| **baseline-ui** | Cleaning up rough, AI-generated UI |
-| **fixing-accessibility** | Making an existing interface usable by everyone |
-| **fixing-motion-performance** | Animations stutter or jank |
-| **fixing-metadata** | Setting page titles and social-share previews |
-| **improve-ui** | Auditing a UI without touching its code (writes a plan) |
-| **shadcn-ui / design-system / frontend-patterns** | Working within a design system |
-| **motion-ui** | Adding animations and transitions |
-| **impeccable-design-polish** | Final polish pass before shipping a page |
-
-### Research  (14 skills)
-> Notes, wiki, deep research.
-
-| Skill | Use it when |
-|-------|-------------|
-| **deep-research** | You need a thorough, cited answer on a topic |
-| **wiki / wiki-ingest / wiki-query** | Building or querying a personal knowledge base |
-| **autoresearch** | Research that files its findings automatically |
-| **save** | Capturing an insight as a structured note |
-| **research-synthesis** | Pulling many sources into one view |
-| **defuddle** | Stripping a web page down before reading it |
-| **think** | Working through a hard problem step by step |
+SuperBob fixes this. It keeps the full library in a **vault** the agent doesn't read, and
+loads only a small **mode** for the job in front of you (about **200–2,000 tokens**).
+**Roughly a 97% cut in wasted context.**
 
 ---
 
-## When to create a new skill
+## Install
 
-Not everything belongs in this library. Create a new skill when a task is **reusable**,
-its steps are **non-obvious**, and nothing here already covers it. If an existing skill
-almost fits, improve that one instead of making a near-duplicate. Trivial one-off tasks
-don't need a skill at all.
+1. Download **`super-bob-skills-<version>.vsix`**.
+2. In Bob / VS Code: **Extensions** panel → **`⋯`** menu → **Install from VSIX…** → pick the file.
+   *(Or in a terminal: `bobide --install-extension super-bob-skills-<version>.vsix`.)*
+3. **Reload the window** (Cmd/Ctrl+Shift+P → *Developer: Reload Window*).
+4. Open the panel (below) and, on first run, choose **Install skills** if prompted — that
+   unpacks the library into place. Your previous skills are backed up first.
 
-## The 19 sources
+Requires `unzip` (built in on macOS and Linux). Tested on **IBM Bob 2.0.1**.
 
-Skills come from, among others: Anthropic (official + knowledge-work), Superpowers,
-Open Design, Everything-Claude-Code, Bug Hunter (security), Hamel Husain's eval
-methodology, ibelick's UI skills, ruflo, the PM Skills marketplace, an Obsidian wiki
-stack, and Karpathy's guidelines. Full attribution and licences are in **LICENSES.md**.
+---
+
+## Getting started (the whole thing in 3 steps)
+
+1. **Click the SuperBob robot icon** in the **left sidebar** (the activity bar). The Skills
+   panel opens there — no terminal needed.
+2. **Leave "Auto mode" on** (it's on by default). SuperBob reads each task and pulls in the
+   right skills automatically. For most people, that's the entire setup.
+3. **Start a new conversation.** Skills load when a conversation begins, so after any change
+   start a fresh chat.
+
+That's it. Everything below is for when you want more control.
+
+---
+
+## Three ways to switch modes
+
+**1. From the sidebar panel** *(most control)*
+Turn Auto off and click a mode's **Use** button. Click **skills** to see exactly what a
+mode includes and what each skill costs. Click **Unload** on an active mode to turn it off.
+
+**2. Auto mode** *(simplest)*
+The toggle at the top. On = SuperBob picks skills per task. Off = you choose a mode.
+
+**3. From the Bob chat** *(hands-free)*
+Type **`/`** in the chat and choose **`/superbob`**, then a mode:
+- `/superbob rag` — load the rag mode
+- `/superbob code`, `/superbob data`, `/superbob auto`, … — any mode
+- `/superbob` alone — lists every mode with its description
+
+You can also just type in plain words: **"use the rag mode"**.
+
+> After switching by any method, **start a new conversation** so the agent re-reads its skills.
+
+---
+
+## The sidebar panel, part by part
+
+- **Auto mode toggle** — let SuperBob choose per task (recommended default).
+- **Active card** — shows what's loaded right now, including the two always-on core skills
+  (`using-superpowers`, `mission-control`), each with a short description and token cost.
+- **Your modes** — Lean plus any modes you've made. Each has **Use** / **Unload**, a
+  **skills** link (name + description + tokens for every skill), and 🗑 to delete.
+- **Starter modes (built-in)** — a collapsed section with 6 ready-made modes.
+- **+ Create your own mode** — see below.
+
+---
+
+## The modes
+
+Each mode loads a focused set of skills. The two **core** skills are always on.
+
+| Mode | Use it for | Key skills |
+|------|-----------|-----------|
+| **Auto / Lean** | Mixed work — SuperBob picks per task | *(core only, ~200 tokens)* |
+| **code** | Building or changing software | tdd-workflow, codebase-exploration, api/system-design, stack patterns, docker/kubernetes |
+| **data** | Data & judging AI output | error-analysis, write-judge-prompt, validate-evaluator, evaluate-rag, SQL, embeddings, statistics |
+| **rag** | Evaluating a RAG / retrieval agent | evaluate-rag, error-analysis, LLM judges, SQL checks, statistics |
+| **security** | Audits & vulnerability hunting | bb-methodology, security-audit, hunt-* skills, redteam-mindset |
+| **ui** | Interfaces & design | frontend-design, fixing-accessibility, motion, design systems, improve-ui |
+| **pm** | Product planning | create-prd, product-vision, roadmaps, prioritization, user stories |
+| **research** | Investigation & notes | deep-research, wiki, autoresearch, note-taking |
+| **ship-it** | Quality gate before shipping | code-review, verification-before-completion, security-audit, tests |
+| **quick-fix** | Fast debugging | systematic-debugging, caveman-debug, error-handling |
+
+*(rag, ship-it and quick-fix are examples you can keep, tweak, or delete.)*
+
+---
+
+## Build your own mode
+
+1. In the panel, click **+ Create your own mode**.
+2. **Name it** (e.g. `my-evals`) and add a short **"what it's for"** description — this is
+   what tells you (and SuperBob) when to use it.
+3. Optionally **start from** an existing mode, then tick or untick skills. The list shows a
+   short description for each skill so you know what you're adding.
+4. Click **Save mode**. It appears as a one-click mode you can **Use** anytime — or delete
+   with 🗑.
+
+---
+
+## Command palette (optional)
+
+`Cmd/Ctrl+Shift+P`:
+- **SuperBob: Open Control Panel**
+- **SuperBob: Load Profile…**
+- **SuperBob: Install / Update Skills**
+- **SuperBob: Show Active Profile**
+
+The status-bar item (bottom-left) also shows the active mode; click it to open the panel.
 
 ---
 
 ## Good to know
 
-- **A VS Code extension can't register agent skills directly.** Skills are files that
-  Bob and the agent in VS Code read from disk. This extension installs those files and
-  runs the profile system on top.
-- Requires `unzip` (present on macOS and Linux).
-- Tested against **IBM Bob 2.0.1**.
-- Nothing is deleted — your previous skills are backed up first, and you can restore
-  them anytime (see the repo's RESTORE.md).
+- **Always start a new conversation after switching a mode** — skills are read at the start
+  of a chat, so a mid-chat change doesn't take effect until the next one.
+- **Bob vs VS Code.** SuperBob installs into IBM Bob (`~/.bob/skills`) and the agent in VS
+  Code (`~/.claude/skills`). Choose which in Settings → `superBobSkills.targets`.
+- **A VS Code extension can't register agent skills directly.** Skills are files the agent
+  reads from disk; SuperBob installs those files and manages which are loaded.
+- **Nothing is deleted.** Your existing skills are backed up before install.
