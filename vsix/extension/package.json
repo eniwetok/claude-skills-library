@@ -1,9 +1,9 @@
 {
   "name": "super-bob-skills",
   "displayName": "Super-bob-skills",
-  "description": "SuperBob gives IBM Bob (and VS Code) its superpowers: best-practice skills from 19 sources, loaded by task so context stays small.",
+  "description": "Best-practice skills for IBM Bob and VS Code, loaded by task so agent context stays small.",
   "version": "1.2.0",
-  "publisher": "eniwetok",
+  "publisher": "superbob",
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.75.0"
@@ -61,14 +61,6 @@
   "galleryBanner": {
     "color": "#2b2fdb",
     "theme": "dark"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/eniwetok/claude-skills-library"
-  },
-  "homepage": "https://github.com/eniwetok/claude-skills-library",
-  "bugs": {
-    "url": "https://github.com/eniwetok/claude-skills-library/issues"
   },
   "license": "SEE LICENSE IN LICENSES.md"
 }

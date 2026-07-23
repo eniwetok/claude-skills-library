@@ -10,9 +10,8 @@ needs.
 > **Credits & licensing.** SuperBob is an **aggregation** — it does not claim ownership
 > of these skills. Each was created by other people and remains under its author's own
 > license. SuperBob's own code (installer, profile system, mission-control router) is
-> MIT; that does **not** cover the bundled skills. AGPL, source-available, and
-> unlicensed content is deliberately **excluded** from the shared package. Full
-> attribution for all sources: **[LICENSES.md](LICENSES.md)**.
+> MIT; that does **not** cover the bundled skills. Full attribution for all
+> sources is in **[LICENSES.md](LICENSES.md)**.
 
 ## What this solves
 

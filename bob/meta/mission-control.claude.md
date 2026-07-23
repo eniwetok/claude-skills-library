@@ -63,8 +63,8 @@ Lean mode (this router) is the default and needs no reload.
 
 # Mission Control — Skill Orchestrator
 
-You have 949 skills installed across 19 groups. This skill tells you which ones
-to use, in what order, and how to resolve conflicts between overlapping skills.
+You have a large library of best-practice skills available. This skill tells you
+which to use, in what order, and how to resolve conflicts when several overlap.
 
 ---
 
@@ -353,8 +353,6 @@ swarm-orchestration → or hive-mind for consensus-driven swarms
 2. skill-builder          → quick scaffolding (ruflo)
 ```
 
-See [SKILLS-GUIDE.md](../../Documents/Skills/SKILLS-GUIDE.md) for the full creation process.
-
 ---
 
 ## Workflow J — Research / Learning
@@ -570,5 +568,3 @@ Complete disambiguation for skills that share similar descriptions:
 | G15 | multica-ai | 1 | **`karpathy-guidelines`** |
 | G16 | SocratiCode | 2+MCP | **`codebase-exploration`**, semantic search, dep graphs |
 | G17 | Claude-BugHunter | 71+15cmd | **`bb-methodology`**, 71 `hunt-*` skills |
-
-Full catalog: see `catalog/CATALOG.md` in the skills library repo.

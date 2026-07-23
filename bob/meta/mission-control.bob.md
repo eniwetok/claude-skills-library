@@ -407,8 +407,6 @@ swarm-orchestration → or hive-mind for consensus-driven swarms
 2. skill-builder          → quick scaffolding (ruflo)
 ```
 
-See [SKILLS-GUIDE.md](../../Documents/Skills/SKILLS-GUIDE.md) for the full creation process.
-
 ---
 
 ## Workflow J — Research / Learning
@@ -625,5 +623,3 @@ Complete disambiguation for skills that share similar descriptions:
 | G15 | multica-ai | 1 | **`karpathy-guidelines`** |
 | G16 | SocratiCode | 2+MCP | **`codebase-exploration`**, semantic search, dep graphs |
 | G17 | Claude-BugHunter | 71+15cmd | **`bb-methodology`**, 71 `hunt-*` skills |
-
-Full catalog: see `catalog/CATALOG.md` in the skills library repo.
