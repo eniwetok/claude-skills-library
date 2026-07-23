@@ -3,7 +3,7 @@
   "displayName": "Super-bob-skills",
   "description": "Best-practice skills for IBM Bob and VS Code, loaded by task so agent context stays small.",
   "version": "1.2.0",
-  "publisher": "superbob",
+  "publisher": "felipe-campo",
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.75.0"
