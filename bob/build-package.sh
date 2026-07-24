@@ -6,6 +6,20 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT="$REPO/dist"
 STAGE="$(mktemp -d)/skills-package"
+
+# GATE: refuse to build if the live library has a broken reference. A mode or the
+# router pointing at a missing skill silently breaks lean mode, so it must never ship.
+LINT="$HOME/.claude/skills/skill-library-lint/scripts/lint.py"
+[ -f "$LINT" ] || LINT="$REPO/skills/skill-library-lint/scripts/lint.py"
+if [ -f "$LINT" ]; then
+  echo "Running skill-library-lint gate…"
+  if ! python3 "$LINT"; then
+    echo "ABORT: skill-library-lint failed — fix the broken references above before building." >&2
+    exit 1
+  fi
+else
+  echo "WARN: skill-library-lint not found; skipping integrity gate." >&2
+fi
 # EXCLUDED from the shareable package for licensing compliance:
 #   AGPL (SocratiCode); source-available (Anthropic docx/pdf/pptx/xlsx);
 #   unlicensed (15-cowork-skills, from a video); no formal license (pablo obsidian-cli).
