@@ -5,9 +5,10 @@
   "pm": "Product management. Includes PRDs (create-prd), product-vision, roadmaps, prioritization, user stories, GTM and competitor analysis.",
   "security": "Finding and fixing security problems. Includes the bb-methodology playbook, security-audit, the hunt-* vulnerability skills (SQLi/XSS/SSRF/RCE), vibesec (write secure code proactively), redteam-mindset and evidence hygiene.",
   "ui": "Building and polishing interfaces. Includes frontend-design, fixing-accessibility, design systems, motion, shadcn-ui and read-only improve-ui audits.",
-  "research": "Digging into a topic and keeping what you learn. Includes deep-research, the wiki knowledge base, autoresearch, Obsidian notes and research synthesis.",
+  "research": "Investigate a topic and synthesize an answer (one-off, not filed into a vault). deep-research, research-synthesis, exa-search, x-research, search-first, defuddle. For a persistent knowledge base, use the knowledge mode instead.",
   "ship-it": "A quality gate to run before shipping. Includes code-review, verification-before-completion, security-audit, tests, clean-code habits, and ponytail (cut over-engineering).",
   "quick-fix": "Fast, focused debugging. Includes systematic-debugging (root cause first), caveman-debug (print statements) and error-handling.",
   "declutter": "Strip out over-engineering. The ponytail 'lazy senior engineer' skills \u2014 audit the repo for bloat, review a diff for what to delete, track deferred shortcuts \u2014 plus karpathy-guidelines and code-review.",
-  "writing": "Everything for writing and editing prose. no-ai-slop (strip AI-slop / detect it), writing-skills, copywriting, article-writing, blog-post, content-creation & strategy, ux-copy, brand-voice, email (sequence + marketing), seo, report-writing, doc-coauthoring, documentation, kb-article, grammar-check and process-doc. Pick this for any docs, posts, or copy."
+  "writing": "Everything for writing and editing prose. no-ai-slop (strip AI-slop / detect it), writing-skills, copywriting, article-writing, blog-post, content-creation & strategy, ux-copy, brand-voice, email (sequence + marketing), seo, report-writing, doc-coauthoring, documentation, kb-article, grammar-check and process-doc. Pick this for any docs, posts, or copy.",
+  "knowledge": "Build and query a personal knowledge base \u2014 Andrej Karpathy's LLM-wiki pattern. The Obsidian stack: wiki (ingest/query/lint/fold), save insights, autoresearch into the vault, canvas, obsidian-cli, think, memory-gc. Pick this to compile knowledge you keep, not one-off answers."
 }

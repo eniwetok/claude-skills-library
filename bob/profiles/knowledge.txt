@@ -1,0 +1,14 @@
+wiki
+wiki-ingest
+wiki-query
+wiki-lint
+wiki-fold
+wiki-retrieve
+save
+autoresearch
+canvas
+obsidian-markdown
+obsidian-cli
+think
+memory-gc
+defuddle

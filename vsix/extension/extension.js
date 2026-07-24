@@ -21,7 +21,7 @@ const CLAUDE_SKILLS = path.join(HOME, '.claude', 'skills');
 // Lean mode: only these two skills stay loaded; mission-control routes to the rest
 // from the vault on demand. Keeps starting context tiny (~200 tokens vs ~67,000).
 const CORE = ['using-superpowers', 'mission-control']; // superpowers first — always check for a skill before acting
-const BUILTIN = ['code', 'data', 'pm', 'security', 'ui', 'research'];
+const BUILTIN = ['code', 'data', 'pm', 'security', 'ui', 'research', 'knowledge'];
 
 let statusItem;
 let panel;
