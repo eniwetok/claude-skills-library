@@ -217,10 +217,10 @@ Use both together. Karpathy shapes your mindset; code-review-graph gives you the
 ```
 
 For role-specific perspective, add one of:
-- `cto-advisor` — technical leadership lens
-- `senior-architect` — system design depth
-- `rag-architect` — if RAG/retrieval is involved
-- `mcp-server-builder` — if building MCP integrations
+- `c-level-advisor` — executive lens (CTO/CEO/CFO/CISO in one skill)
+- `system-design` — system design depth
+- `evaluate-rag` — if RAG/retrieval is involved
+- `mcp-builder` — if building MCP integrations
 
 ---
 
@@ -325,11 +325,11 @@ have looked at failures are vanity metrics.
 ```
 
 For domain-specific strategic lens:
-- `ceo-advisor` — business impact, strategy, stakeholder framing
-- `cto-advisor` — technical strategy, build vs buy, team structure
-- `ciso-advisor` — security risk, compliance implications
-- `cfo-advisor` — cost, ROI, financial risk
-- `senior-architect` — technical architecture depth
+- `c-level-advisor` — business/strategy/security/finance lenses in one skill
+- `council` — convene multiple expert perspectives on the decision
+- `redteam-mindset` — security-risk and compliance lens
+- `dcf-valuation` — cost / ROI / financial-risk lens
+- `architecture` — technical architecture depth
 
 ---
 
@@ -474,7 +474,7 @@ Pick the stack-specific pattern skill, then apply quality skills on top:
 - DB migrations → `database-migrations`
 
 **AI/ML:**
-- RAG → `rag-architect` + `iterative-retrieval`
+- RAG → `evaluate-rag` (rag mode)
 - ML pipeline → `mle-workflow`
 - Vector search / embeddings → `postgres-patterns` (pgvector); no vendor-locked skill is bundled
 - Eval → `eval-harness` + `agent-eval`
@@ -571,7 +571,7 @@ Complete disambiguation for skills that share similar descriptions:
 | G8 | ruvnet/ruflo | 134 | **`sparc-methodology`**, swarm, SPARC agents |
 | G9 | nexu-io/open-design | 264 | FAL AI, Figma, GSAP, 50+ html-ppt themes |
 | G10 | affaan-m/ECC | 277 | **`eval-harness`**, `agentic-engineering`, `hookify-rules`, 15+ stack patterns |
-| G11 | zhangzhang-111-i | ~180 | `cto-advisor`, `senior-architect`, `playwright-pro`, `rag-architect` |
+| G11 | zhangzhang-111-i | ~180 | `c-level-advisor`, `system-design`, `webapp-testing`, `evaluate-rag` |
 | G12 | n8n-io/skills | 14 | n8n workflow automation |
 | G13 | team-attention | 1 | **`agent-council`** |
 | G14 | pablo-mano | 1 | `obsidian-cli` |

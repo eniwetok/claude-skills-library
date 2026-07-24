@@ -20,3 +20,5 @@ hexagonal-architecture
 ponytail
 verification-before-completion
 karpathy-guidelines
+brainstorming
+writing-plans
