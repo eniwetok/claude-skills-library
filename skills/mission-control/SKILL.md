@@ -37,13 +37,13 @@ the agent cannot auto-activate a vault skill, because its description isn't load
 
 | If the task is… | Read & apply these vault skills |
 |-----------------|--------------------------------|
-| **Build a feature / write code** | `karpathy-guidelines`, `brainstorming` (if fuzzy) or `writing-plans`, the stack skill (`python-patterns`, `react-patterns`, …), `tdd-workflow`, `verification-before-completion` |
+| **Build a feature / write code** | `karpathy-guidelines`, `brainstorming` (if fuzzy) or `writing-plans`, the stack skill (`python-patterns`, `react-patterns`, …), `test-driven-development`, `verification-before-completion` |
 | **Fix a bug** | `systematic-debugging`, then `caveman-debug` if no debugger, then `verification-before-completion` |
 | **Understand a codebase** | `code-review-graph` (MCP), `karpathy-guidelines` |
 | **Design a system / architecture** | `brainstorming`, `architecture-decision-records`, `system-design`, `agent-council` |
 | **Evaluate an AI/data pipeline** (Cognos) | `error-analysis` first, then `write-judge-prompt` + `validate-evaluator`, `evaluate-rag`, `eval-audit` |
-| **Write SQL / analytics** | `sql-queries`, `write-query`, `statistical-analysis` |
-| **Security review / hunt** | `security-audit` (dev) or `bb-methodology` (engagement), the matching `hunt-*` skill |
+| **Write SQL / analytics** | `sql-queries`, `statistical-analysis` |
+| **Security review / hunt** | `vibesec` (dev) or `bb-methodology` (engagement), the matching `hunt-*` skill |
 | **Build or fix UI** | `frontend-design` (build) / `baseline-ui` + `fixing-accessibility` (fix), `improve-ui` |
 | **Product work** | `create-prd`, `product-vision`, `outcome-roadmap`, `prioritization-frameworks` |
 | **Research a topic** | `deep-research`, then `save` / `wiki-ingest` to keep findings |
@@ -100,7 +100,7 @@ mission-critical software, being told is not enough — quality must be *harness
 | Pillar | Gate: what must be TRUE before "done" | Enforced by |
 |--------|----------------------------------------|-------------|
 | **Design** | A written plan/ADR existed and was approved BEFORE any code. No code from a blank design. | `brainstorming` / `writing-plans` / `architecture-decision-records` + review |
-| **Correctness** | Tests + typecheck + lint all green. Every new/changed behavior has a test. | `tdd-workflow` + `dod-gate` hook |
+| **Correctness** | Tests + typecheck + lint all green. Every new/changed behavior has a test. | `test-driven-development` + `dod-gate` hook |
 | **Evaluation** | Any AI-generated or heuristic logic has *evidence* it works (eval/benchmark), not vibes. | `eval-harness` / `verification-before-completion` |
 | **Usability** | User-facing paths pass a11y + UX review; every error state is handled and legible. | `frontend-a11y` / `error-handling` / `receiving-code-review` |
 | **Maintainability** | Diff is minimal; names are clear; no dead code; no unexplained complexity; docs/ADR updated. | `karpathy-guidelines` + `ponytail` (cut over-engineering) + `code-review` |
@@ -162,7 +162,7 @@ Read the user's request and identify the primary task type:
 2. writing-plans          → implementation plan from approved design
 3. karpathy-guidelines    → apply behavioral principles throughout
 4. [domain skill]         → react-patterns / django-patterns / etc.
-5. tdd-workflow           → tests alongside implementation
+5. test-driven-development           → tests alongside implementation
 6. verification-before-completion → final quality gate
 7. finishing-a-development-branch → pre-merge checklist
 ```
@@ -230,7 +230,7 @@ Choose the right level:
 
 **During development** (code review with security lens):
 ```
-1. security-audit         → static code analysis, input validation, auth, SQL, etc.
+1. vibesec         → static code analysis, input validation, auth, SQL, etc.
 2. hunt-[relevant class]  → deep dive into specific vuln class if needed
 ```
 
@@ -244,8 +244,8 @@ Choose the right level:
 6. report-writing / redteam-report-template → disclosure report
 ```
 
-**Overlap resolution — security-audit vs bb-methodology vs bug-bounty:**
-- `security-audit` = development-time static review (use DURING coding)
+**Overlap resolution — vibesec vs bb-methodology vs bug-bounty:**
+- `vibesec` = development-time static review (use DURING coding)
 - `bb-methodology` = red-team orchestrator with non-linear 5-phase hunt (use for DEDICATED security work)
 - `bug-bounty` = same scope as bb-methodology but more focused on submission workflow
 - `security-bounty-hunter` (ECC) = similar but lighter; prefer `bb-methodology` for serious work
@@ -397,7 +397,7 @@ learn-with-coursera       → personalized learning path from Coursera catalog
 
 **Components / React:**
 ```
-brainstorming → react-patterns → frontend-a11y → tdd-workflow
+brainstorming → react-patterns → frontend-a11y → test-driven-development
 ```
 
 **Design system / UI:**
@@ -457,14 +457,14 @@ Pick the stack-specific pattern skill, then apply quality skills on top:
 | Stack | Pattern skill | Security | Testing |
 |-------|--------------|---------|---------|
 | Python/Django | `django-patterns` + `django-security` | `django-tdd` | `python-testing` |
-| Python/FastAPI | `fastapi-patterns` | `security-audit` | `python-testing` |
+| Python/FastAPI | `fastapi-patterns` | `vibesec` | `python-testing` |
 | Node.js/NestJS | `nestjs-patterns` | `hunt-nodejs` | — |
 | Next.js | `nextjs-turbopack` | `hunt-nextjs` | `react-testing` |
 | Laravel | `laravel-patterns` + `laravel-security` | `laravel-tdd` | — |
 | Spring Boot | `springboot-patterns` + `springboot-security` | `springboot-tdd` | — |
-| Go | `golang-patterns` | `security-audit` | `golang-testing` |
-| Rust | `rust-patterns` | `security-audit` | `rust-testing` |
-| Kotlin | `kotlin-patterns` + `kotlin-ktor-patterns` | `security-audit` | `kotlin-testing` |
+| Go | `golang-patterns` | `vibesec` | `golang-testing` |
+| Rust | `rust-patterns` | `vibesec` | `rust-testing` |
+| Kotlin | `kotlin-patterns` + `kotlin-ktor-patterns` | `vibesec` | `kotlin-testing` |
 
 **Databases:**
 - PostgreSQL → `postgres-patterns`
@@ -476,7 +476,7 @@ Pick the stack-specific pattern skill, then apply quality skills on top:
 **AI/ML:**
 - RAG → `rag-architect` + `iterative-retrieval`
 - ML pipeline → `mle-workflow`
-- Embeddings → `embeddings` + `agentdb-vector-search`
+- Vector search / embeddings → `postgres-patterns` (pgvector); no vendor-locked skill is bundled
 - Eval → `eval-harness` + `agent-eval`
 
 ---
@@ -485,7 +485,7 @@ Pick the stack-specific pattern skill, then apply quality skills on top:
 
 ```
 brainstorming → deployment-patterns → docker-patterns → kubernetes-patterns
-→ security-audit → agent-ops-cicd-github
+→ vibesec → agent-ops-cicd-github
 ```
 
 Homelab: `homelab-network-setup` → `homelab-wireguard-vpn` → `homelab-pihole-dns` → `homelab-vlan-segmentation`
@@ -546,7 +546,7 @@ Complete disambiguation for skills that share similar descriptions:
 | `karpathy-guidelines` vs `code-review-graph` (MCP) | Mindset vs tooling | Need to set behavioral principles | Need to navigate actual code |
 | `brainstorming` vs `sparc-methodology` | Exploratory vs structured | Requirements unclear, need discovery | Requirements clear, need structured methodology |
 | `writing-plans` vs `sparc-methodology` | Plan doc vs full process | After brainstorming, need a plan doc | Starting complex work from scratch |
-| `security-audit` vs `bb-methodology` | Dev-time vs red-team | Reviewing code you wrote | Running a dedicated security engagement |
+| `vibesec` vs `bb-methodology` | Dev-time vs red-team | Reviewing code you wrote | Running a dedicated security engagement |
 | `bug-bounty` vs `bb-methodology` | Submission vs methodology | Focused on report submission | Focused on the hunt process |
 | `verification-before-completion` vs `eval-harness` | Task gate vs quality measurement | Closing any task | Evaluating AI output quality specifically |
 | `agent-council` vs `dispatching-parallel-agents` | Opinions vs implementation | Need perspectives / consensus | Need to divide work |
@@ -554,7 +554,6 @@ Complete disambiguation for skills that share similar descriptions:
 | `systematic-debugging` vs `debug` | Methodology vs tool | Any bug (enforces root cause) | Quick debug for small issues |
 | `deep-research` vs `autoresearch` | Report vs knowledge base | Need a cited deliverable | Need to build your wiki |
 | `dispatching-parallel-agents` vs `hive-mind` | Work division vs consensus | Independent tasks | Tasks requiring shared state |
-| `security-scan` vs `security-audit` | Automated scan vs manual review | Quick automated pass | Thorough manual code review |
 
 ---
 

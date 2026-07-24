@@ -1,7 +1,7 @@
 code-review
 verification-before-completion
-security-audit
-tdd-workflow
+test-driven-development
 karpathy-guidelines
 ponytail
 ponytail-review
+vibesec

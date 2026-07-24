@@ -10,5 +10,4 @@ canvas
 obsidian-markdown
 obsidian-cli
 think
-memory-gc
 defuddle

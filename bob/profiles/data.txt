@@ -8,12 +8,8 @@ build-review-interface
 eval-harness
 benchmark
 sql-queries
-write-query
 postgres-patterns
 clickhouse-io
-iterative-retrieval
-embeddings
-agentdb-vector-search
 mle-workflow
 statistical-analysis
 data-visualization

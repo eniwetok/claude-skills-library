@@ -1,17 +1,11 @@
 no-ai-slop
-writing-skills
 copywriting
 article-writing
-blog-post
-content-creation
-content-strategy
 draft-content
 ux-copy
 brand-voice
 email-sequence
-email-marketing
 seo
-report-writing
 doc-coauthoring
 documentation
 kb-article

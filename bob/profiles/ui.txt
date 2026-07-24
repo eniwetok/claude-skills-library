@@ -11,4 +11,3 @@ design-system
 design-review
 motion-ui
 web-design-guidelines
-impeccable-design-polish

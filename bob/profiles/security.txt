@@ -1,7 +1,4 @@
 bb-methodology
-security-audit
-security-review
-security-scan
 redteam-mindset
 hunt-sqli
 hunt-xss
@@ -16,3 +13,4 @@ hunt-api-misconfig
 evidence-hygiene
 report-writing
 vibesec
+memory-gc
