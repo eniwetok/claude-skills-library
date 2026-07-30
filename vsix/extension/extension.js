@@ -269,7 +269,14 @@ function getWebviewHtml() {
   .exthd{font-size:11px;color:var(--vscode-charts-green,#89d185);margin-bottom:5px}
   .extlist{display:flex;flex-wrap:wrap;gap:4px}
   .extpill{font-size:11px;padding:1px 7px;border-radius:9px;background:var(--vscode-badge-background,#2a2d2e);color:var(--vscode-badge-foreground,#ccc)}
-  .powerbar{display:flex;gap:8px;align-items:center;padding:8px 10px;margin:10px 0;border:1px solid var(--vscode-widget-border,#333);border-radius:8px}
+  .powerbar{display:flex;gap:10px;align-items:center;padding:9px 11px;margin:10px 0;border:1px solid var(--vscode-widget-border,#333);border-radius:8px}
+  .pswitch{position:relative;width:34px;height:20px;flex:none;cursor:pointer;display:inline-block}
+  .pswitch input{position:absolute;opacity:0;width:0;height:0}
+  .pswitch .track{position:absolute;inset:0;border-radius:999px;background:var(--vscode-input-background,#3a3a3a);border:1px solid var(--vscode-widget-border,#555);transition:.15s}
+  .pswitch .knob{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--vscode-descriptionForeground,#aaa);transition:.15s}
+  .pswitch input:checked ~ .track{background:var(--vscode-charts-green,#3fa76a);border-color:transparent}
+  .pswitch input:checked ~ .knob{left:17px;background:#fff}
+  .pswitch input:focus-visible ~ .track{outline:2px solid var(--vscode-focusBorder,#5a9);outline-offset:1px}
   .powerbar .t b{color:var(--vscode-charts-green,#89d185)}
   #main.off .powerbar .t b{color:var(--vscode-descriptionForeground)}
   #main.off .hideWhenOff{display:none !important}
@@ -322,31 +329,19 @@ function getWebviewHtml() {
   <h1>SuperBob</h1>
   <div class="muted">Load just the skills each task needs, on top of your current Bob mode.</div>
 
-  <label class="powerbar"><input type="checkbox" id="powerToggle" checked/><span><span class="t">SuperBob is <b id="powerState">on</b></span> <span class="muted">,  its skills layer onto whichever Bob mode you're in. Off = plain Bob. Your own skills always stay.</span></span></label>
+  <div class="powerbar">
+    <label class="pswitch"><input type="checkbox" id="powerToggle" checked/><span class="track"></span><span class="knob"></span></label>
+    <span><span class="t">SuperBob is <b id="powerState">on</b>.</span> <span class="muted">Its skills layer onto whichever Bob mode you're in; off runs plain Bob. Your own skills always stay.</span></span>
+  </div>
   <div id="offbanner" class="offbanner" style="display:none">
     SuperBob is <b>off</b>, Bob runs with only your own skills. Turn it on to layer SuperBob's skills onto your current Bob mode, then start a new conversation.
   </div>
-
-  <details class="help">
-    <summary>❔ How to use SuperBob</summary>
-    <div class="helpbody">
-      <p>Pick a <b>kit</b> for what you're doing. SuperBob loads just those skills so the agent stays fast.</p>
-      <ol>
-        <li>Leave <b>Auto mode</b> on and SuperBob picks the skills for each task. That's the whole setup.</li>
-        <li>Or turn Auto off and click a mode's <b>Use</b> button. Click <b>skills</b> to see what's inside and what it costs.</li>
-        <li>Or, in the Bob chat, type <code>/superbob software_development</code> (or any kit). <code>/superbob</code> alone lists them.</li>
-        <li>After switching, <b>start a new conversation</b> so the skills load.</li>
-        <li>Use <b>+ Create your own kit</b> to save your own set of skills.</li>
-      </ol>
-      <button class="sec" id="docsBtn">Open full guide ↗</button>
-    </div>
-  </details>
 
   <div class="hideWhenOff">
   <label class="autobar"><input type="checkbox" id="autoToggle"/><span><span class="t">Auto mode</span> <span class="muted">(recommended). SuperBob picks the right skills for each task.</span></span></label>
 
   <div class="active-card">
-    <div><span class="dot"></span><span class="now" id="activeNow">, </span></div>
+    <div><span class="dot"></span><span class="now" id="activeNow"></span></div>
     <div id="activeDesc"></div>
     <div class="skills" id="activeSkills"></div>
   </div>
@@ -379,7 +374,22 @@ function getWebviewHtml() {
   </div>
   </div><!-- /hideWhenOff -->
 
-  <div class="foot">The 2 core skills are always on. After switching a mode, <b>start a new conversation</b> so it loads.</div>
+  <details class="help">
+    <summary>❔ How to use SuperBob</summary>
+    <div class="helpbody">
+      <p>Pick a <b>kit</b> for what you're doing. SuperBob loads just those skills so the agent stays fast.</p>
+      <ol>
+        <li>Leave <b>Auto mode</b> on and SuperBob picks the skills for each task. That's the whole setup.</li>
+        <li>Or turn Auto off and click a kit's <b>Use</b> button. Click <b>skills</b> to see what's inside and what it costs.</li>
+        <li>Or, in the Bob chat, type <code>/superbob software_development</code> (or any kit). <code>/superbob</code> alone lists them.</li>
+        <li>After switching, <b>start a new conversation</b> so the skills load.</li>
+        <li>Use <b>+ Create your own kit</b> to save your own set of skills.</li>
+      </ol>
+      <button class="sec" id="docsBtn">Open full guide ↗</button>
+    </div>
+  </details>
+
+  <div class="foot">The 2 core skills are always on. After switching a kit, <b>start a new conversation</b> so it loads.</div>
 </div>
 <script nonce="${nonce}">
   const vscode = acquireVsCodeApi();
