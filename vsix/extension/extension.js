@@ -21,7 +21,9 @@ const CLAUDE_SKILLS = path.join(HOME, '.claude', 'skills');
 // Lean mode: only these two skills stay loaded; mission-control routes to the rest
 // from the vault on demand. Keeps starting context tiny (~200 tokens vs ~67,000).
 const CORE = ['using-superpowers', 'mission-control']; // superpowers first, always check for a skill before acting
-const BUILTIN = ['software_development', 'data_analysis', 'product_management', 'production_engineering', 'test_engineering', 'application_security', 'frontend_design', 'web_research'];
+// Every shipped kit is a built-in "starter kit" (not deletable). "Your kits" is left for
+// the user's own creations, seeded with a couple of clearly-labelled sample kits.
+const BUILTIN = ['software_development', 'data_analysis', 'product_management', 'production_engineering', 'test_engineering', 'application_security', 'frontend_design', 'web_research', 'release_review', 'bug_fixing', 'code_simplification', 'rag_evaluation', 'content_writing'];
 
 let statusItem;
 let panel;
@@ -350,9 +352,10 @@ function getWebviewHtml() {
   </div>
 
   <h2>Your kits</h2>
+  <div class="muted" style="margin:-6px 0 8px;font-size:12px">Kits you make, plus a couple of samples to start from. Use <b>+ Create your own kit</b> to add more.</div>
   <div id="yourModes"></div>
 
-  <details class="builtins">
+  <details class="builtins" open>
     <summary id="builtinSummary">Starter kits (built-in)</summary>
     <div id="builtinModes" style="margin-top:8px"></div>
   </details>
@@ -440,7 +443,7 @@ function getWebviewHtml() {
     // The user's own skills, SuperBob never removes these on a mode switch.
     if(ext.size){
       const note=document.createElement('div'); note.className='extnote';
-      note.innerHTML='<div class="exthd">Your own skills, kept through every mode ('+ext.size+')</div>'+
+      note.innerHTML='<div class="exthd">Your own skills, kept through every kit ('+ext.size+')</div>'+
         '<div class="extlist">'+[...ext].map(n=>'<span class="extpill">'+n+'</span>').join('')+'</div>';
       cont.appendChild(note);
     }
@@ -467,14 +470,18 @@ function getWebviewHtml() {
     const count = id==='__lean__' ? 'essentials only' : skills.length+' skills';
     top.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'');
     const sp=document.createElement('span'); sp.className='sp';
-    const use=document.createElement('button');
-    if(isActive && id!=='__lean__'){ use.textContent='Unload'; use.title='turn this kit off (back to Auto)'; use.onclick=()=>vscode.postMessage({type:'applyLean'}); }
-    else if(isActive){ use.textContent='On'; use.disabled=true; }
-    else { use.textContent='Use'; use.onclick=()=> vscode.postMessage(id==='__lean__'?{type:'applyLean'}:{type:'applyProfile',name:id}); }
-    sp.appendChild(use);
+    // Active Lean needs no button: it's the base state, and the "active" badge already
+    // shows it. A disabled "On" button just looks broken (you click it and nothing happens).
+    if(isActive && id==='__lean__'){ /* badge only */ }
+    else {
+      const use=document.createElement('button');
+      if(isActive){ use.textContent='Unload'; use.title='turn this kit off (back to Auto)'; use.onclick=()=>vscode.postMessage({type:'applyLean'}); }
+      else { use.textContent='Use'; use.onclick=()=> vscode.postMessage(id==='__lean__'?{type:'applyLean'}:{type:'applyProfile',name:id}); }
+      sp.appendChild(use);
+    }
     if(id!=='__lean__'){ const sk=document.createElement('button'); sk.className='linkbtn'; sk.textContent='skills';
       sk.onclick=()=>{ const el=d.querySelector('.mode-skills'); el.style.display = el.style.display==='none'?'block':'none'; }; sp.appendChild(sk); }
-    if(deletable){ const del=document.createElement('button'); del.className='del'; del.textContent='🗑'; del.title='delete this mode';
+    if(deletable){ const del=document.createElement('button'); del.className='del'; del.textContent='🗑'; del.title='delete this kit';
       del.onclick=()=> vscode.postMessage({type:'deleteMode',name:id}); sp.appendChild(del); }
     top.appendChild(sp); d.appendChild(top);
     const md=document.createElement('div'); md.className='mode-desc'; md.textContent=descFor(id); d.appendChild(md);

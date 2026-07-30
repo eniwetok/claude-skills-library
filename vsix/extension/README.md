@@ -28,7 +28,7 @@ of you, and it works on top of whatever Bob mode you're already in.
 - **A kit for every stage of the lifecycle.** Plan, research, design, build, test, debug, secure, review, ship, operate, measure, document. Each kit is a curated set of skills for that stage.
 - **Lean context by default.** The agent loads about 200 tokens of skills instead of 67,000, so it spends its attention on your task.
 - **Auto mode.** Leave it on and SuperBob reads each task and loads the right skills itself. No setup for most work.
-- **Layer onto any Bob mode.** One On/Off switch adds SuperBob's skills on top of Bob's Code, Architect, Ask, or your own mode. Off runs plain Bob.
+- **Layer onto any Bob mode.** One On/Off switch adds SuperBob's skills on top of Bob's Agent, Plan, Ask, or your own mode. Off runs plain Bob.
 - **Switch three ways.** The sidebar panel, the `/superbob <kit>` chat command, or plain English ("use the test_engineering kit").
 - **Build your own kits.** Name a set of skills for the work you do; one click loads it, and it gets its own `/superbob` command.
 - **Your own skills stay untouched.** SuperBob only manages the skills it installed. Yours stay put through every kit switch and every on/off.
@@ -58,7 +58,7 @@ library in a vault the agent never reads and loads only the current kit's skills
 
 1. **Vault.** The full skill library sits on disk *unread*. It costs nothing until you load a kit.
 2. **Kit.** A named set of skills for one kind of work (`software_development`, `test_engineering`, and so on). Loading a kit puts just those skills in front of the agent.
-3. **Layering.** A kit loads on top of your current Bob mode. Stay in Bob's Code or Architect mode, flip SuperBob on, and its skills join in. Flip it off to run plain Bob. Your own skills stay untouched either way.
+3. **Layering.** A kit loads on top of your current Bob mode. Stay in Bob's Agent or Plan mode, flip SuperBob on, and its skills join in. Flip it off to run plain Bob. Your own skills stay untouched either way.
 
 The default is **Auto mode**: two small core skills stay loaded, and SuperBob reads each task and
 loads the right skills as it goes. For most people that is the whole setup.
@@ -135,7 +135,7 @@ conversation so the agent re-reads its skills.
 ## The On/Off switch and layering
 
 SuperBob layers on top of whatever Bob mode you're in. Turn it on and its skills load alongside
-your current mode: Bob's Code, Architect, Ask, or one of your own. Turn it off to run plain Bob.
+your current mode: Bob's Agent, Plan, Ask, or one of your own. Turn it off to run plain Bob.
 Your own skills stay put in every case.
 
 There's also a native **SuperBob** entry in Bob's mode selector. Use that when you want SuperBob to
@@ -155,6 +155,10 @@ evaluating a SQL agent, reviewing Terraform changes, or triaging support tickets
 3. Write a one-line **"what it's for"**, for example "Evaluating our SQL agent's answers." Describe the situation, not the skills. This is the cue Auto mode reads to know when to reach for it.
 4. Optionally **start from** an existing kit to prefill skills, then check or uncheck. Each skill shows a short description and its token cost, so you see what a choice adds before you commit.
 5. **Save.** It joins *Your kits* as a one-click kit, editable or removable anytime.
+
+The panel ships with two sample kits under **Your kits**, `sample-rag-evals` and
+`sample-content-writing`, so you can see what a small custom kit looks like. Edit them, delete
+them, or copy one as a starting point.
 
 **Keep kits lean.** The point is a small, focused context. Eight sharp skills beat thirty vague
 ones. Start narrow, and add a skill when you miss it.
