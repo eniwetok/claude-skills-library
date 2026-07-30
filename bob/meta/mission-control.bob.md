@@ -60,14 +60,14 @@ If the user says "use the <name> mode", "load <name> mode", "switch to <name>", 
 2. Read each of those skills' `SKILL.md` from `~/.bob/skills-vault/<skill>/` and apply them.
 3. Tell the user which mode and skills you loaded.
 This works in the middle of a conversation with no restart and no panel — you are
-reading the mode's skills on demand. Known modes: the built-ins (code, data, pm,
-security, ui, research) plus any the user created (their names are the `.txt` files
+reading the mode's skills on demand. Known modes: the built-ins (super-code, super-data, super-pm, super-dev, super-qa,
+super-security, super-ui, super-research) plus any the user created. The `super-` prefix is optional when the user names a mode — "use the code mode" means `super-code`. (Mode names are the `.txt` files
 in `~/.bob/profiles/`, and their descriptions are in `~/.bob/profiles/_meta.json`).
 
 ### Loading a batch instead (optional)
 For a long session on one kind of work, pre-load a whole profile so its skills
 auto-activate normally:
-`~/.bob/bob-profile <code|data|pm|security|ui|research>` (then restart the conversation).
+`~/.bob/bob-profile <super-code|super-data|super-pm|super-dev|super-qa|super-security|super-ui|super-research>` (then restart).
 Lean mode (this router) is the default and needs no reload.
 
 **Ownership rule — never delete the user's own skills.** When you load a mode
@@ -174,8 +174,8 @@ before you type anything**. So the library is NOT all loaded at once.
 
 **Switching (must be done in a terminal, then restart the conversation):**
 ```bash
-~/.bob/bob-profile data          # load one
-~/.bob/bob-profile code ui       # combine two
+~/.bob/bob-profile super-data    # load one
+~/.bob/bob-profile super-code super-ui   # combine two
 ~/.bob/bob-profile status        # what is loaded now
 ~/.bob/bob-profile list          # all profiles
 ~/.bob/bob-profile all           # everything (~67k tokens - avoid)

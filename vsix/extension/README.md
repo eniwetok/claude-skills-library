@@ -60,11 +60,11 @@ The toggle at the top. On = SuperBob picks skills per task. Off = you choose a m
 
 **3. From the Bob chat** *(hands-free)*
 Type **`/`** in the chat and choose **`/superbob`**, then a mode:
-- `/superbob rag` — load the rag mode
-- `/superbob code`, `/superbob data`, `/superbob auto`, … — any mode
+- `/superbob super-rag` — load the super-rag mode
+- `/superbob super-code`, `/superbob super-data`, `/superbob auto`, … — any mode
 - `/superbob` alone — lists every mode with its description
 
-You can also just type in plain words: **"use the rag mode"**.
+You can also just type in plain words: **"use the super-rag mode"** (the `super-` prefix is optional — "use the rag mode" works too).
 
 > After switching by any method, **start a new conversation** so the agent re-reads its skills.
 
@@ -77,7 +77,7 @@ You can also just type in plain words: **"use the rag mode"**.
   (`using-superpowers`, `mission-control`), each with a short description and token cost.
 - **Your modes** — Lean plus any modes you've made. Each has **Use** / **Unload**, a
   **skills** link (name + description + tokens for every skill), and 🗑 to delete.
-- **Starter modes (built-in)** — a collapsed section with 6 ready-made modes.
+- **Starter modes (built-in)** — a collapsed section with 8 ready-made modes.
 - **+ Create your own mode** — see below.
 
 ---
@@ -89,22 +89,22 @@ Each mode loads a focused set of skills. The two **core** skills are always on.
 | Mode | Use it for | Key skills |
 |------|-----------|-----------|
 | **Auto / Lean** | Mixed work — SuperBob picks per task | *(core only, ~200 tokens)* |
-| **code** | Building or changing software | tdd-workflow, codebase-exploration, api/system-design, stack patterns, docker/kubernetes |
-| **data** | Data & judging AI output | error-analysis, write-judge-prompt, validate-evaluator, evaluate-rag, SQL, embeddings, statistics |
-| **rag** | Evaluating a RAG / retrieval agent | evaluate-rag, error-analysis, LLM judges, SQL checks, statistics |
-| **security** | Audits & vulnerability hunting | bb-methodology, security-audit, hunt-* skills, redteam-mindset |
-| **ui** | Interfaces & design | frontend-design, fixing-accessibility, motion, design systems, improve-ui |
-| **pm** | Product planning | create-prd, product-vision, roadmaps, prioritization, user stories |
-| **enterprise-dev** | Production-grade enterprise engineering (full lifecycle) | system-design, hexagonal-architecture, test-driven-development, docker/kubernetes/deployment, vibesec, compliance-check, incident-response |
-| **qa** | Quality assurance & testing | testing-strategy, e2e-testing, webapp-testing, browser-qa, ai-regression-testing, systematic-debugging, intended-vs-implemented, pr-feedback-quality-gate |
+| **super-code** | Building or changing software | tdd-workflow, codebase-exploration, api/system-design, stack patterns, docker/kubernetes |
+| **super-data** | Data & judging AI output | error-analysis, write-judge-prompt, validate-evaluator, evaluate-rag, SQL, embeddings, statistics |
+| **super-rag** | Evaluating a RAG / retrieval agent | evaluate-rag, error-analysis, LLM judges, SQL checks, statistics |
+| **super-security** | Audits & vulnerability hunting | bb-methodology, security-audit, hunt-* skills, redteam-mindset |
+| **super-ui** | Interfaces & design | frontend-design, fixing-accessibility, motion, design systems, improve-ui |
+| **super-pm** | Product planning | create-prd, product-vision, roadmaps, prioritization, user stories |
+| **super-dev** | Production-grade engineering (full lifecycle) | system-design, hexagonal-architecture, test-driven-development, docker/kubernetes/deployment, vibesec, compliance-check, incident-response |
+| **super-qa** | Quality assurance & testing | testing-strategy, e2e-testing, webapp-testing, browser-qa, ai-regression-testing, systematic-debugging, intended-vs-implemented, pr-feedback-quality-gate |
+| **super-research** | Investigate a topic (one-off answer) | deep-research, research-synthesis, exa-search, x-research, search-first |
+| **super-ship-it** | Quality gate before shipping | code-review, verification-before-completion, vibesec, tests |
+| **super-quick-fix** | Fast debugging | systematic-debugging, caveman-debug, error-handling |
+
+*(rag, ship-it and quick-fix are examples you can keep, tweak, or delete.)*
 
 > **Note:** SuperBob does not bundle Obsidian / personal-wiki skills — you manage
 > your own knowledge-base setup, and SuperBob leaves it untouched.
-| **research** | Investigate a topic (one-off answer) | deep-research, research-synthesis, exa-search, x-research, search-first |
-| **ship-it** | Quality gate before shipping | code-review, verification-before-completion, security-audit, tests |
-| **quick-fix** | Fast debugging | systematic-debugging, caveman-debug, error-handling |
-
-*(rag, ship-it and quick-fix are examples you can keep, tweak, or delete.)*
 
 ---
 
@@ -136,7 +136,7 @@ The status-bar item (bottom-left) also shows the active mode; click it to open t
 
 SuperBob loads *skills*. **code-review-graph** is a separate *tool* (an MCP server) that
 builds a map of your codebase so the agent reviews only the files a change affects — it
-pairs well with the `code`, `ship-it`, and `declutter` modes. To deploy it into Bob and
+pairs well with the `super-code`, `super-ship-it`, and `super-declutter` modes. To deploy it into Bob and
 Claude Code, run the command **"SuperBob: Install code-review-graph (MCP tool)"** from the
 palette (needs Python: uv, pipx, or pip3). Then restart Bob. It's optional and always-on
 once installed, independent of which mode you're in.

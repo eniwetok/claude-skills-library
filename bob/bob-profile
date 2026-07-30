@@ -76,10 +76,15 @@ case "${1:-}" in
     echo "Loaded lean core — mission-control routes the rest from the vault on demand."; cost; exit 0 ;;
 esac
 
-# Validate every requested profile BEFORE touching anything
+# Resolve each requested name to a profile file. Mode files carry a `super-` prefix,
+# but accept the bare name too ("code" -> "super-code"). Validate BEFORE touching anything.
+RESOLVED=()
 for p in "$@"; do
-  [ -f "$PROF/$p.txt" ] || { echo "ERROR: no profile '$p'"; echo; usage; exit 1; }
+  if   [ -f "$PROF/$p.txt" ];       then RESOLVED+=("$p")
+  elif [ -f "$PROF/super-$p.txt" ]; then RESOLVED+=("super-$p")
+  else echo "ERROR: no profile '$p'"; echo; usage; exit 1; fi
 done
+set -- "${RESOLVED[@]}"
 
 TMP=$(mktemp -d)
 copy_list() {

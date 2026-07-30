@@ -22,12 +22,27 @@ BOB_BUILTINS = {
     "sync", "sync-upstream", "act-on-feedback", "generate-run-commands",
 }
 NON_SKILL_TOKENS = {
-    # MCP tools, mode names, and YAML frontmatter words that appear in backticks
+    # MCP tools and YAML frontmatter words that appear in backticks (NOT skills).
+    # Mode names are added dynamically from the profiles dir — see mode_tokens().
     "code-review-graph", "update-config",
-    "code", "data", "research", "security", "pm", "knowledge", "writing",
-    "ui", "rag", "ship-it", "quick-fix", "declutter",
-    "name", "description",
+    "name", "description", "super-",
 }
+
+def mode_tokens(profiles_dir):
+    """Every mode name is a legitimate non-skill reference — derive them from the
+    profiles dir so a rename (e.g. adding a `super-` prefix) never trips the router
+    check. Include the bare form too, since the router accepts `code` for `super-code`."""
+    toks = set()
+    try:
+        for f in os.listdir(profiles_dir):
+            if f.endswith(".txt") and f != "_core.txt":
+                name = f[:-4]
+                toks.add(name)
+                if name.startswith("super-"):
+                    toks.add(name[len("super-"):])
+    except OSError:
+        pass
+    return toks
 
 # --- Things a secured library should never DEPEND on (user requirement) ---
 # Vendor products that phone home or lock you in, plus crypto-specific dead weight.
@@ -154,10 +169,11 @@ def main():
     else:
         with open(router, "r", errors="ignore") as f:
             rtxt = f.read()
+        allow = NON_SKILL_TOKENS | mode_tokens(profiles)
         refs = sorted(set(re.findall(r"`([a-z0-9][a-z0-9-]{2,})`", rtxt)))
         b_broken = []
         for r in refs:
-            if r in vault_skills or r in BOB_BUILTINS or r in NON_SKILL_TOKENS:
+            if r in vault_skills or r in BOB_BUILTINS or r in allow:
                 continue
             b_broken.append(r)
         if b_broken:
