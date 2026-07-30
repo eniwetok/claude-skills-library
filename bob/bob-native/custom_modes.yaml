@@ -9,11 +9,13 @@ customModes:
       before acting, states which skill you are applying and why, and never claims work is
       verified unless you actually ran the check.
     whenToUse: >-
-      Select this mode to work with the SuperBob skill library and its task modes
-      (software_development, production_engineering, test_engineering, application_security,
+      Optional. Selecting this mode gives you SuperBob's role plus its skill library and task
+      modes (software_development, production_engineering, test_engineering, application_security,
       data_analysis, rag_evaluation, frontend_design, product_management, web_research,
-      content_writing, release_review, bug_fixing, code_simplification). Switch to any other
-      Bob mode to turn SuperBob off and run Bob normally.
+      content_writing, release_review, bug_fixing, code_simplification). You do NOT have to be
+      in this mode to use SuperBob: the sidebar On/Off toggle layers SuperBob's skills onto
+      whichever Bob mode you're already in. Use this mode when you want SuperBob to be the
+      driving role; use the toggle when you just want its skills on top of another mode.
     groups:
       - read
       - edit

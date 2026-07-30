@@ -318,11 +318,11 @@ function getWebviewHtml() {
 </div>
 <div id="main" style="display:none">
   <h1>SuperBob</h1>
-  <div class="muted">One click picks the skills for what you're doing. Everything else stays out of the way.</div>
+  <div class="muted">Load just the skills each task needs, on top of your current Bob mode.</div>
 
-  <label class="powerbar"><input type="checkbox" id="powerToggle" checked/><span><span class="t">SuperBob is <b id="powerState">on</b></span> <span class="muted">— turn off to run Bob normally; your own skills are always kept</span></span></label>
+  <label class="powerbar"><input type="checkbox" id="powerToggle" checked/><span><span class="t">SuperBob is <b id="powerState">on</b></span> <span class="muted">— its skills layer onto whichever Bob mode you're in. Off = plain Bob. Your own skills always stay.</span></span></label>
   <div id="offbanner" class="offbanner" style="display:none">
-    SuperBob is <b>off</b> — Bob runs with only your own skills. Turn it back on above, or pick <b>SuperBob</b> from Bob's mode selector. Then start a new conversation.
+    SuperBob is <b>off</b> — Bob runs with only your own skills. Turn it on to layer SuperBob's skills onto your current Bob mode, then start a new conversation.
   </div>
 
   <details class="help">
@@ -360,10 +360,11 @@ function getWebviewHtml() {
   <button id="createBtn">+ Create your own mode</button>
 
   <div id="builder" style="display:none">
-    <div style="font-weight:600;margin-bottom:8px">New mode</div>
-    <input type="text" id="bname" placeholder="Name it (e.g. my-evals)"/>
-    <input type="text" id="bdesc" placeholder="What's it for? When should it be used? (e.g. 'Evaluating our SQL agent')"/>
-    <div class="muted" style="margin-bottom:6px">Start from an existing mode, then tick or untick skills:</div>
+    <div style="font-weight:600;margin-bottom:4px">Create your own mode</div>
+    <div class="muted" style="margin-bottom:8px">A mode is a named set of skills you load together for one kind of work.</div>
+    <input type="text" id="bname" placeholder="Name it — e.g. sql-evals"/>
+    <input type="text" id="bdesc" placeholder="What's it for? — e.g. Evaluating our SQL agent's answers"/>
+    <div class="muted" style="margin-bottom:6px">Optional — start from an existing mode, then check the skills to include:</div>
     <select id="bstart"></select>
     <input type="text" id="bsearch" placeholder="Search skills…" style="margin-top:8px"/>
     <div class="blist" id="blist"></div>
@@ -388,7 +389,7 @@ function getWebviewHtml() {
   function curated(){ const set=new Set(); Object.values(S.profiles).forEach(a=>a.forEach(n=>set.add(n))); S.core.forEach(n=>set.delete(n)); return [...set].sort(); }
   function descOf(n){ const s=S.skills.find(x=>x.name===n); return s?s.desc:''; }
   const DESCR={
-    __lean__:'Only the 2 core skills stay loaded. Best when you want SuperBob to read each task and pull in exactly the right skills on the fly — the safest default for mixed work.',
+    __lean__:'Just the two core skills. SuperBob reads each task and pulls in the rest as needed — the safe default for mixed work.',
     code:'Writing or changing software. Includes tests-first (tdd-workflow), codebase-exploration, API & system design, your stack patterns (python/react/…), and docker/kubernetes. Pick this when building or refactoring a feature.',
     data:'Working with data and judging AI output. Includes error-analysis, LLM-as-judge (write-judge-prompt + validate-evaluator), evaluate-rag, SQL, embeddings and statistics. Pick this for analytics or measuring how good an AI pipeline is.',
     pm:'Product management. Includes PRDs (create-prd), product-vision, outcome roadmaps, prioritization frameworks and user stories. Pick this for planning and strategy, not coding.',
@@ -402,11 +403,15 @@ function getWebviewHtml() {
   function descFor(id){ return (S.meta&&S.meta[id]) || DESCR[id] || 'Custom mode.'; }
   function skillInfo(n){ return S.skills.find(x=>x.name===n) || {name:n,tokens:60,desc:''}; }
   function fmtTok(t){ return t>=1000?'~'+(t/1000).toFixed(1)+'k tokens':'~'+t+' tokens'; }
+  // Short, hand-written labels for the two always-on skills — their own frontmatter
+  // descriptions are long and wrap badly in a narrow panel.
+  const SHORT={ 'using-superpowers':'Checks for a matching skill before acting.', 'mission-control':'Routes each task to the right skills.' };
   function skillRows(names){
     const d=document.createElement('div'); d.className='sklist';
     names.forEach(n=>{ const s=skillInfo(n); const core=S.core.includes(n);
       const r=document.createElement('div'); r.className='skrow';
-      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">always on</span>':'')+'</span><span class="stk">'+fmtTok(s.tokens)+'</span></div>'+(s.desc?'<div class="sd">'+s.desc+'</div>':'');
+      const desc=SHORT[n]||s.desc;
+      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">always on</span>':'')+'</span><span class="stk">'+fmtTok(s.tokens)+'</span></div>'+(desc?'<div class="sd">'+desc+'</div>':'');
       d.appendChild(r); });
     return d;
   }

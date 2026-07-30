@@ -72,10 +72,11 @@ You can also just type in plain words: **"use the rag_evaluation mode"** (the `s
 
 ## The sidebar panel, part by part
 
-- **On/Off switch** — turn SuperBob off to run Bob normally (it removes SuperBob's
-  skills but **always keeps your own**); turn it back on to use modes again. You can also
-  switch to the native **SuperBob** entry in Bob's own mode selector, and pick any other
-  Bob mode to turn it off.
+- **On/Off switch** — SuperBob **layers on top of whatever Bob mode you're in**. Turn it on
+  and its skills load alongside your current mode (Code, Architect, Ask, your own — any of
+  them); turn it off to run plain Bob. Either way, **your own skills are always kept**. There
+  is also a native **SuperBob** entry in Bob's mode selector — use that when you want SuperBob
+  to be the *driving role*, and the toggle when you just want its skills on top of another mode.
 - **Auto mode toggle** — let SuperBob choose per task (recommended default).
 - **Active card** — shows what's loaded right now, including the two always-on core skills
   (`using-superpowers`, `mission-control`), each with a short description and token cost.
@@ -114,13 +115,24 @@ Each mode loads a focused set of skills. The two **core** skills are always on.
 
 ## Build your own mode
 
+A **mode** is just a named set of skills you load together for one kind of work. The
+built-in modes cover common jobs; make your own when your work has a recurring shape the
+starters don't match (say, *evaluating our SQL agent* or *reviewing Terraform changes*).
+
 1. In the panel, click **+ Create your own mode**.
-2. **Name it** (e.g. `my-evals`) and add a short **"what it's for"** description — this is
-   what tells you (and SuperBob) when to use it.
-3. Optionally **start from** an existing mode, then tick or untick skills. The list shows a
-   short description for each skill so you know what you're adding.
-4. Click **Save mode**. It appears as a one-click mode you can **Use** anytime — or delete
-   with 🗑.
+2. **Name it** — lowercase, e.g. `sql-evals`. This becomes the mode's label and its
+   `/superbob sql-evals` command.
+3. Add a one-line **"what it's for"** — e.g. *Evaluating our SQL agent's answers*. This is
+   the reminder you (and SuperBob's Auto mode) read to know when to reach for it, so make it
+   describe the *situation*, not the skills.
+4. **Optionally start from** an existing mode to prefill its skills, then check or uncheck to
+   taste. Each skill shows a short description and its token cost, so you can see what a
+   choice adds before you commit.
+5. Click **Save mode**. It joins **Your modes** as a one-click mode you can **Use** anytime —
+   or remove with 🗑. Nothing is permanent; tweak it whenever your workflow changes.
+
+**Keep modes lean.** The whole point is a small, focused context — a mode with 8 sharp skills
+beats one with 30. If you're unsure, start narrow and add skills when you actually miss them.
 
 ---
 

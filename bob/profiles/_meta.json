@@ -1,15 +1,15 @@
 {
-  "software_development": "Building or changing software. Tests-first (test-driven-development), architecture & API design, stack patterns (Python/Go/Rust/React/FastAPI/Django), databases, Docker/Kubernetes, karpathy-guidelines, ponytail, and verification-before-completion as the done-gate.",
-  "data_analysis": "Working with data and judging AI output. error-analysis, LLM-as-judge (write-judge-prompt + validate-evaluator), evaluate-rag, eval-harness, SQL (sql-queries), ClickHouse/Postgres, statistics, data visualization and exploration.",
-  "rag_evaluation": "Evaluating a RAG or retrieval agent. Includes evaluate-rag (scores search and answer separately), error-analysis, LLM judges, SQL checks and statistics.",
-  "product_management": "Product management. Includes PRDs (create-prd), product-vision, roadmaps, prioritization, user stories, GTM and competitor analysis.",
-  "application_security": "Finding and fixing security problems. bb-methodology playbook, security-audit, security-scan, the hunt-* vulnerability skills (SQLi/XSS/SSRF/RCE/cloud/k8s/LLM), vibesec (write secure code proactively), redteam-mindset, evidence-hygiene, report-writing and memory-gc (hunt-memory maintenance).",
-  "frontend_design": "Building and polishing interfaces. frontend-design, baseline-ui, fixing-accessibility + frontend-a11y, design systems, motion, shadcn-ui, design-review and read-only improve-ui audits.",
-  "web_research": "Investigate a topic and synthesize an answer (one-off, not filed into a vault). deep-research, research-synthesis, exa-search, x-research, search-first, defuddle. For a persistent knowledge base, use the knowledge mode instead.",
-  "release_review": "A quality gate to run before shipping. Includes code-review, verification-before-completion, security-audit, tests, clean-code habits, and ponytail (cut over-engineering).",
-  "bug_fixing": "Fast, focused debugging. Includes systematic-debugging (root cause first), caveman-debug (print statements) and error-handling.",
-  "code_simplification": "Strip out over-engineering. The ponytail 'lazy senior engineer' skills \u2014 audit the repo for bloat, review a diff for what to delete, track deferred shortcuts \u2014 plus karpathy-guidelines and code-review.",
-  "content_writing": "Everything for writing and editing prose. no-ai-slop (strip AI-slop / detect it), copywriting, article-writing, draft-content, content channels, ux-copy, brand-voice, email-sequence, seo, doc-coauthoring, documentation, kb-article, grammar-check and process-doc.",
-  "production_engineering": "Production-grade engineering for enterprise software \u2014 the full lifecycle in one mode. Design first (brainstorming, writing-plans, architecture-decision-records, system-design, hexagonal-architecture), build with tests (test-driven-development, backend-patterns, api-design, error-handling, verification-before-completion), ship safely (database-migrations, docker/kubernetes/deployment-patterns), keep it secure and compliant (vibesec, compliance-check), and stay ready to operate (code-review, karpathy-guidelines, incident-response, runbook). Pick this for mission-critical or regulated systems where robustness, security, and maintainability matter more than speed.",
-  "test_engineering": "Quality assurance and testing \u2014 a dedicated QA/test-engineer toolkit. Set the plan (testing-strategy, test-driven-development), cover every layer (react/python unit tests, e2e-testing, webapp-testing, browser-qa, ai-regression-testing), chase down failures (systematic-debugging, caveman-debug, error-handling), confirm the build matches the spec (intended-vs-implemented, triage-validation, verification-before-completion), and gate quality (code-review, pr-feedback-quality-gate, benchmark). Pick this when the job is testing, breaking, or verifying software rather than building features."
+  "software_development": "Build or change software: tests-first, stack patterns (Python/Go/Rust/React\u2026), APIs, databases, containers.",
+  "data_analysis": "Work with data and judge AI output: SQL, stats, charts, and evals.",
+  "rag_evaluation": "Measure a RAG or retrieval system \u2014 score search and answers separately.",
+  "product_management": "Plan product work: PRDs, roadmaps, prioritization, and go-to-market.",
+  "application_security": "Find and fix app vulnerabilities, and write secure code.",
+  "frontend_design": "Build and polish web interfaces: layout, accessibility, motion, design systems.",
+  "web_research": "Research a topic online and synthesize a cited answer.",
+  "release_review": "Final gate before shipping: review, verify, confirm it's ready.",
+  "bug_fixing": "Find and fix a specific bug fast \u2014 root-cause debugging, no ceremony.",
+  "code_simplification": "Cut over-engineering \u2014 find and delete what you don't need.",
+  "content_writing": "Write and edit prose: copy, articles, docs, and UX text.",
+  "production_engineering": "Ship production-grade systems: architecture, security, compliance, deploy, and operate.",
+  "test_engineering": "Test software end to end: strategy, unit, e2e, regression, and quality gates."
 }
