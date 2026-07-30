@@ -13,4 +13,3 @@ hunt-api-misconfig
 evidence-hygiene
 report-writing
 vibesec
-memory-gc

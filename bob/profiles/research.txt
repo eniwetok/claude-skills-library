@@ -3,4 +3,3 @@ research-synthesis
 exa-search
 x-research
 search-first
-defuddle

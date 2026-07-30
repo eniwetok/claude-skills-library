@@ -33,6 +33,7 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 
 ## Group 1 — AgriciDaniel / claude-obsidian (Karpathy pattern)
 
+> **⚠️ Not bundled in SuperBob.** These Obsidian / personal-wiki skills are kept here for reference only — the SuperBob distributable **excludes** them so it never touches your own Obsidian setup. Install them yourself if you want them.
 > **Upstream:** [github.com/AgriciDaniel/claude-obsidian](https://github.com/AgriciDaniel/claude-obsidian)
 > Karpathy's LLM wiki concept — compile knowledge once into interconnected markdown. Built on [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills).
 > **Bundle:** [zips/claude-obsidian-skills.zip](zips/claude-obsidian-skills.zip) · Install: `claude plugin marketplace add AgriciDaniel/claude-obsidian`

@@ -46,7 +46,7 @@ the agent cannot auto-activate a vault skill, because its description isn't load
 | **Security review / hunt** | `vibesec` (dev) or `bb-methodology` (engagement), the matching `hunt-*` skill |
 | **Build or fix UI** | `frontend-design` (build) / `baseline-ui` + `fixing-accessibility` (fix), `improve-ui` |
 | **Product work** | `create-prd`, `product-vision`, `outcome-roadmap`, `prioritization-frameworks` |
-| **Research a topic** | `deep-research`, then `save` / `wiki-ingest` to keep findings |
+| **Research a topic** | `deep-research`, `research-synthesis` |
 | **Review quality before done** | `code-review`, `verification-before-completion`, `ponytail` |
 | **Make a new skill** | `skill-creator` |
 
@@ -436,10 +436,6 @@ swarm-orchestration → or hive-mind for consensus-driven swarms
 deep-research             → 8-phase pipeline, cited report, adversarial verification
 ```
 
-**Build a knowledge base:**
-```
-autoresearch → save → wiki  → files findings into Obsidian vault
-```
 
 **Learn a skill/topic:**
 ```
@@ -450,7 +446,6 @@ learn-with-coursera       → personalized learning path from Coursera catalog
 | Skill | When to use |
 |-------|------------|
 | `deep-research` | Comprehensive cited report on a topic |
-| `autoresearch` | Autonomous research that files into your wiki vault |
 | `search-first` | Quick lookup before implementing anything |
 | `research-synthesis` | Synthesize existing research material |
 
@@ -616,7 +611,6 @@ Complete disambiguation for skills that share similar descriptions:
 | `agent-council` vs `dispatching-parallel-agents` | Opinions vs implementation | Need perspectives / consensus | Need to divide work |
 | `swarm-orchestration` vs `hive-mind` | Coordination vs collective | Linear multi-step flows | Emergent consensus / shared state |
 | `systematic-debugging` vs `debug` | Methodology vs tool | Any bug (enforces root cause) | Quick debug for small issues |
-| `deep-research` vs `autoresearch` | Report vs knowledge base | Need a cited deliverable | Need to build your wiki |
 | `dispatching-parallel-agents` vs `hive-mind` | Work division vs consensus | Independent tasks | Tasks requiring shared state |
 
 ---
@@ -625,7 +619,7 @@ Complete disambiguation for skills that share similar descriptions:
 
 | Group | Source | Count | Best skills |
 |-------|--------|-------|-------------|
-| G1 | claude-obsidian | 15 | `wiki`, `save`, `autoresearch`, `canvas` |
+| G1 | claude-obsidian | — | (removed from SuperBob — user manages Obsidian separately) |
 | G2 | phuryn/pm-skills | 60+ | Full PM toolkit |
 | G3 | Cowork | 15 | Workflow automation |
 | G4 | anthropics/skills | 30+ | `skill-creator`, `code-review`, `system-design` |
@@ -638,7 +632,7 @@ Complete disambiguation for skills that share similar descriptions:
 | G11 | zhangzhang-111-i | ~180 | `c-level-advisor`, `system-design`, `webapp-testing`, `evaluate-rag` |
 | G12 | n8n-io/skills | 14 | n8n workflow automation |
 | G13 | team-attention | 1 | **`agent-council`** |
-| G14 | pablo-mano | 1 | `obsidian-cli` |
+| G14 | pablo-mano | — | (removed from SuperBob) |
 | G15 | multica-ai | 1 | **`karpathy-guidelines`** |
 | G16 | code-review-graph | 2+MCP | **`code-review-graph` (MCP)**, semantic search, dep graphs |
 | G17 | Claude-BugHunter | 71+15cmd | **`bb-methodology`**, 71 `hunt-*` skills |

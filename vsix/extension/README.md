@@ -97,8 +97,10 @@ Each mode loads a focused set of skills. The two **core** skills are always on.
 | **pm** | Product planning | create-prd, product-vision, roadmaps, prioritization, user stories |
 | **enterprise-dev** | Production-grade enterprise engineering (full lifecycle) | system-design, hexagonal-architecture, test-driven-development, docker/kubernetes/deployment, vibesec, compliance-check, incident-response |
 | **qa** | Quality assurance & testing | testing-strategy, e2e-testing, webapp-testing, browser-qa, ai-regression-testing, systematic-debugging, intended-vs-implemented, pr-feedback-quality-gate |
+
+> **Note:** SuperBob does not bundle Obsidian / personal-wiki skills — you manage
+> your own knowledge-base setup, and SuperBob leaves it untouched.
 | **research** | Investigate a topic (one-off answer) | deep-research, research-synthesis, exa-search, x-research, search-first |
-| **knowledge** | Build & query a personal wiki (Karpathy's LLM-wiki pattern) | wiki (ingest/query/lint/fold), save, autoresearch, canvas, obsidian-cli, think, memory-gc |
 | **ship-it** | Quality gate before shipping | code-review, verification-before-completion, security-audit, tests |
 | **quick-fix** | Fast debugging | systematic-debugging, caveman-debug, error-handling |
 

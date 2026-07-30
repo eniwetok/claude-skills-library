@@ -24,10 +24,14 @@ fi
 #   AGPL (SocratiCode); source-available (Anthropic docx/pdf/pptx/xlsx);
 #   unlicensed (15-cowork-skills, from a video); no formal license (pablo obsidian-cli).
 #   mission-control is target-specific (shipped via meta/).
+#   Obsidian / personal-knowledge-base skills are intentionally NOT shipped —
+#   users manage their own Obsidian setup; SuperBob does not touch it.
 EXCLUDE=(mission-control \
   codebase-exploration codebase-management \
   docx pdf pptx xlsx \
-  obsidian-cli \
+  wiki wiki-cli wiki-fold wiki-ingest wiki-lint wiki-mode wiki-query wiki-retrieve \
+  obsidian-cli obsidian-markdown obsidian-bases \
+  save autoresearch canvas defuddle think memory-gc \
   animated-website budget-dashboard contract-reviewer customize difficult-conversation-prep \
   email-drafter explainer-graphic invoice-generator learning-path-generator morning-briefing \
   quick-research receipt-scanner slide-deck-builder visual-page-builder workflow-visualizer)
