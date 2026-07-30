@@ -60,14 +60,14 @@ If the user says "use the <name> mode", "load <name> mode", "switch to <name>", 
 2. Read each of those skills' `SKILL.md` from `~/.bob/skills-vault/<skill>/` and apply them.
 3. Tell the user which mode and skills you loaded.
 This works in the middle of a conversation with no restart and no panel — you are
-reading the mode's skills on demand. Known modes: the built-ins (super-code, super-data, super-pm, super-dev, super-qa,
-super-security, super-ui, super-research) plus any the user created. The `super-` prefix is optional when the user names a mode — "use the code mode" means `super-code`. (Mode names are the `.txt` files
+reading the mode's skills on demand. Known modes: the built-ins (software_development, data_analysis, product_management, production_engineering, test_engineering,
+application_security, frontend_design, web_research) plus any the user created. (Mode names are the `.txt` files
 in `~/.bob/profiles/`, and their descriptions are in `~/.bob/profiles/_meta.json`).
 
 ### Loading a batch instead (optional)
 For a long session on one kind of work, pre-load a whole profile so its skills
 auto-activate normally:
-`~/.bob/bob-profile <super-code|super-data|super-pm|super-dev|super-qa|super-security|super-ui|super-research>` (then restart).
+`~/.bob/bob-profile <software_development|data_analysis|product_management|production_engineering|test_engineering|application_security|frontend_design|web_research>` (then restart).
 Lean mode (this router) is the default and needs no reload.
 
 **Ownership rule — never delete the user's own skills.** When you load a mode
@@ -165,17 +165,22 @@ before you type anything**. So the library is NOT all loaded at once.
 
 | Profile | For | Cost |
 |---------|-----|------|
-| `code` | Building/refactoring software, tests, APIs, infra | ~2.1k tokens |
-| `data` | Evals, SQL, RAG, analytics — the Cognos work | ~2.2k tokens |
-| `pm` | PRDs, roadmaps, strategy, user stories | ~2.1k tokens |
-| `security` | Audits, vulnerability hunting | ~3.1k tokens |
-| `ui` | Interfaces, accessibility, design | ~2.0k tokens |
-| `research` | Wiki, notes, deep research | ~2.5k tokens |
+| `software_development` | Building/refactoring software, tests, APIs, infra | ~1.6k tokens |
+| `production_engineering` | Production-grade lifecycle: design, secure, deploy, operate | ~1.3k tokens |
+| `data_analysis` | SQL, stats, viz + judging AI output | ~1.3k tokens |
+| `rag_evaluation` | Measuring a RAG / retrieval system's quality | ~0.6k tokens |
+| `application_security` | Audits, vulnerability hunting, secure coding | ~2.3k tokens |
+| `frontend_design` | Interfaces, accessibility, design | ~1.1k tokens |
+| `test_engineering` | Tests: unit, e2e, regression, quality gates | ~1.2k tokens |
+| `product_management` | PRDs, roadmaps, strategy, user stories | ~1.5k tokens |
+| `web_research` | Investigate a topic online and synthesize | ~0.5k tokens |
+| `content_writing` | Prose: copy, articles, docs, UX copy | ~1.1k tokens |
+| `release_review` · `bug_fixing` · `code_simplification` | Ship-gate · fast debugging · cut over-engineering | small |
 
 **Switching (must be done in a terminal, then restart the conversation):**
 ```bash
-~/.bob/bob-profile super-data    # load one
-~/.bob/bob-profile super-code super-ui   # combine two
+~/.bob/bob-profile data_analysis    # load one
+~/.bob/bob-profile software_development frontend_design   # combine two
 ~/.bob/bob-profile status        # what is loaded now
 ~/.bob/bob-profile list          # all profiles
 ~/.bob/bob-profile all           # everything (~67k tokens - avoid)

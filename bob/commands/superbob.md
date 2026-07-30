@@ -1,6 +1,6 @@
 ---
 description: Switch SuperBob skill mode — loads that mode's skills for this conversation
-argument-hint: <mode> (e.g. super-code, super-data, super-security, auto — leave blank to list)
+argument-hint: <mode> (e.g. software_development, data_analysis, application_security, auto — leave blank to list)
 ---
 Switch SuperBob to the "$1" mode.
 
@@ -15,13 +15,11 @@ Follow these steps:
    skills stay loaded (using-superpowers, mission-control) and you pull in the right
    skills per task on demand. Stop here.
 
-3. **Otherwise**, load the "$1" mode. Mode files are named with a `super-` prefix, but the
-   user may type the name with or without it, so resolve the profile file like this:
-   - Try `~/.bob/profiles/$1.txt` first; if it does not exist, try `~/.bob/profiles/super-$1.txt`
-     (so "code" resolves to "super-code"). Use whichever exists.
-   - Each non-empty line of that file is a skill name. For each, read
-     `~/.bob/skills-vault/<skill>/SKILL.md` and apply it for the rest of this conversation.
-   - If neither file exists, say so and list the available modes.
+3. **Otherwise**, load the "$1" mode:
+   - Read `~/.bob/profiles/$1.txt` — each non-empty line is a skill name.
+   - For each of those skills, read `~/.bob/skills-vault/<skill>/SKILL.md` and apply it
+     for the rest of this conversation.
+   - If `~/.bob/profiles/$1.txt` does not exist, say so and list the available modes.
 
 4. Confirm to the user which mode you loaded and list the skills it brought in.
 

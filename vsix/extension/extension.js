@@ -21,7 +21,7 @@ const CLAUDE_SKILLS = path.join(HOME, '.claude', 'skills');
 // Lean mode: only these two skills stay loaded; mission-control routes to the rest
 // from the vault on demand. Keeps starting context tiny (~200 tokens vs ~67,000).
 const CORE = ['using-superpowers', 'mission-control']; // superpowers first — always check for a skill before acting
-const BUILTIN = ['super-code', 'super-data', 'super-pm', 'super-dev', 'super-qa', 'super-security', 'super-ui', 'super-research'];
+const BUILTIN = ['software_development', 'data_analysis', 'product_management', 'production_engineering', 'test_engineering', 'application_security', 'frontend_design', 'web_research'];
 
 let statusItem;
 let panel;
@@ -89,6 +89,22 @@ function activeProfile() {
 // switch from clobbering the user's own skills.
 function isOwned(name) { return fs.existsSync(path.join(BOB_VAULT, name, 'SKILL.md')); }
 function externalActiveSkills() { return activeSkillSet().filter(n => !isOwned(n)); }
+
+// ---- power (SuperBob on/off) -----------------------------------------------
+// Off = remove every SuperBob-owned skill from the active dir (including the two
+// core skills), leaving only the user's own skills — Bob then runs normally. The
+// user's own skills are never touched. On = restore lean (core only).
+function isPoweredOff() { return activeProfile() === 'off'; }
+function superbobOff() {
+  if (fs.existsSync(BOB_ACTIVE)) {
+    for (const name of activeSkillSet()) {
+      if (isOwned(name)) fs.rmSync(path.join(BOB_ACTIVE, name), { recursive: true, force: true });
+    }
+  } else { fs.mkdirSync(BOB_ACTIVE, { recursive: true }); }
+  fs.writeFileSync(path.join(BOB_ACTIVE, '.profile'), 'off');
+  updateStatus();
+  return true;
+}
 
 // ---- apply / save / delete -------------------------------------------------
 function applySkillSet(skillNames, label) {
@@ -162,6 +178,7 @@ function stateMessage() {
     active: activeProfile(),
     activeSet: activeSkillSet(),
     external: externalActiveSkills(),
+    poweredOff: isPoweredOff(),
     core: CORE,
     builtin: BUILTIN,
     profiles: profs,
@@ -178,6 +195,11 @@ async function handleMessage(m, context) {
     postState(); return;
   }
   if (m.type === 'applyLean') { applyProfile([]); vscode.window.showInformationMessage('Auto mode on — SuperBob picks skills per task. Start a new conversation.'); postState(); return; }
+  if (m.type === 'setPower') {
+    if (m.on) { applyProfile([]); vscode.window.showInformationMessage('SuperBob on — Auto mode. Start a new conversation.'); }
+    else { superbobOff(); vscode.window.showInformationMessage('SuperBob off — Bob runs normally, your own skills kept. Start a new conversation.'); }
+    postState(); return;
+  }
   if (m.type === 'applyCustom') {
     if (applySkillSet(m.skills, 'custom (' + m.skills.length + ' skills)')) vscode.window.showInformationMessage('Custom set applied. Start a new conversation.');
     postState(); return;
@@ -245,6 +267,11 @@ function getWebviewHtml() {
   .exthd{font-size:11px;color:var(--vscode-charts-green,#89d185);margin-bottom:5px}
   .extlist{display:flex;flex-wrap:wrap;gap:4px}
   .extpill{font-size:11px;padding:1px 7px;border-radius:9px;background:var(--vscode-badge-background,#2a2d2e);color:var(--vscode-badge-foreground,#ccc)}
+  .powerbar{display:flex;gap:8px;align-items:center;padding:8px 10px;margin:10px 0;border:1px solid var(--vscode-widget-border,#333);border-radius:8px}
+  .powerbar .t b{color:var(--vscode-charts-green,#89d185)}
+  #main.off .powerbar .t b{color:var(--vscode-descriptionForeground)}
+  #main.off .hideWhenOff{display:none !important}
+  .offbanner{padding:9px 11px;margin:0 0 12px;border-radius:8px;font-size:12.5px;line-height:1.5;background:var(--vscode-inputValidation-warningBackground,#3b2e1e);border:1px solid var(--vscode-inputValidation-warningBorder,#6b5424)}
   .mode{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:8px;padding:10px 12px;margin-bottom:7px}
   .mode.on{border-color:var(--vscode-focusBorder,#0e639c)}
   .mode-top{display:flex;align-items:center;gap:10px}
@@ -293,6 +320,11 @@ function getWebviewHtml() {
   <h1>SuperBob</h1>
   <div class="muted">One click picks the skills for what you're doing. Everything else stays out of the way.</div>
 
+  <label class="powerbar"><input type="checkbox" id="powerToggle" checked/><span><span class="t">SuperBob is <b id="powerState">on</b></span> <span class="muted">— turn off to run Bob normally; your own skills are always kept</span></span></label>
+  <div id="offbanner" class="offbanner" style="display:none">
+    SuperBob is <b>off</b> — Bob runs with only your own skills. Turn it back on above, or pick <b>SuperBob</b> from Bob's mode selector. Then start a new conversation.
+  </div>
+
   <details class="help">
     <summary>❔ How to use SuperBob</summary>
     <div class="helpbody">
@@ -300,7 +332,7 @@ function getWebviewHtml() {
       <ol>
         <li>Leave <b>Auto mode</b> on → SuperBob picks the skills for each task. That's the whole setup.</li>
         <li>Or turn Auto off and click a mode's <b>Use</b> button. Click <b>skills</b> to see what's inside and what it costs.</li>
-        <li>Or, in the Bob chat, type <code>/superbob rag</code> (or any mode). <code>/superbob</code> alone lists them.</li>
+        <li>Or, in the Bob chat, type <code>/superbob software_development</code> (or any mode). <code>/superbob</code> alone lists them.</li>
         <li>After switching, <b>start a new conversation</b> so the skills load.</li>
         <li>Use <b>+ Create your own mode</b> to save your own set of skills.</li>
       </ol>
@@ -308,6 +340,7 @@ function getWebviewHtml() {
     </div>
   </details>
 
+  <div class="hideWhenOff">
   <label class="autobar"><input type="checkbox" id="autoToggle"/><span><span class="t">Auto mode</span> — let SuperBob pick the right skills for each task automatically <span class="muted">(recommended)</span></span></label>
 
   <div class="active-card">
@@ -340,6 +373,7 @@ function getWebviewHtml() {
       <button class="sec" id="bcancel">Cancel</button>
     </div>
   </div>
+  </div><!-- /hideWhenOff -->
 
   <div class="foot">The 2 core skills are always on. After switching a mode, <b>start a new conversation</b> so it loads.</div>
 </div>
@@ -381,6 +415,13 @@ function getWebviewHtml() {
     document.getElementById('notinstalled').style.display=S.installed?'none':'block';
     document.getElementById('main').style.display=S.installed?'block':'none';
     if(!S.installed) return;
+    // power (on/off)
+    const off=!!S.poweredOff;
+    document.getElementById('main').classList.toggle('off', off);
+    document.getElementById('powerToggle').checked=!off;
+    document.getElementById('powerState').textContent=off?'off':'on';
+    document.getElementById('offbanner').style.display=off?'block':'none';
+    if(off) return;   // nothing else to render while off
     const am=activeMode();
     // active card
     document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode': am==='__custom__'?'custom set': (am||'—'));
@@ -462,6 +503,7 @@ function getWebviewHtml() {
   });
   document.addEventListener('input',e=>{ if(e.target.id==='bsearch') renderBuilder(); });
   document.addEventListener('change',e=>{ if(e.target.id==='autoToggle'){ if(e.target.checked) vscode.postMessage({type:'applyLean'}); }
+    if(e.target.id==='powerToggle'){ vscode.postMessage({type:'setPower', on:e.target.checked}); }
     if(e.target.id==='bstart'){ const p=e.target.value; sel=new Set(p&&S.profiles[p]?S.profiles[p].filter(n=>!S.core.includes(n)):[]); renderBuilder(); } });
 </script></body></html>`;
 }

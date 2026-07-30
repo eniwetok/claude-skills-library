@@ -60,14 +60,14 @@ If the user says "use the <name> mode", "load <name> mode", "switch to <name>", 
 2. Read each of those skills' `SKILL.md` from the vault and apply them.
 3. Tell the user which mode and skills you loaded.
 This works mid-conversation with no restart and no panel — you are reading the mode's
-skills on demand. Known modes: the built-ins (super-code, super-data, super-pm, super-dev, super-qa, security, ui, research)
+skills on demand. Known modes: the built-ins (software_development, data_analysis, product_management, production_engineering, test_engineering, security, ui, research)
 plus any the user created (the `.txt` files in the profiles folder; their descriptions
 are in `_meta.json`).
 
 ### Loading a batch instead (optional)
 For a long session on one kind of work, pre-load a whole profile so its skills
 auto-activate normally:
-`~/.bob/bob-profile <super-code|super-data|super-pm|super-dev|super-qa|super-security|super-ui|super-research>` (then restart).
+`~/.bob/bob-profile <software_development|data_analysis|product_management|production_engineering|test_engineering|application_security|frontend_design|web_research>` (then restart).
 Lean mode (this router) is the default and needs no reload.
 
 **Ownership rule — never delete the user's own skills.** When you load a mode
