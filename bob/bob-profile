@@ -8,6 +8,27 @@ VAULT="$HOME/.bob/skills-vault"
 ACTIVE="$HOME/.bob/skills"
 PROF="$HOME/.bob/profiles"
 
+# --- Ownership boundary ------------------------------------------------------
+# A skill in $ACTIVE is "SuperBob-owned" only if the vault has a skill by that
+# name. Anything else in $ACTIVE is the user's OWN skill — never remove it on a
+# mode switch. sync_active reconciles $ACTIVE to a staging dir that holds exactly
+# the wanted skills: it deletes only owned-and-unwanted skills, adds/refreshes
+# the wanted ones, and leaves every external skill exactly where it is.
+sync_active() {
+  local STAGE="$1"
+  mkdir -p "$ACTIVE"
+  for d in "$ACTIVE"/*/; do
+    [ -d "$d" ] || continue
+    local name; name=$(basename "$d")
+    if [ -d "$VAULT/$name" ] && [ ! -d "$STAGE/$name" ]; then rm -rf "$d"; fi
+  done
+  for d in "$STAGE"/*/; do
+    [ -d "$d" ] || continue
+    local name; name=$(basename "$d")
+    rm -rf "$ACTIVE/$name"; cp -R "$d" "$ACTIVE/$name"
+  done
+}
+
 usage() {
   echo "Usage: bob-profile <name> [name2 ...]   load profile(s)"
   echo "       bob-profile list                 show profiles"
@@ -43,14 +64,14 @@ case "${1:-}" in
     [ -f "$ACTIVE/.profile" ] && echo "  profile: $(cat "$ACTIVE/.profile")" || echo "  profile: (unknown)"
     exit 0 ;;
   all)
-    rm -rf "$ACTIVE"; mkdir -p "$ACTIVE"
-    rsync -a "$VAULT"/ "$ACTIVE"/
+    mkdir -p "$ACTIVE"
+    rsync -a "$VAULT"/ "$ACTIVE"/          # add/refresh every vault skill; no --delete, so external skills stay
     echo "all" > "$ACTIVE/.profile"
-    echo "Loaded ALL skills."; cost; exit 0 ;;
+    echo "Loaded ALL skills (your own skills kept)."; cost; exit 0 ;;
   lean|core)
     TMP=$(mktemp -d)
     while read -r s; do [ -z "$s" ] && continue; [ -d "$VAULT/$s" ] && cp -R "$VAULT/$s" "$TMP/$s"; done < "$PROF/_core.txt"
-    rm -rf "$ACTIVE"; mkdir -p "$ACTIVE"; cp -R "$TMP"/. "$ACTIVE"/; rm -rf "$TMP"
+    sync_active "$TMP"; rm -rf "$TMP"
     echo "lean (core only)" > "$ACTIVE/.profile"
     echo "Loaded lean core — mission-control routes the rest from the vault on demand."; cost; exit 0 ;;
 esac
@@ -74,11 +95,10 @@ for p in "$@"; do copy_list "$PROF/$p.txt"; done
 COUNT=$(ls -1 "$TMP" | wc -l | tr -d ' ')
 [ "$COUNT" -lt 2 ] && { echo "ERROR: only $COUNT skills resolved — aborting, nothing changed."; rm -rf "$TMP"; exit 1; }
 
-rm -rf "$ACTIVE"; mkdir -p "$ACTIVE"
-cp -R "$TMP"/. "$ACTIVE"/; rm -rf "$TMP"
+sync_active "$TMP"; rm -rf "$TMP"
 echo "core + $*" > "$ACTIVE/.profile"
 
-echo "Loaded: core + $*"
+echo "Loaded: core + $* (your own skills kept)"
 cost
 echo ""
 echo "Restart your Bob conversation for the change to take effect."

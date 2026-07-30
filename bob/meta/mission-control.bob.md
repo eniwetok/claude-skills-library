@@ -70,6 +70,14 @@ auto-activate normally:
 `~/.bob/bob-profile <code|data|pm|security|ui|research>` (then restart the conversation).
 Lean mode (this router) is the default and needs no reload.
 
+**Ownership rule — never delete the user's own skills.** When you load a mode
+(here or from chat), only add or remove skills that exist in the vault
+(`~/.bob/skills-vault/`). Any skill in `~/.bob/skills/` that has NO vault
+counterpart is one the user installed themselves — leave it exactly where it is.
+Always switch modes with `~/.bob/bob-profile` (it enforces this); never
+`rm -rf ~/.bob/skills` or clear the folder wholesale, or you will disable the
+user's own skills.
+
 ---
 
 # Mission Control — Skill Orchestrator

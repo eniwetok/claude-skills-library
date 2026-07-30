@@ -81,6 +81,15 @@ function activeProfile() {
   return fs.existsSync(f) ? fs.readFileSync(f, 'utf8').trim() : null;
 }
 
+// ---- ownership boundary ----------------------------------------------------
+// A skill sitting in the active dir (~/.bob/skills) is "SuperBob-owned" ONLY if a
+// skill of the same name exists in the vault. Anything else in the active dir is a
+// skill the user installed themselves — SuperBob does not manage it and must never
+// remove or disable it when switching modes. This one rule is what stops a mode
+// switch from clobbering the user's own skills.
+function isOwned(name) { return fs.existsSync(path.join(BOB_VAULT, name, 'SKILL.md')); }
+function externalActiveSkills() { return activeSkillSet().filter(n => !isOwned(n)); }
+
 // ---- apply / save / delete -------------------------------------------------
 function applySkillSet(skillNames, label) {
   if (!fs.existsSync(BOB_VAULT)) { vscode.window.showErrorMessage('SuperBob: not installed yet.'); return false; }
@@ -88,10 +97,21 @@ function applySkillSet(skillNames, label) {
   for (const n of skillNames) wanted.add(n);
   const staged = [...wanted].filter(s => fs.existsSync(path.join(BOB_VAULT, s)));
   if (staged.length < CORE.length) { vscode.window.showErrorMessage('SuperBob: nothing to load — aborted.'); return false; }
-  fs.rmSync(BOB_ACTIVE, { recursive: true, force: true });
   fs.mkdirSync(BOB_ACTIVE, { recursive: true });
-  for (const s of staged) copyDir(path.join(BOB_VAULT, s), path.join(BOB_ACTIVE, s));
+  // Remove ONLY owned skills the new set no longer wants. External (user-installed)
+  // skills are left exactly as they are — they stay loaded through every mode switch.
+  for (const name of activeSkillSet()) {
+    if (isOwned(name) && !wanted.has(name)) fs.rmSync(path.join(BOB_ACTIVE, name), { recursive: true, force: true });
+  }
+  // Add or refresh the wanted skills from the vault (refresh picks up vault updates).
+  for (const s of staged) {
+    const dest = path.join(BOB_ACTIVE, s);
+    fs.rmSync(dest, { recursive: true, force: true });
+    copyDir(path.join(BOB_VAULT, s), dest);
+  }
   fs.writeFileSync(path.join(BOB_ACTIVE, '.profile'), label);
+  const kept = externalActiveSkills().length;
+  if (kept) vscode.window.setStatusBarMessage('SuperBob kept ' + kept + ' of your own skill(s) untouched', 4000);
   updateStatus();
   return true;
 }
@@ -141,6 +161,7 @@ function stateMessage() {
     installed: fs.existsSync(BOB_VAULT),
     active: activeProfile(),
     activeSet: activeSkillSet(),
+    external: externalActiveSkills(),
     core: CORE,
     builtin: BUILTIN,
     profiles: profs,
@@ -220,6 +241,10 @@ function getWebviewHtml() {
   .skrow .sn .ao{font-size:9px;color:var(--vscode-charts-blue,#4aa8d8);border:1px solid currentColor;border-radius:7px;padding:0 5px;margin-left:5px;text-transform:uppercase}
   .skrow .stk{color:var(--vscode-descriptionForeground);font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
   .skrow .sd{color:var(--vscode-descriptionForeground);font-size:11.5px;margin-top:1px;line-height:1.4}
+  .extnote{margin-top:10px;padding-top:9px;border-top:1px dashed var(--vscode-widget-border,#2a2a2a)}
+  .exthd{font-size:11px;color:var(--vscode-charts-green,#89d185);margin-bottom:5px}
+  .extlist{display:flex;flex-wrap:wrap;gap:4px}
+  .extpill{font-size:11px;padding:1px 7px;border-radius:9px;background:var(--vscode-badge-background,#2a2d2e);color:var(--vscode-badge-foreground,#ccc)}
   .mode{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:8px;padding:10px 12px;margin-bottom:7px}
   .mode.on{border-color:var(--vscode-focusBorder,#0e639c)}
   .mode-top{display:flex;align-items:center;gap:10px}
@@ -361,10 +386,18 @@ function getWebviewHtml() {
     document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode': am==='__custom__'?'custom set': (am||'—'));
     document.getElementById('autoToggle').checked = (am==='__lean__');
     document.getElementById('activeDesc').textContent = (am && am!=='__custom__') ? descFor(am) : (am==='__custom__'?'A custom set of skills you picked.':'');
-    const extras=S.activeSet.filter(n=>!S.core.includes(n));
+    const ext=new Set(S.external||[]);
+    const extras=S.activeSet.filter(n=>!S.core.includes(n) && !ext.has(n));   // the mode's own skills
     const ordered=[...S.core, ...extras];   // superpowers + mission-control first (always on)
     const cont=document.getElementById('activeSkills'); cont.innerHTML='';
     cont.appendChild(skillRows(ordered));
+    // The user's own skills — SuperBob never removes these on a mode switch.
+    if(ext.size){
+      const note=document.createElement('div'); note.className='extnote';
+      note.innerHTML='<div class="exthd">Your own skills — kept through every mode ('+ext.size+')</div>'+
+        '<div class="extlist">'+[...ext].map(n=>'<span class="extpill">'+n+'</span>').join('')+'</div>';
+      cont.appendChild(note);
+    }
 
     // your modes = Lean + custom modes
     const your=document.getElementById('yourModes'); your.innerHTML='';
