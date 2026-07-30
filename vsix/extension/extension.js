@@ -191,10 +191,10 @@ function postState() { const msg = stateMessage(); webviews.forEach(w => { try {
 async function handleMessage(m, context) {
   if (m.type === 'ready') { postState(); return; }
   if (m.type === 'applyProfile') {
-    if (applyProfile([m.name])) vscode.window.showInformationMessage('Loaded "' + m.name + '". Start a new conversation to apply.');
+    if (applyProfile([m.name])) vscode.window.showInformationMessage('Loaded "' + m.name + '" kit. Start a new conversation to apply.');
     postState(); return;
   }
-  if (m.type === 'applyLean') { applyProfile([]); vscode.window.showInformationMessage('Auto mode on — SuperBob picks skills per task. Start a new conversation.'); postState(); return; }
+  if (m.type === 'applyLean') { applyProfile([]); vscode.window.showInformationMessage('Auto mode on. SuperBob picks skills per task. Start a new conversation.'); postState(); return; }
   if (m.type === 'setPower') {
     if (m.on) { applyProfile([]); vscode.window.showInformationMessage('SuperBob on — Auto mode. Start a new conversation.'); }
     else { superbobOff(); vscode.window.showInformationMessage('SuperBob off — Bob runs normally, your own skills kept. Start a new conversation.'); }
@@ -328,20 +328,20 @@ function getWebviewHtml() {
   <details class="help">
     <summary>❔ How to use SuperBob</summary>
     <div class="helpbody">
-      <p>Pick a <b>mode</b> for what you're doing — SuperBob loads just those skills so the agent stays fast.</p>
+      <p>Pick a <b>kit</b> for what you're doing. SuperBob loads just those skills so the agent stays fast.</p>
       <ol>
-        <li>Leave <b>Auto mode</b> on → SuperBob picks the skills for each task. That's the whole setup.</li>
+        <li>Leave <b>Auto mode</b> on and SuperBob picks the skills for each task. That's the whole setup.</li>
         <li>Or turn Auto off and click a mode's <b>Use</b> button. Click <b>skills</b> to see what's inside and what it costs.</li>
-        <li>Or, in the Bob chat, type <code>/superbob software_development</code> (or any mode). <code>/superbob</code> alone lists them.</li>
+        <li>Or, in the Bob chat, type <code>/superbob software_development</code> (or any kit). <code>/superbob</code> alone lists them.</li>
         <li>After switching, <b>start a new conversation</b> so the skills load.</li>
-        <li>Use <b>+ Create your own mode</b> to save your own set of skills.</li>
+        <li>Use <b>+ Create your own kit</b> to save your own set of skills.</li>
       </ol>
       <button class="sec" id="docsBtn">Open full guide ↗</button>
     </div>
   </details>
 
   <div class="hideWhenOff">
-  <label class="autobar"><input type="checkbox" id="autoToggle"/><span><span class="t">Auto mode</span> — let SuperBob pick the right skills for each task automatically <span class="muted">(recommended)</span></span></label>
+  <label class="autobar"><input type="checkbox" id="autoToggle"/><span><span class="t">Auto mode</span> <span class="muted">(recommended). SuperBob picks the right skills for each task.</span></span></label>
 
   <div class="active-card">
     <div><span class="dot"></span><span class="now" id="activeNow">—</span></div>
@@ -349,19 +349,19 @@ function getWebviewHtml() {
     <div class="skills" id="activeSkills"></div>
   </div>
 
-  <h2>Your modes</h2>
+  <h2>Your kits</h2>
   <div id="yourModes"></div>
 
   <details class="builtins">
-    <summary id="builtinSummary">Starter modes (built-in)</summary>
+    <summary id="builtinSummary">Starter kits (built-in)</summary>
     <div id="builtinModes" style="margin-top:8px"></div>
   </details>
 
-  <button id="createBtn">+ Create your own mode</button>
+  <button id="createBtn">+ Create your own kit</button>
 
   <div id="builder" style="display:none">
-    <div style="font-weight:600;margin-bottom:4px">Create your own mode</div>
-    <div class="muted" style="margin-bottom:8px">A mode is a named set of skills you load together for one kind of work.</div>
+    <div style="font-weight:600;margin-bottom:4px">Create your own kit</div>
+    <div class="muted" style="margin-bottom:8px">A kit is a named set of skills you load together for one kind of work.</div>
     <input type="text" id="bname" placeholder="Name it — e.g. sql-evals"/>
     <input type="text" id="bdesc" placeholder="What's it for? — e.g. Evaluating our SQL agent's answers"/>
     <div class="muted" style="margin-bottom:6px">Optional — start from an existing mode, then check the skills to include:</div>
@@ -400,7 +400,7 @@ function getWebviewHtml() {
     'ship-it':'A quality gate to run before shipping. Includes code-review, verification-before-completion, security-audit, tests and clean-code habits (karpathy-guidelines). Pick this right before you merge or release.',
     'quick-fix':'Fast, focused debugging. Includes systematic-debugging (find the root cause first), caveman-debug (print statements) and error-handling. Pick this when something is broken and you need it fixed.'
   };
-  function descFor(id){ return (S.meta&&S.meta[id]) || DESCR[id] || 'Custom mode.'; }
+  function descFor(id){ return (S.meta&&S.meta[id]) || DESCR[id] || 'Custom kit.'; }
   function skillInfo(n){ return S.skills.find(x=>x.name===n) || {name:n,tokens:60,desc:''}; }
   function fmtTok(t){ return t>=1000?'~'+(t/1000).toFixed(1)+'k tokens':'~'+t+' tokens'; }
   // Short, hand-written labels for the two always-on skills — their own frontmatter
@@ -454,7 +454,7 @@ function getWebviewHtml() {
     // built-in modes
     const bi=document.getElementById('builtinModes'); bi.innerHTML='';
     S.builtin.forEach(p=>{ if(S.profiles[p]) bi.appendChild(modeCard(p, p, S.profiles[p], am===p, false)); });
-    document.getElementById('builtinSummary').textContent='Starter modes (built-in · '+S.builtin.filter(p=>S.profiles[p]).length+')';
+    document.getElementById('builtinSummary').textContent='Starter kits (built-in · '+S.builtin.filter(p=>S.profiles[p]).length+')';
     // builder start-from options
     const bs=document.getElementById('bstart'); if(bs && bs.options.length===0){
       bs.innerHTML='<option value="">(blank — pick your own)</option>'+Object.keys(S.profiles).map(p=>'<option value="'+p+'">'+p+'</option>').join('');
@@ -468,7 +468,7 @@ function getWebviewHtml() {
     top.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'');
     const sp=document.createElement('span'); sp.className='sp';
     const use=document.createElement('button');
-    if(isActive && id!=='__lean__'){ use.textContent='Unload'; use.title='turn this mode off (back to Auto)'; use.onclick=()=>vscode.postMessage({type:'applyLean'}); }
+    if(isActive && id!=='__lean__'){ use.textContent='Unload'; use.title='turn this kit off (back to Auto)'; use.onclick=()=>vscode.postMessage({type:'applyLean'}); }
     else if(isActive){ use.textContent='On'; use.disabled=true; }
     else { use.textContent='Use'; use.onclick=()=> vscode.postMessage(id==='__lean__'?{type:'applyLean'}:{type:'applyProfile',name:id}); }
     sp.appendChild(use);
@@ -569,8 +569,8 @@ async function doInstall(context) {
 
 async function doLoadProfile() {
   const names = profileNames();
-  if (!names.length) { vscode.window.showErrorMessage('SuperBob: no profiles found. Run "Install / Update Skills" first.'); return; }
-  const pick = await vscode.window.showQuickPick(['lean (core only)', ...names], { placeHolder: 'Load which mode?' });
+  if (!names.length) { vscode.window.showErrorMessage('SuperBob: no kits found. Run "Install / Update Skills" first.'); return; }
+  const pick = await vscode.window.showQuickPick(['lean (core only)', ...names], { placeHolder: 'Load which kit?' });
   if (!pick) return;
   const ok = pick.startsWith('lean') ? applyProfile([]) : applyProfile([pick]);
   if (ok) vscode.window.showInformationMessage('Loaded "' + pick + '". Restart the conversation to apply.');
@@ -590,7 +590,7 @@ function activate(context) {
     vscode.commands.registerCommand('superBobSkills.loadProfile', () => doLoadProfile()),
     vscode.commands.registerCommand('superBobSkills.status', () => {
       const p = activeProfile();
-      vscode.window.showInformationMessage(p ? 'Active mode: ' + p : 'SuperBob not installed yet.');
+      vscode.window.showInformationMessage(p ? 'Active kit: ' + p : 'SuperBob not installed yet.');
     }),
     vscode.commands.registerCommand('superBobSkills.installCrg', () => {
       // code-review-graph is an MCP TOOL (not a skill). Run the bundled deploy

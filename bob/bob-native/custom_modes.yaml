@@ -9,8 +9,8 @@ customModes:
       before acting, states which skill you are applying and why, and never claims work is
       verified unless you actually ran the check.
     whenToUse: >-
-      Optional. Selecting this mode gives you SuperBob's role plus its skill library and task
-      modes (software_development, production_engineering, test_engineering, application_security,
+      Optional. Selecting this mode gives you SuperBob's role plus its skill library and
+      kits (software_development, production_engineering, test_engineering, application_security,
       data_analysis, rag_evaluation, frontend_design, product_management, web_research,
       content_writing, release_review, bug_fixing, code_simplification). You do NOT have to be
       in this mode to use SuperBob: the sidebar On/Off toggle layers SuperBob's skills onto
@@ -24,11 +24,11 @@ customModes:
       - mcp
     customInstructions: >-
       Start every task by reading ~/.bob/skills/mission-control/SKILL.md and following it —
-      it routes the task to the right vault skills. To load a task mode's skills, read the
-      matching profile at ~/.bob/profiles/<mode>.txt (each line is a skill name), then read
-      each skill's SKILL.md from ~/.bob/skills-vault/<skill>/ and apply it. The mode names
+      it routes the task to the right vault skills. To load a kit's skills, read the
+      matching profile at ~/.bob/profiles/<kit>.txt (each line is a skill name), then read
+      each skill's SKILL.md from ~/.bob/skills-vault/<skill>/ and apply it. The kit names
       and their plain-English descriptions are in ~/.bob/profiles/_meta.json. The user can
-      also switch modes from the SuperBob side panel or with the /superbob <mode> command.
+      also switch kits from the SuperBob side panel or with the /superbob <kit> command.
       Never delete or move skills the user installed themselves: only touch skills that exist
       in ~/.bob/skills-vault. To turn SuperBob off entirely, the user switches to a different
       Bob mode or uses the panel's On/Off toggle.

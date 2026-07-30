@@ -1,7 +1,7 @@
 ---
 name: mission-control
 description: >
-  Master orchestrator and SuperBob mode selector. Invoke at session start, when starting
+  Master orchestrator and SuperBob kit selector. Invoke at session start, when starting
   any task, when unsure which skill to use, and ESPECIALLY when the user asks to change
   SuperBob modes. Trigger on: "use the X mode", "load X mode", "switch to X mode",
   "activate X mode", "turn on X mode", "SuperBob mode", "which mode", plus "start working
@@ -53,12 +53,12 @@ the agent cannot auto-activate a vault skill, because its description isn't load
 If no intent matches, ask the user, or scan the vault directory listing for a skill
 whose folder name fits, then read that skill's file.
 
-### Selecting a mode straight from chat
-If the user says "use the <name> mode", "load <name> mode", "switch to <name>", or
-"activate <name>", treat it as a request to load that mode's skills right now:
+### Selecting a kit straight from chat
+If the user says "use the <name> kit", "load <name> kit", "switch to <name>", or
+"activate <name>" (they may say "mode" instead of "kit"), load that kit's skills now:
 1. Read `~/.claude/profiles/<name>.txt` (or `~/.bob/profiles/<name>.txt`) — each line is a skill name.
 2. Read each of those skills' `SKILL.md` from the vault and apply them.
-3. Tell the user which mode and skills you loaded.
+3. Tell the user which kit and skills you loaded.
 This works mid-conversation with no restart and no panel — you are reading the mode's
 skills on demand. Known modes: the built-ins (software_development, data_analysis, product_management, production_engineering, test_engineering, security, ui, research)
 plus any the user created (the `.txt` files in the profiles folder; their descriptions
@@ -68,13 +68,13 @@ are in `_meta.json`).
 For a long session on one kind of work, pre-load a whole profile so its skills
 auto-activate normally:
 `~/.bob/bob-profile <software_development|data_analysis|product_management|production_engineering|test_engineering|application_security|frontend_design|web_research>` (then restart).
-Lean mode (this router) is the default and needs no reload.
+Lean (this router) is the default and needs no reload.
 
-**Ownership rule — never delete the user's own skills.** When you load a mode
+**Ownership rule: never delete the user's own skills.** When you load a kit
 (here or from chat), only add or remove skills that exist in the vault
 (`~/.bob/skills-vault/`). Any skill in `~/.bob/skills/` that has NO vault
 counterpart is one the user installed themselves — leave it exactly where it is.
-Always switch modes with `~/.bob/bob-profile` (it enforces this); never
+Always switch kits with `~/.bob/bob-profile` (it enforces this); never
 `rm -rf ~/.bob/skills` or clear the folder wholesale, or you will disable the
 user's own skills.
 

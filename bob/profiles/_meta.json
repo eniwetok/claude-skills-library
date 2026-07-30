@@ -1,14 +1,14 @@
 {
   "software_development": "Build or change software: tests-first, stack patterns (Python/Go/Rust/React\u2026), APIs, databases, containers.",
   "data_analysis": "Work with data and judge AI output: SQL, stats, charts, and evals.",
-  "rag_evaluation": "Measure a RAG or retrieval system \u2014 score search and answers separately.",
+  "rag_evaluation": "Measure a RAG or retrieval system. Scores search and answers separately.",
   "product_management": "Plan product work: PRDs, roadmaps, prioritization, and go-to-market.",
   "application_security": "Find and fix app vulnerabilities, and write secure code.",
   "frontend_design": "Build and polish web interfaces: layout, accessibility, motion, design systems.",
   "web_research": "Research a topic online and synthesize a cited answer.",
   "release_review": "Final gate before shipping: review, verify, confirm it's ready.",
-  "bug_fixing": "Find and fix a specific bug fast \u2014 root-cause debugging, no ceremony.",
-  "code_simplification": "Cut over-engineering \u2014 find and delete what you don't need.",
+  "bug_fixing": "Find and fix a specific bug fast. Root-cause debugging, no ceremony.",
+  "code_simplification": "Cut over-engineering. Find and delete what you don't need.",
   "content_writing": "Write and edit prose: copy, articles, docs, and UX text.",
   "production_engineering": "Ship production-grade systems: architecture, security, compliance, deploy, and operate.",
   "test_engineering": "Test software end to end: strategy, unit, e2e, regression, and quality gates."

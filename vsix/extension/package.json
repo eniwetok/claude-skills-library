@@ -1,8 +1,8 @@
 {
   "name": "super-bob-skills",
   "displayName": "Super-bob-skills",
-  "description": "Help every developer get senior-level results from Bob across the whole software lifecycle. SuperBob puts best-practice, stage-specific skills (design, build, test, secure, review, ship) in front of the agent automatically — so best practices are applied consistently, not left to who remembers to ask.",
-  "version": "1.15.0",
+  "description": "Help every developer get strong results from Bob across the software lifecycle. SuperBob loads the right skills for each stage (design, build, test, secure, review, ship) automatically, so your best practices get applied consistently instead of only when someone remembers to ask.",
+  "version": "1.16.0",
   "publisher": "felipe-campo",
   "icon": "icon.png",
   "engines": {
@@ -58,12 +58,12 @@
       },
       {
         "command": "superBobSkills.loadProfile",
-        "title": "SuperBob: Load Profile\u2026",
+        "title": "SuperBob: Load Kit\u2026",
         "category": "SuperBob"
       },
       {
         "command": "superBobSkills.status",
-        "title": "SuperBob: Show Active Profile",
+        "title": "SuperBob: Show Active Kit",
         "category": "SuperBob"
       },
       {
