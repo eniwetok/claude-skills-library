@@ -2,7 +2,7 @@
   "name": "super-bob-skills",
   "displayName": "Super-bob-skills",
   "description": "Best-practice skills for IBM Bob and VS Code, loaded by task so agent context stays small.",
-  "version": "1.11.0",
+  "version": "1.13.0",
   "publisher": "felipe-campo",
   "icon": "icon.png",
   "engines": {
