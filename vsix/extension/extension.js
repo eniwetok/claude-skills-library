@@ -143,7 +143,7 @@ function readMeta() { try { return JSON.parse(fs.readFileSync(META(), 'utf8')); 
 function writeMeta(m) { try { fs.writeFileSync(META(), JSON.stringify(m, null, 2)); } catch (e) {} }
 
 function saveCustomProfile(name, skills, desc) {
-  const clean = name.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '');
+  const clean = name.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '');  // snake_case, matches the built-in kits
   if (!clean) return null;
   fs.mkdirSync(BOB_PROFILES, { recursive: true });
   const body = skills.filter(s => !CORE.includes(s)).join('\n') + '\n';
@@ -347,7 +347,7 @@ function getWebviewHtml() {
   </div>
 
   <h2>Your kits</h2>
-  <div class="muted" style="margin:-6px 0 8px;font-size:12px">Kits you make, plus a couple of samples to start from. Use <b>+ Create your own kit</b> to add more.</div>
+  <div class="muted" style="margin:-6px 0 8px;font-size:12px">Kits you create. Use <b>+ Create your own kit</b> to make one.</div>
   <div id="yourModes"></div>
 
   <details class="builtins" open>
@@ -360,7 +360,7 @@ function getWebviewHtml() {
   <div id="builder" style="display:none">
     <div style="font-weight:600;margin-bottom:4px">Create your own kit</div>
     <div class="muted" style="margin-bottom:8px">A kit is a named set of skills you load together for one kind of work.</div>
-    <input type="text" id="bname" placeholder="Name it, e.g. sql-evals"/>
+    <input type="text" id="bname" placeholder="Name it, e.g. sql_evals"/>
     <input type="text" id="bdesc" placeholder="What's it for?, e.g. Evaluating our SQL agent's answers"/>
     <div class="muted" style="margin-bottom:6px">Optional, start from an existing mode, then check the skills to include:</div>
     <select id="bstart"></select>
@@ -458,12 +458,12 @@ function getWebviewHtml() {
       cont.appendChild(note);
     }
 
-    // your modes = Lean + custom modes
+    // your kits = the user's own (non-builtin) kits. Lean is the Auto/base state,
+    // controlled by the Auto toggle and shown in the active card, so it is not a card here.
     const your=document.getElementById('yourModes'); your.innerHTML='';
-    your.appendChild(modeCard('__lean__','Lean', ['just the essentials'], am==='__lean__', false));
-    Object.keys(S.profiles).filter(p=>!S.builtin.includes(p)).forEach(p=>{
-      your.appendChild(modeCard(p, p, S.profiles[p], am===p, true));
-    });
+    const mine=Object.keys(S.profiles).filter(p=>!S.builtin.includes(p));
+    if(!mine.length){ your.innerHTML='<div class="muted" style="font-size:12px;padding:6px 0">No kits yet.</div>'; }
+    mine.forEach(p=>{ your.appendChild(modeCard(p, p, S.profiles[p], am===p, true)); });
     // built-in modes
     const bi=document.getElementById('builtinModes'); bi.innerHTML='';
     S.builtin.forEach(p=>{ if(S.profiles[p]) bi.appendChild(modeCard(p, p, S.profiles[p], am===p, false)); });

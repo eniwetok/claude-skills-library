@@ -146,13 +146,13 @@ common jobs. Make your own when your work has a recurring shape they don't match
 evaluating a SQL agent, reviewing Terraform changes, or triaging support tickets.
 
 1. In the panel, click **+ Create your own kit**.
-2. **Name it** in lowercase, for example `sql-evals`. That becomes the label and the `/superbob sql-evals` command.
+2. **Name it** in lowercase, for example `sql_evals`. That becomes the label and the `/superbob sql_evals` command.
 3. Write a one-line **"what it's for"**, for example "Evaluating our SQL agent's answers." Describe the situation, not the skills. This is the cue Auto mode reads to know when to reach for it.
 4. Optionally **start from** an existing kit to prefill skills, then check or uncheck. Each skill shows a short description and its token cost.
 5. **Save.** It joins *Your kits* as a one-click kit, editable or removable anytime.
 
-The panel ships with two sample kits under **Your kits**, `sample-rag-evals` and
-`sample-content-writing`, so you can see what a small custom kit looks like. Edit them, delete
+The panel ships with two sample kits under **Your kits**, `sample_rag_evals` and
+`sample_content_writing`, so you can see what a small custom kit looks like. Edit them, delete
 them, or copy one as a starting point.
 
 **Keep kits lean.** The point is a small, focused context. Eight sharp skills beat thirty vague

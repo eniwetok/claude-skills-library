@@ -12,6 +12,6 @@
   "content_writing": "Write and edit prose: copy, articles, docs, and UX text.",
   "production_engineering": "Ship production-grade systems: architecture, security, compliance, deploy, and operate.",
   "test_engineering": "Test software end to end: strategy, unit, e2e, regression, and quality gates.",
-  "sample-rag-evals": "Sample custom kit. A small, focused kit for checking a RAG agent's answers. Edit it, delete it, or copy it as a starting point for your own.",
-  "sample-content-writing": "Sample custom kit. A small kit for writing and cleaning up docs. Edit it, delete it, or copy it as a starting point for your own."
+  "sample_rag_evals": "Sample custom kit. A small, focused kit for checking a RAG agent's answers. Edit it, delete it, or copy it as a starting point for your own.",
+  "sample_content_writing": "Sample custom kit. A small kit for writing and cleaning up docs. Edit it, delete it, or copy it as a starting point for your own."
 }
