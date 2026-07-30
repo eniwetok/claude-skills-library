@@ -1,18 +1,12 @@
-# SuperBob: help every developer use Bob at its best
+# SuperBob: get the most out of Bob, at every step
 
-Most teams use only a fraction of what their AI coding assistant can do.
+Your AI coding assistant can do far more than write code. It can design a system for production,
+cover it with tests, check it for vulnerabilities, and review a change before it ships. SuperBob
+brings that expertise to every stage of the work and applies it automatically.
 
-An organization gives thousands of developers an AI coding assistant, and the results vary
-widely. Given a blank prompt, the agent writes code but doesn't insist on tests. It answers the
-question but skips the architecture review, the security checks, and the release steps a strong
-engineer runs by habit. Experienced developers know to ask for those. Most developers don't, or
-are moving too fast to. The same tool produces careful work for a few people and rough work for
-everyone else, and the money spent on it doesn't come back.
-
-SuperBob fixes that. It loads the right expertise for each stage of the work automatically: how
-to design a system, how to test it, how to check it for vulnerabilities, how to review it before
-release. Every developer gets the practices your strongest engineers already use, without having
-to know to ask.
+So your team's best practices are built into how the assistant helps, for every developer and
+every task. The work comes out strong and consistent, and you get the full value of the tool you
+already have.
 
 Those bundles of stage-specific skills are called **kits**. You load a kit for the task in front
 of you, and it works on top of whatever Bob mode you're already in.
@@ -38,12 +32,12 @@ of you, and it works on top of whatever Bob mode you're already in.
 
 ## Why it matters at scale
 
-Write your best practices down once, and every developer applies them everywhere.
+Write your best practices down once, and every developer gets them, everywhere they work.
 
-- **Consistent quality, whoever is at the keyboard.** A junior fixing a bug gets the same root-cause method a staff engineer would use. A rushed change still goes through the review gate.
-- **Practices that travel.** How your teams design, test, secure, and ship becomes skills anyone can load, instead of knowledge held by a few people.
-- **Faster onboarding.** New hires get expert scaffolding for each stage on day one, instead of learning what to ask for over months.
-- **More value from the tool you bought.** The assistant does the work the way you want it done.
+- **Consistent quality for everyone.** Every developer gets the same expert practices, from their first week to their tenth year, and every change gets the same careful review.
+- **Best practices, built in.** How your teams design, test, secure, and ship travels with the assistant, so it reaches the whole team automatically.
+- **Productive from day one.** New hires get expert scaffolding for each stage of the lifecycle right away.
+- **Full value from your tool.** The assistant helps across the whole lifecycle, not only the coding step.
 
 ### How it stays fast
 

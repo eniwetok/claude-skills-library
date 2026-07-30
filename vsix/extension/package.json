@@ -1,8 +1,8 @@
 {
   "name": "super-bob-skills",
   "displayName": "Super-bob-skills",
-  "description": "Help every developer get strong results from Bob across the software lifecycle. SuperBob loads the right skills for each stage (design, build, test, secure, review, ship) automatically, so your best practices get applied consistently instead of only when someone remembers to ask.",
-  "version": "1.18.0",
+  "description": "SuperBob brings expert practices to every stage of building software (design, build, test, secure, review, ship) and applies them automatically, so every developer gets strong, consistent results from Bob across the whole lifecycle.",
+  "version": "1.19.0",
   "publisher": "felipe-campo",
   "icon": "icon.png",
   "engines": {
