@@ -31,6 +31,11 @@ NON_SKILL_TOKENS = {
 
 # --- Things a secured library should never DEPEND on (user requirement) ---
 # Vendor products that phone home or lock you in, plus crypto-specific dead weight.
+# CRITICAL distinction: we flag a DEPENDENCY, not a MENTION. A general testing skill
+# that shows one example of mocking `window.ethereum` does not depend on Ethereum;
+# a skill whose whole job is `npx @claude-flow/cli` does depend on claude-flow. So a
+# token only counts when it appears in the skill's IDENTITY (frontmatter) or in an
+# actual install/import line — never in an arbitrary code example or prose.
 VENDOR_PATTERNS = [
     ("claude-flow", "ruflo / claude-flow product dependency"),
     ("agentic-flow", "ruflo / agentic-flow product dependency"),
@@ -40,7 +45,16 @@ VENDOR_PATTERNS = [
     ("ethereum", "Ethereum-specific dependency"),
     ("keccak256", "Ethereum-specific dependency"),
     ("web3", "web3 / crypto dependency"),
+    ("ethers", "web3 / crypto library dependency"),
 ]
+# A line that actually pulls in a dependency (install or import). Only tokens found
+# inside one of these count toward check [C].
+DEP_CONTEXT_RE = re.compile(
+    r"(?:npm\s+(?:install|i|add)|pnpm\s+add|yarn\s+add|npx|"
+    r"pip3?\s+install|uv\s+(?:tool\s+)?install|brew\s+install|"
+    r"require\(|import\s|from\s)[^\n]*",
+    re.IGNORECASE,
+)
 # Egress = a skill that, in normal operation, sends the user's OWN data off-machine.
 # Deliberately narrow: match the concrete signals a data-egress skill uses to describe
 # itself, NOT words like "exfiltrate" that security skills use when describing attacks.
@@ -164,27 +178,43 @@ def main():
         sd = os.path.join(vault, s)
         if not os.path.isdir(sd):
             continue
-        for root, _, files in os.walk(sd):
-            for fn in files:
-                if not fn.endswith((".md", ".sh", ".py", ".js", ".json")):
-                    continue
-                fp = os.path.join(root, fn)
-                try:
-                    body = open(fp, "r", errors="ignore").read().lower()
-                except OSError:
-                    continue
-                for pat, why in VENDOR_PATTERNS:
-                    if pat in body:
-                        c_hits.append((s, pat, why))
+
+        hit = None
+        # (1) Identity: does the skill's own name+description declare the dependency?
+        fm = first_paragraph_frontmatter(os.path.join(sd, "SKILL.md")).lower()
+        for pat, why in VENDOR_PATTERNS:
+            if pat in fm:
+                hit = (s, why, "named in frontmatter")
+                break
+        # (2) Dependency lines: does any file actually install/import the product?
+        if not hit:
+            for root, _, files in os.walk(sd):
+                if hit:
+                    break
+                for fn in files:
+                    if not fn.endswith((".md", ".sh", ".py", ".js", ".ts", ".json")):
+                        continue
+                    try:
+                        body = open(os.path.join(root, fn), "r", errors="ignore").read()
+                    except OSError:
+                        continue
+                    for m in DEP_CONTEXT_RE.finditer(body):
+                        line = m.group(0).lower()
+                        for pat, why in VENDOR_PATTERNS:
+                            if pat in line:
+                                hit = (s, why, f"install/import in {fn}")
+                                break
+                        if hit:
+                            break
+                    if hit:
                         break
+        if hit:
+            c_hits.append(hit)
+
     if c_hits:
         hard_fail = True
-        seen = set()
-        for s, pat, why in c_hits:
-            if s in seen:
-                continue
-            seen.add(s)
-            print(f"    FAIL  {s}  ({why})")
+        for s, why, where in c_hits:
+            print(f"    FAIL  {s}  ({why}; {where})")
     else:
         print("    PASS  no vendor-product or crypto dependencies found")
 

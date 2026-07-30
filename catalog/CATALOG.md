@@ -409,6 +409,7 @@ All 264 skills ✅ installed. Key categories:
 | **requesting-code-review** | Verify work meets requirements and prepare review request | After completing implementation |
 | **receiving-code-review** | Process review feedback with technical rigor — verify before implementing | When code review arrives |
 | **using-git-worktrees** | Set up isolated workspace via git worktree before feature work | Before starting isolated feature work |
+| **worktree-audit** | Read-only triage of all worktrees: OPEN (unmerged) / merged-but-dirty / closable, with status of the open ones | "which worktrees are open", worktree cleanup, before bulk removal |
 | **dispatching-parallel-agents** | Fan out 2+ independent tasks to parallel agents | When tasks have no shared state or sequential dependencies |
 | **subagent-driven-development** | Execute implementation plans with independent tasks in the current session | When a plan has parallelizable steps |
 | **finishing-a-development-branch** | Structured options for integrating completed work — merge, PR, or cleanup | When implementation is done and tests pass |
