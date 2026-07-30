@@ -1,14 +1,19 @@
-# SuperBob — best-in-class skills for every stage of your day
+# SuperBob — help every developer use Bob at its best
 
-A developer's day is never one job. Before lunch you might design an API, fix a failing
-test, review a teammate's pull request, and chase a production bug — four kinds of work,
-four different disciplines. An AI agent that carries *every* skill at once is average at all
-of them and slow to start. One that carries the *right handful* for the task in front of you
-is sharp.
+**The gap is rarely the tool. It's how much of the tool actually gets used.**
 
-SuperBob is that switch. It installs a large library of best-practice skills — organized by
-stage of the software lifecycle — and loads only the set your current task needs, on top of
-whatever Bob mode you're already in. You stay in flow; the agent stays focused.
+An organization gives thousands of developers an AI coding assistant. The potential is real —
+but the results are uneven. Faced with a blank prompt, the agent gives generic help: it writes
+code, but doesn't insist on tests; it answers the question, but skips the architecture review,
+the security checks, and the release gate your strongest engineers run by reflex. Senior
+developers know to ask for those. Many developers don't — or are moving too fast to. So one
+tool delivers senior-grade work for a few and merely-okay work for most, and the investment
+never pays back the way it should.
+
+SuperBob closes that gap. It puts best-in-class, stage-specific expertise in front of *every*
+developer automatically — design discipline, testing rigor, security hygiene, review gates —
+matched to whatever part of the software lifecycle they're working in. Everyone gets the
+practices your best engineers already follow, without having to know to ask for them.
 
 > **Credits & licensing.** SuperBob is an *aggregation*. It doesn't claim ownership of these
 > skills — each was written by someone else and keeps its author's license. SuperBob's own
@@ -29,15 +34,28 @@ whatever Bob mode you're already in. You stay in flow; the agent stays focused.
 
 ---
 
-## The problem
+## Why it matters at scale
 
-When a conversation starts, the agent loads a one-line summary of **every** installed skill.
-With a full library that's roughly **67,000 tokens spent before you type a word** — context
-the agent could have used to think, gone to a menu it will mostly ignore.
+Encode your best practices once; every developer applies them everywhere. That's the point of
+SuperBob for an organization:
 
-SuperBob keeps the full library in a **vault the agent never reads**, and loads only a small
-**mode** for the job at hand — about **200–2,000 tokens**. Same skills available, ~97% less
-wasted context, and the agent isn't distracted by nine hundred things you're not doing.
+- **Consistent quality, regardless of who's at the keyboard.** A junior fixing a bug gets the
+  same root-cause discipline a staff engineer would apply. A rushed change still passes through
+  the review gate.
+- **Best practices that travel.** The way your teams should design, test, secure, and ship is
+  captured as ready-to-use skills — not tribal knowledge locked in a few people's heads.
+- **Faster onboarding.** New hires get expert-level scaffolding for each stage of the lifecycle
+  on day one, instead of learning what to ask for over months.
+- **More return on the tool you already bought.** The assistant stops being a fancy autocomplete
+  and starts doing the work the way you'd want it done.
+
+### How it stays fast (the mechanism)
+
+Loading a thousand skills at once would bury the agent: it reads a one-line summary of *every*
+installed skill before you type a word — roughly **67,000 tokens** of menu it will mostly
+ignore. SuperBob avoids that by keeping the full library in a **vault the agent never reads**
+and loading only the current stage's skills — about **200–2,000 tokens**. Efficiency is how the
+tool stays quick and pleasant to use; it's the means, not the point.
 
 ---
 

@@ -1,7 +1,7 @@
 {
   "name": "super-bob-skills",
   "displayName": "Super-bob-skills",
-  "description": "Switch your AI coding agent between focused, best-in-class skill sets — one for each stage of building software (design, build, test, review, ship) — loaded on demand so it stays sharp instead of drowning in a thousand skills at once.",
+  "description": "Help every developer get senior-level results from Bob across the whole software lifecycle. SuperBob puts best-practice, stage-specific skills (design, build, test, secure, review, ship) in front of the agent automatically — so best practices are applied consistently, not left to who remembers to ask.",
   "version": "1.15.0",
   "publisher": "felipe-campo",
   "icon": "icon.png",
