@@ -56,7 +56,9 @@ function frontmatterTokens(skillDir) {
     const m = t.match(/^---\s*\n([\s\S]*?)\n---/);
     const fm = m ? m[1] : t.slice(0, 400);
     const desc = (fm.match(/description:\s*([\s\S]*?)(?:\n\w+:|$)/) || [, ''])[1];
-    return { desc: desc.replace(/^[>|]\s*/, '').replace(/^["']|["']$/g, '').replace(/\s+/g, ' ').trim().slice(0, 160), tokens: Math.ceil(fm.length / 4) };
+    const clean = desc.replace(/^[>|]\s*/, '').replace(/^["']|["']$/g, '').replace(/\s+/g, ' ').trim();
+    const short = clean.split(/\.\s/)[0];   // first sentence only — keeps rows tidy in a narrow sidebar
+    return { desc: (short.length > 110 ? short.slice(0, 108) + '…' : short), tokens: Math.ceil(fm.length / 4) };
   } catch (e) { return { desc: '', tokens: 60 }; }
 }
 function listVaultSkills() {
@@ -318,7 +320,7 @@ function getWebviewHtml() {
 </div>
 <div id="main" style="display:none">
   <h1>SuperBob</h1>
-  <div class="muted">One click picks the skills for what you're doing. Everything else stays out of the way.</div>
+  <div class="muted">Load only the skills each task needs.</div>
 
   <label class="powerbar"><input type="checkbox" id="powerToggle" checked/><span><span class="t">SuperBob is <b id="powerState">on</b></span> <span class="muted">— turn off to run Bob normally; your own skills are always kept</span></span></label>
   <div id="offbanner" class="offbanner" style="display:none">
@@ -341,7 +343,7 @@ function getWebviewHtml() {
   </details>
 
   <div class="hideWhenOff">
-  <label class="autobar"><input type="checkbox" id="autoToggle"/><span><span class="t">Auto mode</span> — let SuperBob pick the right skills for each task automatically <span class="muted">(recommended)</span></span></label>
+  <label class="autobar"><input type="checkbox" id="autoToggle"/><span><span class="t">Auto mode</span> <span class="muted">— skills picked per task (recommended)</span></span></label>
 
   <div class="active-card">
     <div><span class="dot"></span><span class="now" id="activeNow">—</span></div>
@@ -388,7 +390,7 @@ function getWebviewHtml() {
   function curated(){ const set=new Set(); Object.values(S.profiles).forEach(a=>a.forEach(n=>set.add(n))); S.core.forEach(n=>set.delete(n)); return [...set].sort(); }
   function descOf(n){ const s=S.skills.find(x=>x.name===n); return s?s.desc:''; }
   const DESCR={
-    __lean__:'Only the 2 core skills stay loaded. Best when you want SuperBob to read each task and pull in exactly the right skills on the fly — the safest default for mixed work.',
+    __lean__:'Just the 2 core skills. SuperBob adds the rest per task.',
     code:'Writing or changing software. Includes tests-first (tdd-workflow), codebase-exploration, API & system design, your stack patterns (python/react/…), and docker/kubernetes. Pick this when building or refactoring a feature.',
     data:'Working with data and judging AI output. Includes error-analysis, LLM-as-judge (write-judge-prompt + validate-evaluator), evaluate-rag, SQL, embeddings and statistics. Pick this for analytics or measuring how good an AI pipeline is.',
     pm:'Product management. Includes PRDs (create-prd), product-vision, outcome roadmaps, prioritization frameworks and user stories. Pick this for planning and strategy, not coding.',
@@ -402,14 +404,16 @@ function getWebviewHtml() {
   function descFor(id){ return (S.meta&&S.meta[id]) || DESCR[id] || 'Custom mode.'; }
   function skillInfo(n){ return S.skills.find(x=>x.name===n) || {name:n,tokens:60,desc:''}; }
   function fmtTok(t){ return t>=1000?'~'+(t/1000).toFixed(1)+'k tokens':'~'+t+' tokens'; }
-  function skillRows(names){
+  function skillRows(names, compact){
     const d=document.createElement('div'); d.className='sklist';
     names.forEach(n=>{ const s=skillInfo(n); const core=S.core.includes(n);
       const r=document.createElement('div'); r.className='skrow';
-      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">always on</span>':'')+'</span><span class="stk">'+fmtTok(s.tokens)+'</span></div>'+(s.desc?'<div class="sd">'+s.desc+'</div>':'');
+      const desc=(!compact && s.desc)?'<div class="sd">'+s.desc+'</div>':'';
+      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">core</span>':'')+'</span><span class="stk">'+fmtTok(s.tokens)+'</span></div>'+desc;
       d.appendChild(r); });
     return d;
   }
+  function shortDesc(d){ const s=(d||'').split(/\.\s/)[0].trim(); return s.length>84?s.slice(0,82)+'…':s; }
 
   function render(){
     document.getElementById('notinstalled').style.display=S.installed?'none':'block';
@@ -426,12 +430,12 @@ function getWebviewHtml() {
     // active card
     document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode': am==='__custom__'?'custom set': (am||'—'));
     document.getElementById('autoToggle').checked = (am==='__lean__');
-    document.getElementById('activeDesc').textContent = (am && am!=='__custom__') ? descFor(am) : (am==='__custom__'?'A custom set of skills you picked.':'');
+    document.getElementById('activeDesc').textContent = (am && am!=='__custom__') ? shortDesc(descFor(am)) : (am==='__custom__'?'A set you picked.':'');
     const ext=new Set(S.external||[]);
     const extras=S.activeSet.filter(n=>!S.core.includes(n) && !ext.has(n));   // the mode's own skills
     const ordered=[...S.core, ...extras];   // superpowers + mission-control first (always on)
     const cont=document.getElementById('activeSkills'); cont.innerHTML='';
-    cont.appendChild(skillRows(ordered));
+    cont.appendChild(skillRows(ordered, true));   // compact: names + tokens only, no descriptions
     // The user's own skills — SuperBob never removes these on a mode switch.
     if(ext.size){
       const note=document.createElement('div'); note.className='extnote';
@@ -472,7 +476,7 @@ function getWebviewHtml() {
     if(deletable){ const del=document.createElement('button'); del.className='del'; del.textContent='🗑'; del.title='delete this mode';
       del.onclick=()=> vscode.postMessage({type:'deleteMode',name:id}); sp.appendChild(del); }
     top.appendChild(sp); d.appendChild(top);
-    const md=document.createElement('div'); md.className='mode-desc'; md.textContent=descFor(id); d.appendChild(md);
+    const md=document.createElement('div'); md.className='mode-desc'; md.textContent=shortDesc(descFor(id)); d.appendChild(md);
     if(id!=='__lean__'){ const s=document.createElement('div'); s.className='mode-skills'; s.style.display='none';
       s.appendChild(skillRows(skills)); d.appendChild(s); }
     return d;
