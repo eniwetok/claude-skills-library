@@ -1,8 +1,8 @@
 {
   "name": "super-bob-skills",
   "displayName": "Super-bob-skills",
-  "description": "Best-practice skills for IBM Bob and VS Code, loaded by task so agent context stays small.",
-  "version": "1.14.0",
+  "description": "Switch your AI coding agent between focused, best-in-class skill sets — one for each stage of building software (design, build, test, review, ship) — loaded on demand so it stays sharp instead of drowning in a thousand skills at once.",
+  "version": "1.15.0",
   "publisher": "felipe-campo",
   "icon": "icon.png",
   "engines": {

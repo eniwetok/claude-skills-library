@@ -1,142 +1,176 @@
-# SuperBob 🦸 — Best-Practice Skills for Bob & VS Code
+# SuperBob — best-in-class skills for every stage of your day
 
-**SuperBob gives IBM Bob (and VS Code) its superpowers.** It installs a big library of
-best-practice skills and lets you load only the ones a task needs — so the agent stays
-fast and focused instead of drowning in a thousand skills at once.
+A developer's day is never one job. Before lunch you might design an API, fix a failing
+test, review a teammate's pull request, and chase a production bug — four kinds of work,
+four different disciplines. An AI agent that carries *every* skill at once is average at all
+of them and slow to start. One that carries the *right handful* for the task in front of you
+is sharp.
 
-> **Credits & licensing.** SuperBob is an **aggregation** — it does not claim ownership of
-> these skills. Each was created by other people and remains under its author's own
-> license. SuperBob's own code is MIT; that does not cover the bundled skills. Full
-> attribution is in **[LICENSES.md](LICENSES.md)**.
+SuperBob is that switch. It installs a large library of best-practice skills — organized by
+stage of the software lifecycle — and loads only the set your current task needs, on top of
+whatever Bob mode you're already in. You stay in flow; the agent stays focused.
+
+> **Credits & licensing.** SuperBob is an *aggregation*. It doesn't claim ownership of these
+> skills — each was written by someone else and keeps its author's license. SuperBob's own
+> code is MIT; that doesn't cover the bundled skills. Full attribution: **[LICENSES.md](LICENSES.md)**.
 
 ---
 
-## Why it exists (30-second version)
+## What you get
 
-An AI agent loads a one-line summary of **every** installed skill when a conversation
-starts. With ~1,500 skills that's about **67,000 tokens before you type a word** — it
-crowds out the space the agent needs to think.
+- **A mode for every stage of the lifecycle** — plan, research, design, build, test, debug, secure, review, ship, operate, measure, document. Each is a hand-picked skill set, not a grab-bag.
+- **Lean context by default** — the agent loads ~200 tokens of skills instead of ~67,000, so it spends its attention on *your task*, not a menu of a thousand skills.
+- **Auto mode** — leave it on and SuperBob reads each task and pulls in the right skills itself. Zero configuration for most work.
+- **Layer onto any Bob mode** — one On/Off switch adds SuperBob's skills on top of Bob's Code, Architect, Ask, or your own mode. Off = plain Bob.
+- **Switch three ways** — the sidebar panel, the `/superbob <mode>` chat command, or plain English (*"use the test_engineering mode"*).
+- **Build your own modes** — name a set of skills for the work you actually do; one click loads it, and it gets its own `/superbob` command.
+- **Your own skills are never touched** — SuperBob only manages the skills it installed. Yours stay put through every mode switch and every on/off.
+- **Pairs with a code map** — add the optional code-review-graph tool so the agent also understands *your* codebase, not just the craft.
 
-SuperBob fixes this. It keeps the full library in a **vault** the agent doesn't read, and
-loads only a small **mode** for the job in front of you (about **200–2,000 tokens**).
-**Roughly a 97% cut in wasted context.**
+---
+
+## The problem
+
+When a conversation starts, the agent loads a one-line summary of **every** installed skill.
+With a full library that's roughly **67,000 tokens spent before you type a word** — context
+the agent could have used to think, gone to a menu it will mostly ignore.
+
+SuperBob keeps the full library in a **vault the agent never reads**, and loads only a small
+**mode** for the job at hand — about **200–2,000 tokens**. Same skills available, ~97% less
+wasted context, and the agent isn't distracted by nine hundred things you're not doing.
+
+---
+
+## Three ideas, and you've got it
+
+1. **Vault** — the full skill library, sitting on disk *unread*. It costs nothing until you reach for it.
+2. **Mode** — a named set of skills for one kind of work (`software_development`, `test_engineering`, …). Loading a mode puts just those skills in front of the agent.
+3. **Layering** — a mode loads *on top of* your current Bob mode. Stay in Bob's Code or Architect mode and flip SuperBob on; its skills join in. Flip it off to run plain Bob. Your own skills are never touched, either way.
+
+The default is **Auto mode**: only two tiny core skills stay loaded, and SuperBob reads each
+task and pulls in the right skills on the fly. For most people that's the whole setup.
+
+---
+
+## Skills for each stage of the lifecycle
+
+Each mode is a curated, best-in-class toolkit for one stage of building software. Pick the
+stage you're in; the agent gets the discipline that stage demands and nothing else.
+
+| Stage | Mode | What it's for | Representative skills |
+|-------|------|---------------|-----------------------|
+| **Plan** | `product_management` | Shape what to build | create-prd, product-strategy, outcome-roadmap, prioritization-frameworks, user-stories |
+| **Research** | `web_research` | Investigate before you commit | deep-research, research-synthesis, exa-search, search-first |
+| **Design** | `production_engineering` | Architect for production | system-design, hexagonal-architecture, architecture-decision-records, api-design |
+| **Build** | `software_development` | Write and change code | test-driven-development, stack patterns (Python/Go/Rust/React/FastAPI/Django), database-migrations, docker/kubernetes |
+| **Build UI** | `frontend_design` | Interfaces that hold up | frontend-design, fixing-accessibility, motion-ui, design-system, design-review |
+| **Test** | `test_engineering` | Prove it works | testing-strategy, e2e-testing, webapp-testing, ai-regression-testing, intended-vs-implemented |
+| **Debug** | `bug_fixing` | Fix one bug, fast | systematic-debugging, caveman-debug, error-handling |
+| **Secure** | `application_security` | Find and fix vulnerabilities | bb-methodology, the hunt-* skills (SQLi/XSS/SSRF/RCE/…), redteam-mindset, vibesec |
+| **Review** | `release_review` | The gate before shipping | code-review, verification-before-completion, vibesec, ponytail-review |
+| **Simplify** | `code_simplification` | Cut over-engineering | ponytail (audit/review/debt), karpathy-guidelines, code-review |
+| **Operate** | *(in `production_engineering`)* | Run it in production | incident-response, runbook |
+| **Measure** | `data_analysis` | Data & judging AI output | error-analysis, write-judge-prompt, validate-evaluator, evaluate-rag, sql-queries, statistical-analysis |
+| **Measure retrieval** | `rag_evaluation` | Score a RAG/search system | evaluate-rag, write-judge-prompt, validate-evaluator, error-analysis |
+| **Document** | `content_writing` | Write it up | no-ai-slop, documentation, doc-coauthoring, ux-copy, kb-article, article-writing |
+
+Two **core** skills are always on underneath any mode: `mission-control` (routes each task to
+the right skills) and `using-superpowers` (checks for a matching skill before acting).
+
+> `release_review`, `rag_evaluation`, and `bug_fixing` are examples — keep them, edit them, or
+> delete them. Make your own for the shape of work you actually do (see *Build your own mode*).
 
 ---
 
 ## Install
 
 1. Download **`super-bob-skills-<version>.vsix`**.
-2. In Bob / VS Code: **Extensions** panel → **`⋯`** menu → **Install from VSIX…** → pick the file.
-   *(Or in a terminal: `bobide --install-extension super-bob-skills-<version>.vsix`.)*
-3. **Reload the window** (Cmd/Ctrl+Shift+P → *Developer: Reload Window*).
-4. Open the panel (below) and, on first run, choose **Install skills** if prompted — that
-   unpacks the library into place. Your previous skills are backed up first.
+2. In Bob / VS Code: **Extensions** → **`⋯`** menu → **Install from VSIX…** → pick the file.
+   *(Terminal alternative: `bobide --install-extension super-bob-skills-<version>.vsix`.)*
+3. **Reload the window** — Cmd/Ctrl+Shift+P → *Developer: Reload Window*. (Installing updates
+   the files; the window has to reload before Bob runs the new code.)
+4. Open the panel (below); on first run, choose **Install skills** if prompted. Your existing
+   skills are backed up first.
 
-Requires `unzip` (built in on macOS and Linux). Tested on **IBM Bob 2.0.1**.
-
----
-
-## Getting started (the whole thing in 3 steps)
-
-1. **Click the SuperBob robot icon** in the **left sidebar** (the activity bar). The Skills
-   panel opens there — no terminal needed.
-2. **Leave "Auto mode" on** (it's on by default). SuperBob reads each task and pulls in the
-   right skills automatically. For most people, that's the entire setup.
-3. **Start a new conversation.** Skills load when a conversation begins, so after any change
-   start a fresh chat.
-
-That's it. Everything below is for when you want more control.
+Needs `unzip` (built in on macOS and Linux). Tested on **IBM Bob 2.0.1**.
 
 ---
 
-## Three ways to switch modes
+## Getting started (three steps)
 
-**1. From the sidebar panel** *(most control)*
-Turn Auto off and click a mode's **Use** button. Click **skills** to see exactly what a
-mode includes and what each skill costs. Click **Unload** on an active mode to turn it off.
+1. Click the **SuperBob** icon in the left sidebar (the activity bar). The panel opens there — no terminal needed.
+2. Leave **Auto mode** on. SuperBob picks skills per task. For most work, that's it.
+3. **Start a new conversation.** Skills are read when a chat begins, so start fresh after any change.
 
-**2. Auto mode** *(simplest)*
-The toggle at the top. On = SuperBob picks skills per task. Off = you choose a mode.
-
-**3. From the Bob chat** *(hands-free)*
-Type **`/`** in the chat and choose **`/superbob`**, then a mode:
-- `/superbob rag_evaluation` — load the rag_evaluation mode
-- `/superbob software_development`, `/superbob data_analysis`, `/superbob auto`, … — any mode
-- `/superbob` alone — lists every mode with its description
-
-You can also just type in plain words: **"use the rag_evaluation mode"** (the `super-` prefix is optional — "use the rag mode" works too).
-
-> After switching by any method, **start a new conversation** so the agent re-reads its skills.
+Everything below is for when you want more control.
 
 ---
 
-## The sidebar panel, part by part
+## Switching modes — three ways
 
-- **On/Off switch** — SuperBob **layers on top of whatever Bob mode you're in**. Turn it on
-  and its skills load alongside your current mode (Code, Architect, Ask, your own — any of
-  them); turn it off to run plain Bob. Either way, **your own skills are always kept**. There
-  is also a native **SuperBob** entry in Bob's mode selector — use that when you want SuperBob
-  to be the *driving role*, and the toggle when you just want its skills on top of another mode.
-- **Auto mode toggle** — let SuperBob choose per task (recommended default).
-- **Active card** — shows what's loaded right now, including the two always-on core skills
-  (`using-superpowers`, `mission-control`), each with a short description and token cost.
-- **Your modes** — Lean plus any modes you've made. Each has **Use** / **Unload**, a
-  **skills** link (name + description + tokens for every skill), and 🗑 to delete.
-- **Starter modes (built-in)** — a collapsed section with 8 ready-made modes.
-- **+ Create your own mode** — see below.
+**From the panel** *(most control).* Turn Auto off and click a mode's **Use**. Click **skills**
+to see what's inside and what each costs. Click **Unload** to turn a mode off.
+
+**Auto mode** *(simplest).* The top toggle. On = SuperBob picks per task. Off = you choose.
+
+**From the chat** *(hands-free).* Type `/` and pick **`/superbob`**, then a mode:
+- `/superbob software_development` — load that mode
+- `/superbob` alone — list every mode with its description
+
+Plain words work too: **"use the test_engineering mode."** After switching by any method,
+**start a new conversation** so the agent re-reads its skills.
 
 ---
 
-## The modes
+## The On/Off switch, and layering
 
-Each mode loads a focused set of skills. The two **core** skills are always on.
+SuperBob **layers on top of whatever Bob mode you're in**. Turn it on and its skills load
+alongside your current mode — Bob's Code, Architect, Ask, or one of your own. Turn it off to
+run plain Bob. **Your own skills stay put in every case.**
 
-| Mode | Use it for | Key skills |
-|------|-----------|-----------|
-| **Auto / Lean** | Mixed work — SuperBob picks per task | *(core only, ~200 tokens)* |
-| **software_development** | Building or changing software | tdd-workflow, codebase-exploration, api/system-design, stack patterns, docker/kubernetes |
-| **data_analysis** | Data & judging AI output | error-analysis, write-judge-prompt, validate-evaluator, evaluate-rag, SQL, embeddings, statistics |
-| **rag_evaluation** | Evaluating a RAG / retrieval agent | evaluate-rag, error-analysis, LLM judges, SQL checks, statistics |
-| **application_security** | Audits & vulnerability hunting | bb-methodology, security-audit, hunt-* skills, redteam-mindset |
-| **frontend_design** | Interfaces & design | frontend-design, fixing-accessibility, motion, design systems, improve-ui |
-| **product_management** | Product planning | create-prd, product-vision, roadmaps, prioritization, user stories |
-| **production_engineering** | Production-grade engineering (full lifecycle) | system-design, hexagonal-architecture, test-driven-development, docker/kubernetes/deployment, vibesec, compliance-check, incident-response |
-| **test_engineering** | Quality assurance & testing | testing-strategy, e2e-testing, webapp-testing, browser-qa, ai-regression-testing, systematic-debugging, intended-vs-implemented, pr-feedback-quality-gate |
-| **web_research** | Investigate a topic (one-off answer) | deep-research, research-synthesis, exa-search, x-research, search-first |
-| **release_review** | Quality gate before shipping | code-review, verification-before-completion, vibesec, tests |
-| **bug_fixing** | Fast debugging | systematic-debugging, caveman-debug, error-handling |
-
-*(rag, ship-it and quick-fix are examples you can keep, tweak, or delete.)*
-
-> **Note:** SuperBob does not bundle Obsidian / personal-wiki skills — you manage
-> your own knowledge-base setup, and SuperBob leaves it untouched.
+There's also a native **SuperBob** entry in Bob's mode selector. Use *that* when you want
+SuperBob to be the driving role for the whole session; use the *toggle* when you just want its
+skills on top of another mode. Neither is required — pick whichever fits the moment.
 
 ---
 
 ## Build your own mode
 
-A **mode** is just a named set of skills you load together for one kind of work. The
-built-in modes cover common jobs; make your own when your work has a recurring shape the
-starters don't match (say, *evaluating our SQL agent* or *reviewing Terraform changes*).
+A **mode** is a named set of skills you load together for one kind of work. The built-ins
+cover common stages; make your own when your work has a recurring shape they don't match —
+*evaluating our SQL agent*, *reviewing Terraform changes*, *triaging support tickets*.
 
 1. In the panel, click **+ Create your own mode**.
-2. **Name it** — lowercase, e.g. `sql-evals`. This becomes the mode's label and its
-   `/superbob sql-evals` command.
-3. Add a one-line **"what it's for"** — e.g. *Evaluating our SQL agent's answers*. This is
-   the reminder you (and SuperBob's Auto mode) read to know when to reach for it, so make it
-   describe the *situation*, not the skills.
-4. **Optionally start from** an existing mode to prefill its skills, then check or uncheck to
-   taste. Each skill shows a short description and its token cost, so you can see what a
-   choice adds before you commit.
-5. Click **Save mode**. It joins **Your modes** as a one-click mode you can **Use** anytime —
-   or remove with 🗑. Nothing is permanent; tweak it whenever your workflow changes.
+2. **Name it** in lowercase, e.g. `sql-evals`. That becomes the label and the `/superbob sql-evals` command.
+3. Write a one-line **"what it's for"** — e.g. *Evaluating our SQL agent's answers*. Describe the *situation*, not the skills; this is the cue Auto mode reads to know when to reach for it.
+4. Optionally **start from** an existing mode to prefill skills, then check or uncheck. Each skill shows a short description and its token cost, so you see what a choice adds before you commit.
+5. **Save.** It joins *Your modes* as a one-click mode, editable or removable anytime.
 
-**Keep modes lean.** The whole point is a small, focused context — a mode with 8 sharp skills
-beats one with 30. If you're unsure, start narrow and add skills when you actually miss them.
+**Keep modes lean.** The point is a small, focused context — eight sharp skills beat thirty
+vague ones. Start narrow; add a skill when you actually miss it.
 
 ---
 
-## Command palette (optional)
+## Pair it with a code map (optional but recommended)
+
+SuperBob loads *skills* — reusable expertise that travels across projects. It doesn't, by
+itself, know *your* codebase. **code-review-graph** (a separate MCP tool) fills that gap: it
+builds a persistent, incremental map of your repo, so the agent works from the few files a
+change actually touches instead of guessing.
+
+The two compose well. A rule of thumb:
+
+- **SuperBob skills** = *how* to do a kind of work (the discipline).
+- **code-review-graph** = *what* your code is (the map).
+- **A nested `AGENTS.md`** in a folder = *how to handle this specific area* (e.g. `reports/AGENTS.md`).
+
+Install it from the palette: **"SuperBob: Install code-review-graph (MCP tool)"** (needs
+Python — uv, pipx, or pip3), then restart Bob. It's always-on once installed, independent of
+mode.
+
+---
+
+## Command palette
 
 `Cmd/Ctrl+Shift+P`:
 - **SuperBob: Open Control Panel**
@@ -148,21 +182,10 @@ The status-bar item (bottom-left) also shows the active mode; click it to open t
 
 ---
 
-## Optional: code-review-graph (code-map MCP tool)
-
-SuperBob loads *skills*. **code-review-graph** is a separate *tool* (an MCP server) that
-builds a map of your codebase so the agent reviews only the files a change affects — it
-pairs well with the `software_development`, `release_review`, and `code_simplification` modes. To deploy it into Bob and
-Claude Code, run the command **"SuperBob: Install code-review-graph (MCP tool)"** from the
-palette (needs Python: uv, pipx, or pip3). Then restart Bob. It's optional and always-on
-once installed, independent of which mode you're in.
-
 ## Good to know
 
-- **Always start a new conversation after switching a mode** — skills are read at the start
-  of a chat, so a mid-chat change doesn't take effect until the next one.
-- **Bob vs VS Code.** SuperBob installs into IBM Bob (`~/.bob/skills`) and the agent in VS
-  Code (`~/.claude/skills`). Choose which in Settings → `superBobSkills.targets`.
-- **A VS Code extension can't register agent skills directly.** Skills are files the agent
-  reads from disk; SuperBob installs those files and manages which are loaded.
-- **Nothing is deleted.** Your existing skills are backed up before install.
+- **Start a new conversation after switching a mode.** Skills load at the start of a chat, so a mid-chat change waits for the next one.
+- **Bob and VS Code both work.** SuperBob installs into IBM Bob (`~/.bob/skills`) and the agent in VS Code (`~/.claude/skills`). Choose targets in Settings → `superBobSkills.targets`.
+- **A VS Code extension can't register skills directly.** Skills are files the agent reads from disk; SuperBob installs those files and manages which are active.
+- **Your own skills are never removed.** They stay through every mode switch and every on/off — SuperBob only manages the skills it installed.
+- **SuperBob leaves your knowledge base alone.** It doesn't bundle Obsidian/personal-wiki skills; manage those yourself.
