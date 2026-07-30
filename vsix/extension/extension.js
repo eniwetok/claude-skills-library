@@ -1,6 +1,6 @@
-// SuperBob — installs best-practice skills into VS Code-compatible IDEs (IBM Bob, VS Code).
+// SuperBob, installs best-practice skills into VS Code-compatible IDEs (IBM Bob, VS Code).
 //
-// A VS Code extension cannot "register" agent skills — skills are SKILL.md files that
+// A VS Code extension cannot "register" agent skills, skills are SKILL.md files that
 // the agent reads from disk folders (~/.bob/skills, ~/.claude/skills). So this extension
 // is an INSTALLER + CONTROL PANEL: it unpacks the bundled library into those folders and
 // controls which skills are loaded, to keep the agent's context small.
@@ -20,7 +20,7 @@ const CLAUDE_SKILLS = path.join(HOME, '.claude', 'skills');
 
 // Lean mode: only these two skills stay loaded; mission-control routes to the rest
 // from the vault on demand. Keeps starting context tiny (~200 tokens vs ~67,000).
-const CORE = ['using-superpowers', 'mission-control']; // superpowers first — always check for a skill before acting
+const CORE = ['using-superpowers', 'mission-control']; // superpowers first, always check for a skill before acting
 const BUILTIN = ['software_development', 'data_analysis', 'product_management', 'production_engineering', 'test_engineering', 'application_security', 'frontend_design', 'web_research'];
 
 let statusItem;
@@ -84,7 +84,7 @@ function activeProfile() {
 // ---- ownership boundary ----------------------------------------------------
 // A skill sitting in the active dir (~/.bob/skills) is "SuperBob-owned" ONLY if a
 // skill of the same name exists in the vault. Anything else in the active dir is a
-// skill the user installed themselves — SuperBob does not manage it and must never
+// skill the user installed themselves, SuperBob does not manage it and must never
 // remove or disable it when switching modes. This one rule is what stops a mode
 // switch from clobbering the user's own skills.
 function isOwned(name) { return fs.existsSync(path.join(BOB_VAULT, name, 'SKILL.md')); }
@@ -92,7 +92,7 @@ function externalActiveSkills() { return activeSkillSet().filter(n => !isOwned(n
 
 // ---- power (SuperBob on/off) -----------------------------------------------
 // Off = remove every SuperBob-owned skill from the active dir (including the two
-// core skills), leaving only the user's own skills — Bob then runs normally. The
+// core skills), leaving only the user's own skills, Bob then runs normally. The
 // user's own skills are never touched. On = restore lean (core only).
 function isPoweredOff() { return activeProfile() === 'off'; }
 function superbobOff() {
@@ -112,10 +112,10 @@ function applySkillSet(skillNames, label) {
   const wanted = new Set(CORE);
   for (const n of skillNames) wanted.add(n);
   const staged = [...wanted].filter(s => fs.existsSync(path.join(BOB_VAULT, s)));
-  if (staged.length < CORE.length) { vscode.window.showErrorMessage('SuperBob: nothing to load — aborted.'); return false; }
+  if (staged.length < CORE.length) { vscode.window.showErrorMessage('SuperBob: nothing to load, aborted.'); return false; }
   fs.mkdirSync(BOB_ACTIVE, { recursive: true });
   // Remove ONLY owned skills the new set no longer wants. External (user-installed)
-  // skills are left exactly as they are — they stay loaded through every mode switch.
+  // skills are left exactly as they are, they stay loaded through every mode switch.
   for (const name of activeSkillSet()) {
     if (isOwned(name) && !wanted.has(name)) fs.rmSync(path.join(BOB_ACTIVE, name), { recursive: true, force: true });
   }
@@ -196,8 +196,8 @@ async function handleMessage(m, context) {
   }
   if (m.type === 'applyLean') { applyProfile([]); vscode.window.showInformationMessage('Auto mode on. SuperBob picks skills per task. Start a new conversation.'); postState(); return; }
   if (m.type === 'setPower') {
-    if (m.on) { applyProfile([]); vscode.window.showInformationMessage('SuperBob on — Auto mode. Start a new conversation.'); }
-    else { superbobOff(); vscode.window.showInformationMessage('SuperBob off — Bob runs normally, your own skills kept. Start a new conversation.'); }
+    if (m.on) { applyProfile([]); vscode.window.showInformationMessage('SuperBob on. Auto mode. Start a new conversation.'); }
+    else { superbobOff(); vscode.window.showInformationMessage('SuperBob off. Bob runs normally, your own skills kept. Start a new conversation.'); }
     postState(); return;
   }
   if (m.type === 'applyCustom') {
@@ -234,7 +234,7 @@ class SuperBobViewProvider {
 // Optional: also open the panel as a full editor tab.
 function openPanel(context) {
   if (panel) { panel.reveal(); return; }
-  panel = vscode.window.createWebviewPanel('superbob', 'SuperBob — Skills', vscode.ViewColumn.One, { enableScripts: true, retainContextWhenHidden: true });
+  panel = vscode.window.createWebviewPanel('superbob', 'SuperBob Skills', vscode.ViewColumn.One, { enableScripts: true, retainContextWhenHidden: true });
   panel.webview.html = getWebviewHtml();
   webviews.add(panel.webview);
   panel.webview.onDidReceiveMessage(m => handleMessage(m, context));
@@ -320,9 +320,9 @@ function getWebviewHtml() {
   <h1>SuperBob</h1>
   <div class="muted">Load just the skills each task needs, on top of your current Bob mode.</div>
 
-  <label class="powerbar"><input type="checkbox" id="powerToggle" checked/><span><span class="t">SuperBob is <b id="powerState">on</b></span> <span class="muted">— its skills layer onto whichever Bob mode you're in. Off = plain Bob. Your own skills always stay.</span></span></label>
+  <label class="powerbar"><input type="checkbox" id="powerToggle" checked/><span><span class="t">SuperBob is <b id="powerState">on</b></span> <span class="muted">,  its skills layer onto whichever Bob mode you're in. Off = plain Bob. Your own skills always stay.</span></span></label>
   <div id="offbanner" class="offbanner" style="display:none">
-    SuperBob is <b>off</b> — Bob runs with only your own skills. Turn it on to layer SuperBob's skills onto your current Bob mode, then start a new conversation.
+    SuperBob is <b>off</b>, Bob runs with only your own skills. Turn it on to layer SuperBob's skills onto your current Bob mode, then start a new conversation.
   </div>
 
   <details class="help">
@@ -344,7 +344,7 @@ function getWebviewHtml() {
   <label class="autobar"><input type="checkbox" id="autoToggle"/><span><span class="t">Auto mode</span> <span class="muted">(recommended). SuperBob picks the right skills for each task.</span></span></label>
 
   <div class="active-card">
-    <div><span class="dot"></span><span class="now" id="activeNow">—</span></div>
+    <div><span class="dot"></span><span class="now" id="activeNow">, </span></div>
     <div id="activeDesc"></div>
     <div class="skills" id="activeSkills"></div>
   </div>
@@ -362,9 +362,9 @@ function getWebviewHtml() {
   <div id="builder" style="display:none">
     <div style="font-weight:600;margin-bottom:4px">Create your own kit</div>
     <div class="muted" style="margin-bottom:8px">A kit is a named set of skills you load together for one kind of work.</div>
-    <input type="text" id="bname" placeholder="Name it — e.g. sql-evals"/>
-    <input type="text" id="bdesc" placeholder="What's it for? — e.g. Evaluating our SQL agent's answers"/>
-    <div class="muted" style="margin-bottom:6px">Optional — start from an existing mode, then check the skills to include:</div>
+    <input type="text" id="bname" placeholder="Name it, e.g. sql-evals"/>
+    <input type="text" id="bdesc" placeholder="What's it for?, e.g. Evaluating our SQL agent's answers"/>
+    <div class="muted" style="margin-bottom:6px">Optional, start from an existing mode, then check the skills to include:</div>
     <select id="bstart"></select>
     <input type="text" id="bsearch" placeholder="Search skills…" style="margin-top:8px"/>
     <div class="blist" id="blist"></div>
@@ -389,7 +389,7 @@ function getWebviewHtml() {
   function curated(){ const set=new Set(); Object.values(S.profiles).forEach(a=>a.forEach(n=>set.add(n))); S.core.forEach(n=>set.delete(n)); return [...set].sort(); }
   function descOf(n){ const s=S.skills.find(x=>x.name===n); return s?s.desc:''; }
   const DESCR={
-    __lean__:'Just the two core skills. SuperBob reads each task and pulls in the rest as needed — the safe default for mixed work.',
+    __lean__:'Just the two core skills. SuperBob reads each task and pulls in the rest as needed, the safe default for mixed work.',
     code:'Writing or changing software. Includes tests-first (tdd-workflow), codebase-exploration, API & system design, your stack patterns (python/react/…), and docker/kubernetes. Pick this when building or refactoring a feature.',
     data:'Working with data and judging AI output. Includes error-analysis, LLM-as-judge (write-judge-prompt + validate-evaluator), evaluate-rag, SQL, embeddings and statistics. Pick this for analytics or measuring how good an AI pipeline is.',
     pm:'Product management. Includes PRDs (create-prd), product-vision, outcome roadmaps, prioritization frameworks and user stories. Pick this for planning and strategy, not coding.',
@@ -403,7 +403,7 @@ function getWebviewHtml() {
   function descFor(id){ return (S.meta&&S.meta[id]) || DESCR[id] || 'Custom kit.'; }
   function skillInfo(n){ return S.skills.find(x=>x.name===n) || {name:n,tokens:60,desc:''}; }
   function fmtTok(t){ return t>=1000?'~'+(t/1000).toFixed(1)+'k tokens':'~'+t+' tokens'; }
-  // Short, hand-written labels for the two always-on skills — their own frontmatter
+  // Short, hand-written labels for the two always-on skills, their own frontmatter
   // descriptions are long and wrap badly in a narrow panel.
   const SHORT={ 'using-superpowers':'Checks for a matching skill before acting.', 'mission-control':'Routes each task to the right skills.' };
   function skillRows(names){
@@ -429,7 +429,7 @@ function getWebviewHtml() {
     if(off) return;   // nothing else to render while off
     const am=activeMode();
     // active card
-    document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode': am==='__custom__'?'custom set': (am||'—'));
+    document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode': am==='__custom__'?'custom set': (am||', '));
     document.getElementById('autoToggle').checked = (am==='__lean__');
     document.getElementById('activeDesc').textContent = (am && am!=='__custom__') ? descFor(am) : (am==='__custom__'?'A custom set of skills you picked.':'');
     const ext=new Set(S.external||[]);
@@ -437,10 +437,10 @@ function getWebviewHtml() {
     const ordered=[...S.core, ...extras];   // superpowers + mission-control first (always on)
     const cont=document.getElementById('activeSkills'); cont.innerHTML='';
     cont.appendChild(skillRows(ordered));
-    // The user's own skills — SuperBob never removes these on a mode switch.
+    // The user's own skills, SuperBob never removes these on a mode switch.
     if(ext.size){
       const note=document.createElement('div'); note.className='extnote';
-      note.innerHTML='<div class="exthd">Your own skills — kept through every mode ('+ext.size+')</div>'+
+      note.innerHTML='<div class="exthd">Your own skills, kept through every mode ('+ext.size+')</div>'+
         '<div class="extlist">'+[...ext].map(n=>'<span class="extpill">'+n+'</span>').join('')+'</div>';
       cont.appendChild(note);
     }
@@ -457,7 +457,7 @@ function getWebviewHtml() {
     document.getElementById('builtinSummary').textContent='Starter kits (built-in · '+S.builtin.filter(p=>S.profiles[p]).length+')';
     // builder start-from options
     const bs=document.getElementById('bstart'); if(bs && bs.options.length===0){
-      bs.innerHTML='<option value="">(blank — pick your own)</option>'+Object.keys(S.profiles).map(p=>'<option value="'+p+'">'+p+'</option>').join('');
+      bs.innerHTML='<option value="">(blank, pick your own)</option>'+Object.keys(S.profiles).map(p=>'<option value="'+p+'">'+p+'</option>').join('');
     }
   }
 
@@ -579,7 +579,7 @@ async function doLoadProfile() {
 function activate(context) {
   statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   statusItem.command = 'superBobSkills.openPanel';
-  statusItem.tooltip = 'SuperBob — open the skills control panel';
+  statusItem.tooltip = 'SuperBob, open the skills control panel';
   context.subscriptions.push(statusItem);
   updateStatus();
 
@@ -596,10 +596,10 @@ function activate(context) {
       // code-review-graph is an MCP TOOL (not a skill). Run the bundled deploy
       // script in a terminal so the user sees the pip/uv install + MCP registration.
       const script = path.join(context.extensionPath, 'deploy-code-review-graph.sh');
-      const term = vscode.window.createTerminal('SuperBob — code-review-graph');
+      const term = vscode.window.createTerminal('SuperBob, code-review-graph');
       term.show();
       term.sendText('bash "' + script + '"');
-      vscode.window.showInformationMessage('Installing code-review-graph — watch the terminal. Restart Bob when it finishes.');
+      vscode.window.showInformationMessage('Installing code-review-graph, watch the terminal. Restart Bob when it finishes.');
     })
   );
 

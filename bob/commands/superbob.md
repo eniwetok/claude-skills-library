@@ -1,5 +1,5 @@
 ---
-description: Switch SuperBob kit — loads that kit's skills for this conversation
+description: Switch SuperBob kit, loads that kit's skills for this conversation
 argument-hint: <kit> (e.g. software_development, data_analysis, application_security, auto; blank lists them)
 ---
 Switch SuperBob to the "$1" kit.
@@ -24,4 +24,4 @@ Follow these steps:
 4. Confirm to the user which kit you loaded and list the skills it brought in.
 
 The two core skills (using-superpowers, mission-control) are always active regardless of
-kit — you never need to reload those.
+kit, you never need to reload those.

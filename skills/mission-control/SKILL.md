@@ -12,10 +12,10 @@ description: >
 
 ---
 
-## LEAN MODE — you are the router (read this first)
+## LEAN MODE (you are the router) (read this first)
 
 **Only two skills are loaded right now: `mission-control` (this one) and
-`using-superpowers`.** Everything else — ~1,000 skills — sits UNLOADED in a vault:
+`using-superpowers`.** Everything else, ~1,000 skills, sits UNLOADED in a vault:
 
 - IBM Bob: `~/.bob/skills-vault/<skill>/SKILL.md`
 - VS Code: `~/.claude/skills-vault/<skill>/SKILL.md`
@@ -30,7 +30,7 @@ the agent cannot auto-activate a vault skill, because its description isn't load
    (`~/.bob/skills-vault/<skill>/SKILL.md` or `~/.claude/skills-vault/<skill>/SKILL.md`)
    and follow it as if it were active.
 3. Announce which skill you are applying and why.
-4. Do not guess a skill's contents — read the file. Do not apply a skill the intent
+4. Do not guess a skill's contents, read the file. Do not apply a skill the intent
    below does not call for.
 
 ### Intent → skills (hardcoded routing)
@@ -56,10 +56,10 @@ whose folder name fits, then read that skill's file.
 ### Selecting a kit straight from chat
 If the user says "use the <name> kit", "load <name> kit", "switch to <name>", or
 "activate <name>" (they may say "mode" instead of "kit"), load that kit's skills now:
-1. Read `~/.claude/profiles/<name>.txt` (or `~/.bob/profiles/<name>.txt`) — each line is a skill name.
+1. Read `~/.claude/profiles/<name>.txt` (or `~/.bob/profiles/<name>.txt`), each line is a skill name.
 2. Read each of those skills' `SKILL.md` from the vault and apply them.
 3. Tell the user which kit and skills you loaded.
-This works mid-conversation with no restart and no panel — you are reading the mode's
+This works mid-conversation with no restart and no panel, you are reading the mode's
 skills on demand. Known modes: the built-ins (software_development, data_analysis, product_management, production_engineering, test_engineering, security, ui, research)
 plus any the user created (the `.txt` files in the profiles folder; their descriptions
 are in `_meta.json`).
@@ -73,14 +73,14 @@ Lean (this router) is the default and needs no reload.
 **Ownership rule: never delete the user's own skills.** When you load a kit
 (here or from chat), only add or remove skills that exist in the vault
 (`~/.bob/skills-vault/`). Any skill in `~/.bob/skills/` that has NO vault
-counterpart is one the user installed themselves — leave it exactly where it is.
+counterpart is one the user installed themselves, leave it exactly where it is.
 Always switch kits with `~/.bob/bob-profile` (it enforces this); never
 `rm -rf ~/.bob/skills` or clear the folder wholesale, or you will disable the
 user's own skills.
 
 ---
 
-# Mission Control — Skill Orchestrator
+# Mission Control: Skill Orchestrator
 
 You have a large library of best-practice skills available. This skill tells you
 which to use, in what order, and how to resolve conflicts when several overlap.
@@ -90,20 +90,20 @@ which to use, in what order, and how to resolve conflicts when several overlap.
 ## Mission-Critical Mode (default for production / enterprise work)
 
 **Routing is not enforcement.** This skill tells you WHICH skills to run, but for
-mission-critical software, being told is not enough — quality must be *harnessed*
+mission-critical software, being told is not enough, quality must be *harnessed*
 (deterministically gated), not merely recommended. Three layers work together:
 
-1. **Deterministic hooks** (cannot be skipped) — in `~/.claude/settings.json`, wired to `~/.claude/hooks/`:
-   - `branch-guard` (PreToolUse, **global**) — no edits on main/master/trunk/develop; forces worktree-per-feature.
-   - `design-gate` (PreToolUse, mission-critical) — blocks the FIRST code edit until a plan/ADR exists. Design-before-code.
-   - `format-on-save` (PostToolUse, mission-critical) — formats each file right after it's written; maintainability never drifts.
-   - `dod-gate` (Stop, mission-critical) — the session **cannot end** while `verify` (lint + typecheck + tests) is red. The real backstop.
+1. **Deterministic hooks** (cannot be skipped), in `~/.claude/settings.json`, wired to `~/.claude/hooks/`:
+   - `branch-guard` (PreToolUse, **global**), no edits on main/master/trunk/develop; forces worktree-per-feature.
+   - `design-gate` (PreToolUse, mission-critical), blocks the FIRST code edit until a plan/ADR exists. Design-before-code.
+   - `format-on-save` (PostToolUse, mission-critical), formats each file right after it's written; maintainability never drifts.
+   - `dod-gate` (Stop, mission-critical), the session **cannot end** while `verify` (lint + typecheck + tests) is red. The real backstop.
 
    The three mission-critical hooks activate together the moment a repo has `.claude/dod.json`.
-2. **This skill** (routing) — picks the right skills in the right order.
-3. **The five pillars** (below) — each is a GATE that must be satisfied, not a suggestion.
+2. **This skill** (routing), picks the right skills in the right order.
+3. **The five pillars** (below), each is a GATE that must be satisfied, not a suggestion.
 
-### The Five Pillars — each is a GATE, not advice
+### The Five Pillars, each is a GATE, not advice
 
 | Pillar | Gate: what must be TRUE before "done" | Enforced by |
 |--------|----------------------------------------|-------------|
@@ -113,19 +113,19 @@ mission-critical software, being told is not enough — quality must be *harness
 | **Usability** | User-facing paths pass a11y + UX review; every error state is handled and legible. | `frontend-a11y` / `error-handling` / `receiving-code-review` |
 | **Maintainability** | Diff is minimal; names are clear; no dead code; no unexplained complexity; docs/ADR updated. | `karpathy-guidelines` + `ponytail` (cut over-engineering) + `code-review` |
 
-### The enforced outer loop (wraps EVERY workflow A–M)
+### The enforced outer loop (wraps EVERY workflow A, M)
 
 ```
 DESIGN GATE  →  BUILD  →  VERIFY GATE  →  SHIP GATE
-  (pillar 1)     (A–M)    (pillars 2-4)   (pillar 5 + dod-gate hook)
+  (pillar 1)     (A, M)    (pillars 2-4)   (pillar 5 + dod-gate hook)
 ```
 
-**You do not advance past a gate until it is satisfied.** Workflows A–M are the BUILD
-phase only — they are always bracketed by the DESIGN gate before and the VERIFY/SHIP
+**You do not advance past a gate until it is satisfied.** Workflows A, M are the BUILD
+phase only, they are always bracketed by the DESIGN gate before and the VERIFY/SHIP
 gates after. If `.claude/dod.json` exists, the SHIP gate is enforced by the machine,
 not by your judgment.
 
-### Definition of Done (mission-critical) — announce this checklist and complete it
+### Definition of Done (mission-critical), announce this checklist and complete it
 
 - [ ] **Design**: a written plan/ADR existed before code, and matches what was built
 - [ ] **Tests**: every new/changed behavior is covered; the suite is green
@@ -141,7 +141,7 @@ into `<repo>/.claude/dod.json` and set its `verify` to your real command
 
 ---
 
-## Step 1 — Classify the Task
+## Step 1, Classify the Task
 
 Read the user's request and identify the primary task type:
 
@@ -163,7 +163,7 @@ Read the user's request and identify the primary task type:
 
 ---
 
-## Workflow A — New Feature
+## Workflow A, New Feature
 
 ```
 1. brainstorming          → design-first, explore requirements, get approval
@@ -181,7 +181,7 @@ Do NOT use both.
 
 ---
 
-## Workflow B — Debugging
+## Workflow B, Debugging
 
 ```
 1. systematic-debugging   → root cause FIRST, never patch symptoms
@@ -192,11 +192,11 @@ Do NOT use both.
 
 **Overlap note:** For AI agent failures specifically, use `agent-introspection-debugging` instead of `systematic-debugging`. For general code bugs, always `systematic-debugging`.
 
-**caveman-debug vs systematic-debugging:** not a conflict — systematic-debugging is the methodology (think before acting); caveman-debug is the technique (print statements) used during step 2 when you need to observe live runtime state and no proper debugger is available. Use both together.
+**caveman-debug vs systematic-debugging:** not a conflict, systematic-debugging is the methodology (think before acting); caveman-debug is the technique (print statements) used during step 2 when you need to observe live runtime state and no proper debugger is available. Use both together.
 
 ---
 
-## Workflow C — Codebase Intelligence
+## Workflow C, Codebase Intelligence
 
 ```
 1. code-review-graph   → semantic search, dependency graph, call-flow (code-review-graph MCP)
@@ -204,7 +204,7 @@ Do NOT use both.
 3. [domain skill]         → once oriented, apply relevant patterns
 ```
 
-**Overlap resolution — Karpathy vs code-review-graph:**
+**Overlap resolution, Karpathy vs code-review-graph:**
 These are NOT in conflict. They operate on different layers:
 - `karpathy-guidelines` = **behavioral principles** (HOW to think: research-first, minimal changes, honest uncertainty, verifiable success criteria)
 - `code-review-graph` (MCP) = **tooling layer** (WHAT to use: semantic search, dependency graphs, call-flow analysis via code-review-graph MCP)
@@ -213,7 +213,7 @@ Use both together. Karpathy shapes your mindset; code-review-graph gives you the
 
 ---
 
-## Workflow D — Architecture / Complex Systems
+## Workflow D, Architecture / Complex Systems
 
 ```
 1. agent-council          → get multi-AI perspectives on the approach (consensus)
@@ -225,14 +225,14 @@ Use both together. Karpathy shapes your mindset; code-review-graph gives you the
 ```
 
 For role-specific perspective, add one of:
-- `c-level-advisor` — executive lens (CTO/CEO/CFO/CISO in one skill)
-- `system-design` — system design depth
-- `evaluate-rag` — if RAG/retrieval is involved
-- `mcp-builder` — if building MCP integrations
+- `c-level-advisor`, executive lens (CTO/CEO/CFO/CISO in one skill)
+- `system-design`, system design depth
+- `evaluate-rag`, if RAG/retrieval is involved
+- `mcp-builder`, if building MCP integrations
 
 ---
 
-## Workflow E — Security
+## Workflow E, Security
 
 Choose the right level:
 
@@ -252,7 +252,7 @@ Choose the right level:
 6. report-writing / redteam-report-template → disclosure report
 ```
 
-**Overlap resolution — vibesec vs bb-methodology vs bug-bounty:**
+**Overlap resolution, vibesec vs bb-methodology vs bug-bounty:**
 - `vibesec` = development-time static review (use DURING coding)
 - `bb-methodology` = red-team orchestrator with non-linear 5-phase hunt (use for DEDICATED security work)
 - `bug-bounty` = same scope as bb-methodology but more focused on submission workflow
@@ -268,7 +268,7 @@ Choose the right level:
 
 ---
 
-## Workflow F — Quality Gates
+## Workflow F, Quality Gates
 
 **Pre-commit / task completion:**
 ```
@@ -283,7 +283,7 @@ Choose the right level:
 3. benchmark-optimization-loop → continuous improvement loop
 ```
 
-**Evaluating an LLM PIPELINE's output** (Hamel Husain's method — the rigorous path):
+**Evaluating an LLM PIPELINE's output** (Hamel Husain's method, the rigorous path):
 ```
 0. eval-audit              → START HERE if evals exist but you don't trust them
 1. error-analysis          → read real traces, build a vocabulary of failure modes
@@ -295,7 +295,7 @@ Choose the right level:
 ```
 
 **The non-negotiable rule:** never trust a judge you have not calibrated against human
-labels. `write-judge-prompt` without `validate-evaluator` is a vanity metric — it will
+labels. `write-judge-prompt` without `validate-evaluator` is a vanity metric, it will
 happily report a number that means nothing. This is the "independent inspector" principle
 from Mission-Critical Mode, applied to AI output.
 
@@ -311,10 +311,10 @@ from Mission-Critical Mode, applied to AI output.
 Start with `error-analysis` on real traces, not with metrics. Metrics chosen before you
 have looked at failures are vanity metrics.
 
-**Overlap resolution — quality gate skills:**
+**Overlap resolution, quality gate skills:**
 | Skill | When to use |
 |-------|------------|
-| `verification-before-completion` | Before closing ANY task — final gate |
+| `verification-before-completion` | Before closing ANY task, final gate |
 | `verification-quality` | Mid-task quality checkpoint |
 | `verification-loop` | Ongoing verification cycle (security contexts) |
 | `eval-harness` | Evaluating AI-generated code or output quality |
@@ -324,7 +324,7 @@ have looked at failures are vanity metrics.
 
 ---
 
-## Workflow G — Decisions
+## Workflow G, Decisions
 
 ```
 1. agent-council          → query multiple AI models, synthesize consensus
@@ -333,15 +333,15 @@ have looked at failures are vanity metrics.
 ```
 
 For domain-specific strategic lens:
-- `c-level-advisor` — business/strategy/security/finance lenses in one skill
-- `council` — convene multiple expert perspectives on the decision
-- `redteam-mindset` — security-risk and compliance lens
-- `dcf-valuation` — cost / ROI / financial-risk lens
-- `architecture` — technical architecture depth
+- `c-level-advisor`, business/strategy/security/finance lenses in one skill
+- `council`, convene multiple expert perspectives on the decision
+- `redteam-mindset`, security-risk and compliance lens
+- `dcf-valuation`, cost / ROI / financial-risk lens
+- `architecture`, technical architecture depth
 
 ---
 
-## Workflow H — Parallel Work
+## Workflow H, Parallel Work
 
 **Simple: independent tasks across modules:**
 ```
@@ -353,7 +353,7 @@ dispatching-parallel-agents → spawn sub-agents per module, synthesize
 swarm-orchestration → or hive-mind for consensus-driven swarms
 ```
 
-**Overlap resolution — multi-agent skills:**
+**Overlap resolution, multi-agent skills:**
 | Skill | Purpose |
 |-------|---------|
 | `agent-council` | Get OPINIONS from multiple models (consensus, not work) |
@@ -365,7 +365,7 @@ swarm-orchestration → or hive-mind for consensus-driven swarms
 
 ---
 
-## Workflow I — Skill Creation
+## Workflow I, Skill Creation
 
 ```
 1. skill-creator          → full loop: draft → eval → iterate (official Anthropic skill)
@@ -374,7 +374,7 @@ swarm-orchestration → or hive-mind for consensus-driven swarms
 
 ---
 
-## Workflow J — Research / Learning
+## Workflow J, Research / Learning
 
 **Deep multi-source research:**
 ```
@@ -387,7 +387,7 @@ deep-research             → 8-phase pipeline, cited report, adversarial verifi
 learn-with-coursera       → personalized learning path from Coursera catalog
 ```
 
-**Overlap resolution — research skills:**
+**Overlap resolution, research skills:**
 | Skill | When to use |
 |-------|------------|
 | `deep-research` | Comprehensive cited report on a topic |
@@ -396,7 +396,7 @@ learn-with-coursera       → personalized learning path from Coursera catalog
 
 ---
 
-## Workflow K — Frontend / Design
+## Workflow K, Frontend / Design
 
 **Components / React:**
 ```
@@ -408,7 +408,7 @@ brainstorming → react-patterns → frontend-a11y → test-driven-development
 brainstorming → shadcn-ui / design-system → impeccable-design-polish
 ```
 
-**Fixing UI that already exists** (ibelick's pack — these FIX, they don't build):
+**Fixing UI that already exists** (ibelick's pack, these FIX, they don't build):
 ```
 baseline-ui                → clean up AI-generated "slop": spacing, hierarchy, typography
 fixing-accessibility       → plain HTML/WCAG: ARIA, keyboard, focus, contrast, forms
@@ -417,7 +417,7 @@ fixing-metadata            → page titles, Open Graph, Twitter cards, favicons,
 improve-ui                 → READ-ONLY audit; writes a plan for ANOTHER agent to execute
 ```
 
-**Build vs fix — pick the right one:**
+**Build vs fix, pick the right one:**
 | Need | Use |
 |------|-----|
 | Build new animations | `motion-ui` / `gsap-*` |
@@ -429,7 +429,7 @@ improve-ui                 → READ-ONLY audit; writes a plan for ANOTHER agent 
 | Polish a page you just built | `impeccable-design-polish` |
 | Audit someone else's surface without touching it | `improve-ui` |
 
-**`improve-ui` is the Mission-Critical-Mode choice for UI**: it never edits product source — it writes an implementation plan for a separate agent. That is the "independent inspector / plan-before-code" pattern, applied to interfaces.
+**`improve-ui` is the Mission-Critical-Mode choice for UI**: it never edits product source, it writes an implementation plan for a separate agent. That is the "independent inspector / plan-before-code" pattern, applied to interfaces.
 
 **Animation:**
 ```
@@ -453,7 +453,7 @@ figma-use → figma-generate-design → figma-implement-design
 
 ---
 
-## Workflow L — Backend / Data
+## Workflow L, Backend / Data
 
 Pick the stack-specific pattern skill, then apply quality skills on top:
 
@@ -461,10 +461,10 @@ Pick the stack-specific pattern skill, then apply quality skills on top:
 |-------|--------------|---------|---------|
 | Python/Django | `django-patterns` + `django-security` | `django-tdd` | `python-testing` |
 | Python/FastAPI | `fastapi-patterns` | `vibesec` | `python-testing` |
-| Node.js/NestJS | `nestjs-patterns` | `hunt-nodejs` | — |
+| Node.js/NestJS | `nestjs-patterns` | `hunt-nodejs` |, |
 | Next.js | `nextjs-turbopack` | `hunt-nextjs` | `react-testing` |
-| Laravel | `laravel-patterns` + `laravel-security` | `laravel-tdd` | — |
-| Spring Boot | `springboot-patterns` + `springboot-security` | `springboot-tdd` | — |
+| Laravel | `laravel-patterns` + `laravel-security` | `laravel-tdd` |, |
+| Spring Boot | `springboot-patterns` + `springboot-security` | `springboot-tdd` |, |
 | Go | `golang-patterns` | `vibesec` | `golang-testing` |
 | Rust | `rust-patterns` | `vibesec` | `rust-testing` |
 | Kotlin | `kotlin-patterns` + `kotlin-ktor-patterns` | `vibesec` | `kotlin-testing` |
@@ -484,7 +484,7 @@ Pick the stack-specific pattern skill, then apply quality skills on top:
 
 ---
 
-## Workflow M — DevOps / Infrastructure
+## Workflow M, DevOps / Infrastructure
 
 ```
 brainstorming → deployment-patterns → docker-patterns → kubernetes-patterns
@@ -499,38 +499,38 @@ Homelab: `homelab-network-setup` → `homelab-wireguard-vpn` → `homelab-pihole
 
 These apply across ALL workflows, not just specific ones:
 
-1. **`karpathy-guidelines`** — behavioral principles that run alongside everything:
+1. **`karpathy-guidelines`**, behavioral principles that run alongside everything:
    - Research and read before writing
    - Make surgical minimal changes
    - Surface assumptions as explicit tests
    - Define verifiable success criteria before starting
    - Never over-engineer; three simple lines beat one abstraction
 
-2. **`using-superpowers`** — the meta-protocol: invoke relevant skills before ANY action. This skill (mission-control) tells you WHICH skill to invoke; using-superpowers enforces THAT you invoke something.
+2. **`using-superpowers`**, the meta-protocol: invoke relevant skills before ANY action. This skill (mission-control) tells you WHICH skill to invoke; using-superpowers enforces THAT you invoke something.
 
-3. **`agent-self-evaluation`** — run after completing any non-trivial task for a structured self-scorecard.
+3. **`agent-self-evaluation`**, run after completing any non-trivial task for a structured self-scorecard.
 
-4. **`hookify-rules`** — for recurring rules ("always do X"), encode them as hooks, not memory. Memory is lossy; hooks are deterministic.
+4. **`hookify-rules`**, for recurring rules ("always do X"), encode them as hooks, not memory. Memory is lossy; hooks are deterministic.
 
-5. **Deterministic gates already installed** (`~/.claude/hooks/`) — these fire whether or not you remember them:
-   - `branch-guard` (PreToolUse, global) — blocks edits on main/master/trunk/develop in the main worktree.
-   - `design-gate` (PreToolUse, mission-critical) — blocks the first code edit until a plan/ADR exists.
-   - `format-on-save` (PostToolUse, mission-critical) — auto-formats each written file.
-   - `dod-gate` (Stop, mission-critical) — blocks session end while `verify` is red.
-   - `skill-self-eval` (UserPromptSubmit, global) — injects rule 6 below on every turn.
-   When a gate blocks you, do not work around it — satisfy it. That is the point of Mission-Critical Mode.
+5. **Deterministic gates already installed** (`~/.claude/hooks/`), these fire whether or not you remember them:
+   - `branch-guard` (PreToolUse, global), blocks edits on main/master/trunk/develop in the main worktree.
+   - `design-gate` (PreToolUse, mission-critical), blocks the first code edit until a plan/ADR exists.
+   - `format-on-save` (PostToolUse, mission-critical), auto-formats each written file.
+   - `dod-gate` (Stop, mission-critical), blocks session end while `verify` is red.
+   - `skill-self-eval` (UserPromptSubmit, global), injects rule 6 below on every turn.
+   When a gate blocks you, do not work around it, satisfy it. That is the point of Mission-Critical Mode.
 
-6. **Close the loop — skill-coverage check after every task.** Answer the user FIRST, then ask:
+6. **Close the loop, skill-coverage check after every task.** Answer the user FIRST, then ask:
    did this use case have a skill?
 
    ```
    already covered?          → say so, change nothing
    NEW reusable capability?  → skill-scout (confirm nothing exists) → skill-creator (create)
-   extends existing skill?   → skill-creator (UPDATE it — never a near-duplicate)
+   extends existing skill?   → skill-creator (UPDATE it, never a near-duplicate)
    trivial one-off?          → skip; do not spam the library
    ```
 
-   Use `skill-scout` BEFORE creating — it searches local + marketplace + GitHub so you don't rebuild
+   Use `skill-scout` BEFORE creating, it searches local + marketplace + GitHub so you don't rebuild
    what already exists. Use `skill-creator` for both create AND update (it explicitly covers "modify
    and improve existing skills"). End with a one-line `Skill check:` verdict.
 
@@ -563,7 +563,7 @@ Complete disambiguation for skills that share similar descriptions:
 
 | Group | Source | Count | Best skills |
 |-------|--------|-------|-------------|
-| G1 | claude-obsidian | — | (removed from SuperBob — user manages Obsidian separately) |
+| G1 | claude-obsidian |, | (removed from SuperBob, user manages Obsidian separately) |
 | G2 | phuryn/pm-skills | 60+ | Full PM toolkit |
 | G3 | Cowork | 15 | Workflow automation |
 | G4 | anthropics/skills | 30+ | `skill-creator`, `code-review`, `system-design` |
@@ -576,7 +576,7 @@ Complete disambiguation for skills that share similar descriptions:
 | G11 | zhangzhang-111-i | ~180 | `c-level-advisor`, `system-design`, `webapp-testing`, `evaluate-rag` |
 | G12 | n8n-io/skills | 14 | n8n workflow automation |
 | G13 | team-attention | 1 | **`agent-council`** |
-| G14 | pablo-mano | — | (removed from SuperBob) |
+| G14 | pablo-mano |, | (removed from SuperBob) |
 | G15 | multica-ai | 1 | **`karpathy-guidelines`** |
 | G16 | code-review-graph | 2+MCP | **`code-review-graph` (MCP)**, semantic search, dep graphs |
 | G17 | Claude-BugHunter | 71+15cmd | **`bb-methodology`**, 71 `hunt-*` skills |
