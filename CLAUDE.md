@@ -16,8 +16,15 @@ claude-skills-library/
 │   └── awesome-claude-skills.md  ← community curated index for reference (travisvn)
 ├── skills/                       ← individual skills, one subfolder per skill
 ├── packages/                     ← multi-skill bundles from upstream repos
+├── superbob/                     ← SEPARATE PROJECT — the IBM Bob extension (not library)
 └── zips/                         ← installable archives (one per skill or package)
 ```
+
+**`superbob/` is a separate project, not part of the library.** It is the IBM Bob extension
+that *packages* this library for use in Bob. Keep its code fully inside `superbob/` — never mix
+extension files into `skills/`, `packages/`, or the top level. It reads the library as a build
+input via `superbob/config.sh` (`SB_LIBRARY`), so it can be lifted into its own repo later with
+no code changes. Build it with `superbob/vsix/build-vsix.sh`. See `superbob/README.md`.
 
 ---
 

@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
-# Build dist/bob-skills-package.zip — installs into IBM Bob and/or Claude Code.
-# Excludes AGPL skills. Ships both mission-control variants (Bob vs Claude Code).
+# Build the Bob skills package (dist/bob-skills-package.zip) that the SuperBob .vsix ships.
+# Reads the claude-skills-library (SB_LIBRARY) as input; writes into the extension (SB_ROOT).
 set -euo pipefail
 
-REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OUT="$REPO/dist"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/config.sh"
+REPO="$SB_ROOT"          # SuperBob extension root (bob/, vsix/, dist/ live here)
+LIB="$SB_LIBRARY"        # the claude-skills-library this extension packages
+OUT="$SB_DIST"
 STAGE="$(mktemp -d)/skills-package"
 
-# GATE: refuse to build if the live library has a broken reference. A mode or the
+# GATE: refuse to build if the library has a broken reference. A mode or the
 # router pointing at a missing skill silently breaks lean mode, so it must never ship.
 LINT="$HOME/.claude/skills/skill-library-lint/scripts/lint.py"
-[ -f "$LINT" ] || LINT="$REPO/skills/skill-library-lint/scripts/lint.py"
+[ -f "$LINT" ] || LINT="$LIB/skills/skill-library-lint/scripts/lint.py"
 if [ -f "$LINT" ]; then
   echo "Running skill-library-lint gate…"
   if ! python3 "$LINT"; then
@@ -42,7 +44,7 @@ while IFS= read -r f; do
   d="$(dirname "$f")"; name="$(basename "$d")"
   for x in "${EXCLUDE[@]}"; do [ "$name" = "$x" ] && continue 2; done
   rsync -a --exclude '.DS_Store' "$d"/ "$STAGE/skills/$name"/ 2>/dev/null || true
-done < <(find "$REPO/packages" "$REPO/skills" -name SKILL.md 2>/dev/null)
+done < <(find "$LIB/packages" "$LIB/skills" -name SKILL.md 2>/dev/null)
 
 # target-specific meta skill, chosen at install time
 cp "$REPO/bob/meta/mission-control.bob.md"    "$STAGE/meta/"
@@ -53,8 +55,8 @@ cp "$REPO"/bob/profiles/_meta.json "$STAGE/profiles/" 2>/dev/null || true
 cp "$REPO"/bob/commands/*.md "$STAGE/commands/" 2>/dev/null || true
 cp "$REPO/bob/bob-profile"          "$STAGE/bob-profile"
 cp "$REPO/bob/package-install.sh"   "$STAGE/install.sh"
-cp "$REPO/dist/BOB-INSTALL-INSTRUCTIONS.md" "$STAGE/README.md"
-cp "$REPO/dist/LICENSES.md"         "$STAGE/LICENSES.md"
+cp "$REPO/bob/BOB-INSTALL-INSTRUCTIONS.md" "$STAGE/README.md"
+cp "$REPO/bob/LICENSES.md"          "$STAGE/LICENSES.md"
 chmod +x "$STAGE/bob-profile" "$STAGE/install.sh"
 
 cd "$(dirname "$STAGE")"

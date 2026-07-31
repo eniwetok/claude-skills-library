@@ -409,6 +409,14 @@ claude-skills-library/
 │   ├── 15-cowork-skills/         ← G3: Brock/YouTube
 │   ├── anthropics-skills/        ← G4: anthropics/skills
 │   └── knowledge-work-plugins/   ← G5: anthropics/knowledge-work-plugins
+├── superbob/                     ← SEPARATE PROJECT: the IBM Bob extension.
+│   │                               A consumer of this library, not part of it.
+│   │                               Packages the library into a .vsix for Bob.
+│   │                               See superbob/README.md. Liftable to its own
+│   │                               repo (superbob/config.sh → SB_LIBRARY).
+│   ├── vsix/                     ← extension source + build-vsix.sh
+│   ├── bob/                      ← kits, /superbob command, native mode, build-package.sh
+│   └── config.sh                ← declares the library dependency
 └── zips/                         ← installable archives
     ├── claude-obsidian-skills.zip ← G1 bundle (11 core skills)
     ├── pm-skills-bundle.zip       ← G2 bundle

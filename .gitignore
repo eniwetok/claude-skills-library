@@ -10,9 +10,9 @@ backups/*.json
 backups/*.sh
 backups/.latest-stamp
 
-# Built distributable package (65MB). Rebuild with: ./bob/build-package.sh
-dist/*.zip
+# Built distributable package (65MB). Rebuild with: superbob/bob/build-package.sh
+superbob/dist/*.zip
 
-vsix/extension/skills.zip
+superbob/vsix/extension/skills.zip
 
-dist/*.vsix
+superbob/dist/*.vsix
