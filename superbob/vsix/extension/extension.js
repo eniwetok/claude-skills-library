@@ -82,13 +82,18 @@ function activeProfile() {
 }
 
 // ---- ownership boundary ----------------------------------------------------
-// A skill sitting in the active dir (~/.bob/skills) is "SuperBob-owned" ONLY if a
-// skill of the same name exists in the vault. Anything else in the active dir is a
-// skill the user installed themselves, SuperBob does not manage it and must never
-// remove or disable it when switching modes. This one rule is what stops a mode
-// switch from clobbering the user's own skills.
-function isOwned(name) { return fs.existsSync(path.join(BOB_VAULT, name, 'SKILL.md')); }
-function externalActiveSkills() { return activeSkillSet().filter(n => !isOwned(n)); }
+// SuperBob owns ONLY the skills it itself placed in the active dir. It records them in a
+// manifest (~/.bob/skills/.superbob-managed) written on every apply. Ownership is NOT decided
+// by name-match with the vault: a user's own skill (say their own `docx`) that happens to
+// share a name with a vault skill must never be treated as SuperBob's, shown as loaded, or
+// removed on a switch. Anything in the active dir that is NOT in the manifest is the user's own.
+const MANAGED_FILE = () => path.join(BOB_ACTIVE, '.superbob-managed');
+function managedSet() {
+  try { return new Set(fs.readFileSync(MANAGED_FILE(), 'utf8').split('\n').map(s => s.trim()).filter(Boolean)); }
+  catch (e) { return new Set(CORE); }   // no manifest yet: treat only the core as ours
+}
+function writeManaged(names) { try { fs.writeFileSync(MANAGED_FILE(), [...names].join('\n') + '\n'); } catch (e) {} }
+function externalActiveSkills() { const m = managedSet(); return activeSkillSet().filter(n => !m.has(n)); }
 
 // ---- power (SuperBob on/off) -----------------------------------------------
 // Off = remove every SuperBob-owned skill from the active dir (including the two
@@ -97,10 +102,12 @@ function externalActiveSkills() { return activeSkillSet().filter(n => !isOwned(n
 function isPoweredOff() { return activeProfile() === 'off'; }
 function superbobOff() {
   if (fs.existsSync(BOB_ACTIVE)) {
+    const managed = managedSet();
     for (const name of activeSkillSet()) {
-      if (isOwned(name)) fs.rmSync(path.join(BOB_ACTIVE, name), { recursive: true, force: true });
+      if (managed.has(name)) fs.rmSync(path.join(BOB_ACTIVE, name), { recursive: true, force: true });
     }
   } else { fs.mkdirSync(BOB_ACTIVE, { recursive: true }); }
+  writeManaged([]);   // SuperBob manages nothing while off
   fs.writeFileSync(path.join(BOB_ACTIVE, '.profile'), 'off');
   updateStatus();
   return true;
@@ -114,10 +121,11 @@ function applySkillSet(skillNames, label) {
   const staged = [...wanted].filter(s => fs.existsSync(path.join(BOB_VAULT, s)));
   if (staged.length < CORE.length) { vscode.window.showErrorMessage('SuperBob: nothing to load, aborted.'); return false; }
   fs.mkdirSync(BOB_ACTIVE, { recursive: true });
-  // Remove ONLY owned skills the new set no longer wants. External (user-installed)
-  // skills are left exactly as they are, they stay loaded through every mode switch.
+  const managed = managedSet();
+  // Remove ONLY skills SuperBob itself placed that the new set no longer wants. The user's
+  // own skills (not in the manifest) are left exactly as they are, even if a name collides.
   for (const name of activeSkillSet()) {
-    if (isOwned(name) && !wanted.has(name)) fs.rmSync(path.join(BOB_ACTIVE, name), { recursive: true, force: true });
+    if (managed.has(name) && !wanted.has(name)) fs.rmSync(path.join(BOB_ACTIVE, name), { recursive: true, force: true });
   }
   // Add or refresh the wanted skills from the vault (refresh picks up vault updates).
   for (const s of staged) {
@@ -126,6 +134,7 @@ function applySkillSet(skillNames, label) {
     copyDir(path.join(BOB_VAULT, s), dest);
   }
   fs.writeFileSync(path.join(BOB_ACTIVE, '.profile'), label);
+  writeManaged(staged);   // the manifest is exactly what SuperBob just placed
   const kept = externalActiveSkills().length;
   if (kept) vscode.window.setStatusBarMessage('SuperBob kept ' + kept + ' of your own skill(s) untouched', 4000);
   updateStatus();
