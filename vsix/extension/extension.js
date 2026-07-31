@@ -1,7 +1,7 @@
-// SuperBob, installs best-practice skills into VS Code-compatible IDEs (IBM Bob, VS Code).
+// SuperBob, installs best-practice skills into IBM Bob.
 //
 // A VS Code extension cannot "register" agent skills, skills are SKILL.md files that
-// the agent reads from disk folders (~/.bob/skills, ~/.claude/skills). So this extension
+// the agent reads from disk folders (~/.bob/skills). So this extension
 // is an INSTALLER + CONTROL PANEL: it unpacks the bundled library into those folders and
 // controls which skills are loaded, to keep the agent's context small.
 
@@ -15,8 +15,6 @@ const HOME = os.homedir();
 const BOB_VAULT = path.join(HOME, '.bob', 'skills-vault');
 const BOB_ACTIVE = path.join(HOME, '.bob', 'skills');
 const BOB_PROFILES = path.join(HOME, '.bob', 'profiles');
-const CLAUDE_VAULT = path.join(HOME, '.claude', 'skills-vault');
-const CLAUDE_SKILLS = path.join(HOME, '.claude', 'skills');
 
 // Lean mode: only these two skills stay loaded; mission-control routes to the rest
 // from the vault on demand. Keeps starting context tiny (~200 tokens vs ~67,000).
@@ -533,7 +531,6 @@ function getWebviewHtml() {
 
 // ---- install (unchanged behaviour) ----------------------------------------
 async function doInstall(context) {
-  const target = vscode.workspace.getConfiguration('superBobSkills').get('targets', 'both');
   await vscode.window.withProgress(
     { location: vscode.ProgressLocation.Notification, title: 'SuperBob: installing…', cancellable: false },
     async (progress) => {
@@ -544,9 +541,8 @@ async function doInstall(context) {
         const pkg = path.join(tmp, 'bob-skills-package');
         const skillsSrc = path.join(pkg, 'skills');
         const bobMeta = path.join(pkg, 'meta', 'mission-control.bob.md');
-        const claudeMeta = path.join(pkg, 'meta', 'mission-control.claude.md');
-        if (target === 'both' || target === 'bob') {
-          progress.report({ message: 'IBM Bob' });
+        {
+          progress.report({ message: 'installing skills' });
           const bk = backupIfPresent(BOB_ACTIVE);
           fs.mkdirSync(BOB_VAULT, { recursive: true });
           fs.cpSync(skillsSrc, BOB_VAULT, { recursive: true });
@@ -563,19 +559,6 @@ async function doInstall(context) {
           }
           applyProfile([]);
           if (bk) log('Bob skills backed up to ' + bk);
-        }
-        if (target === 'both' || target === 'claude') {
-          progress.report({ message: 'VS Code (~/.claude/skills)' });
-          const bk = backupIfPresent(CLAUDE_SKILLS);
-          fs.rmSync(CLAUDE_VAULT, { recursive: true, force: true });
-          fs.mkdirSync(CLAUDE_VAULT, { recursive: true });
-          fs.cpSync(skillsSrc, CLAUDE_VAULT, { recursive: true });
-          fs.mkdirSync(path.join(CLAUDE_VAULT, 'mission-control'), { recursive: true });
-          fs.copyFileSync(claudeMeta, path.join(CLAUDE_VAULT, 'mission-control', 'SKILL.md'));
-          fs.rmSync(CLAUDE_SKILLS, { recursive: true, force: true });
-          fs.mkdirSync(CLAUDE_SKILLS, { recursive: true });
-          for (const skill of CORE) { const src = path.join(CLAUDE_VAULT, skill); if (fs.existsSync(src)) copyDir(src, path.join(CLAUDE_SKILLS, skill)); }
-          if (bk) log('VS Code skills backed up to ' + bk);
         }
       } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
     }
@@ -620,7 +603,7 @@ function activate(context) {
     })
   );
 
-  if (!fs.existsSync(BOB_VAULT) && !fs.existsSync(CLAUDE_SKILLS)) {
+  if (!fs.existsSync(BOB_VAULT)) {
     vscode.window.showInformationMessage('SuperBob is ready to install into Bob / VS Code.', 'Install now')
       .then(choice => { if (choice === 'Install now') doInstall(context); });
   }

@@ -92,7 +92,7 @@ and `using-superpowers` (checks for a matching skill before acting).
 ## Install
 
 1. Download `super-bob-skills-<version>.vsix`.
-2. In Bob or VS Code: **Extensions**, then the **`⋯`** menu, then **Install from VSIX…**, then pick the file. (Terminal alternative: `bobide --install-extension super-bob-skills-<version>.vsix`.)
+2. In Bob: **Extensions**, then the **`⋯`** menu, then **Install from VSIX…**, then pick the file. (Terminal alternative: `bobide --install-extension super-bob-skills-<version>.vsix`.)
 3. **Reload the window.** Cmd/Ctrl+Shift+P, then *Developer: Reload Window*. Installing updates the files; the window reloads before Bob runs the new code.
 4. Open the panel (below). On first run, choose **Install skills** if prompted. Your existing skills are backed up first.
 
@@ -174,7 +174,6 @@ The status-bar item (bottom-left) also shows the active kit. Click it to open th
 ## Good to know
 
 - **Start a new conversation after switching a kit.** Skills load at the start of a chat, so a mid-chat change waits for the next one.
-- **Bob and VS Code both work.** SuperBob installs into IBM Bob (`~/.bob/skills`) and the agent in VS Code (`~/.claude/skills`). Choose targets in Settings, under `superBobSkills.targets`.
-- **A VS Code extension can't register skills directly.** Skills are files the agent reads from disk. SuperBob installs those files and manages which are active.
+- **Bob reads skills as files.** Bob looks for `SKILL.md` files in `~/.bob/skills`. SuperBob installs those files into `~/.bob/skills` and controls which are active. It only touches Bob's own skills directory.
 - **Your own skills are never removed.** They stay through every kit switch and every on/off. SuperBob only manages the skills it installed.
 - **SuperBob leaves your knowledge base alone.** It doesn't bundle Obsidian or personal-wiki skills. Manage those yourself.
