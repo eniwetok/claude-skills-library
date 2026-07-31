@@ -177,3 +177,33 @@ The status-bar item (bottom-left) also shows the active kit. Click it to open th
 - **Bob reads skills as files.** Bob looks for `SKILL.md` files in `~/.bob/skills`. SuperBob installs those files into `~/.bob/skills` and controls which are active. It only touches Bob's own skills directory.
 - **Your own skills are never removed.** They stay through every kit switch and every on/off. SuperBob only manages the skills it installed.
 - **SuperBob leaves your knowledge base alone.** It doesn't bundle Obsidian or personal-wiki skills. Manage those yourself.
+
+---
+
+## Where the skills come from
+
+SuperBob doesn't write these skills. It bundles open-source skills from the authors below, and
+each stays under its own license. SuperBob's own code (the installer, kit system, and
+`mission-control` router) is MIT.
+
+| Source | Author | License |
+|--------|--------|---------|
+| [obra/superpowers](https://github.com/obra/superpowers) | Jesse Vincent | MIT |
+| [phuryn/pm-skills](https://github.com/phuryn/pm-skills) | Paweł Huryn | MIT |
+| [affaan-m/ECC](https://github.com/affaan-m/ECC) | affaan-m | MIT |
+| [ruvnet/ruflo](https://github.com/ruvnet/ruflo) | ruvnet | MIT |
+| [zhangzhang-111-i/claude-skills](https://github.com/zhangzhang-111-i/claude-skills) | zhangzhang-111-i | MIT |
+| [elementalsouls/Claude-BugHunter](https://github.com/elementalsouls/Claude-BugHunter) | elementalsouls | MIT |
+| [ibelick/ui-skills](https://github.com/ibelick/ui-skills) | ibelick | MIT |
+| [hamelsmu/evals-skills](https://github.com/hamelsmu/evals-skills) | Hamel Husain | MIT |
+| [team-attention/agent-council](https://github.com/team-attention/agent-council) | team-attention | MIT |
+| [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | multica-ai | MIT |
+| [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) | Dietrich Gebert | MIT |
+| [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) | Peter Yang | MIT |
+| [anthropics/skills](https://github.com/anthropics/skills) | Anthropic | Apache 2.0 |
+| [anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) | Anthropic | Apache 2.0 |
+| [nexu-io/open-design](https://github.com/nexu-io/open-design) | nexu-io | Apache 2.0 |
+| [n8n-io/skills](https://github.com/n8n-io/skills) | n8n-io | Apache 2.0 |
+| [BehiSecc/VibeSec-Skill](https://github.com/BehiSecc/VibeSec-Skill) | BehiSecc | Apache 2.0 |
+
+Full attribution and license terms: [LICENSES.md](LICENSES.md).
