@@ -44,8 +44,7 @@ Write your best practices down once, and every developer gets them, everywhere t
 
 Bob normally loads a one-line summary of every installed skill before you type a word, about
 67,000 tokens with a full library. SuperBob keeps the library in a vault Bob never reads and
-loads only the current kit's skills, about 200 to 2,000 tokens. Speed is a side effect of that,
-not the reason to use it.
+loads only the current kit's skills, about 200 to 2,000 tokens.
 
 ---
 
