@@ -272,10 +272,6 @@ function getWebviewHtml() {
   .skrow .sn .ao{font-size:9px;color:var(--vscode-charts-blue,#4aa8d8);border:1px solid currentColor;border-radius:7px;padding:0 5px;margin-left:5px;text-transform:uppercase}
   .skrow .stk{color:var(--vscode-descriptionForeground);font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
   .skrow .sd{color:var(--vscode-descriptionForeground);font-size:11.5px;margin-top:1px;line-height:1.4}
-  .extnote{margin-top:10px;padding-top:9px;border-top:1px dashed var(--vscode-widget-border,#2a2a2a)}
-  .exthd{font-size:11px;color:var(--vscode-charts-green,#89d185);margin-bottom:5px}
-  .extlist{display:flex;flex-wrap:wrap;gap:4px}
-  .extpill{font-size:11px;padding:1px 7px;border-radius:9px;background:var(--vscode-badge-background,#2a2d2e);color:var(--vscode-badge-foreground,#ccc)}
   .powerbar{display:flex;gap:10px;align-items:center;padding:9px 11px;margin:10px 0;border:1px solid var(--vscode-widget-border,#333);border-radius:8px}
   .pswitch{position:relative;width:34px;height:20px;flex:none;cursor:pointer;display:inline-block}
   .pswitch input{position:absolute;opacity:0;width:0;height:0}
@@ -452,18 +448,13 @@ function getWebviewHtml() {
     document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode': am==='__custom__'?'custom set': (am||', '));
     document.getElementById('autoToggle').checked = (am==='__lean__');
     document.getElementById('activeDesc').textContent = (am && am!=='__custom__') ? descFor(am) : (am==='__custom__'?'A custom set of skills you picked.':'');
+    // Show only what SuperBob loaded (core + the kit's skills). The user's own skills are
+    // deliberately not listed here: they're kept untouched, but listing 30+ of them is noise.
     const ext=new Set(S.external||[]);
-    const extras=S.activeSet.filter(n=>!S.core.includes(n) && !ext.has(n));   // the mode's own skills
+    const extras=S.activeSet.filter(n=>!S.core.includes(n) && !ext.has(n));   // the kit's own skills
     const ordered=[...S.core, ...extras];   // superpowers + mission-control first (always on)
     const cont=document.getElementById('activeSkills'); cont.innerHTML='';
     cont.appendChild(skillRows(ordered));
-    // The user's own skills, SuperBob never removes these on a mode switch.
-    if(ext.size){
-      const note=document.createElement('div'); note.className='extnote';
-      note.innerHTML='<div class="exthd">Your own skills, kept through every kit ('+ext.size+')</div>'+
-        '<div class="extlist">'+[...ext].map(n=>'<span class="extpill">'+n+'</span>').join('')+'</div>';
-      cont.appendChild(note);
-    }
 
     // your kits = the user's own (non-builtin) kits. Lean is the Auto/base state,
     // controlled by the Auto toggle and shown in the active card, so it is not a card here.
