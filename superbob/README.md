@@ -45,7 +45,7 @@ superbob/
 superbob/vsix/build-vsix.sh
 ```
 
-That runs `bob/build-package.sh` first (reads the library, runs the `skill-library-lint`
+That runs `superbob/bob/build-package.sh` first (reads the library, runs the `skill-library-lint`
 gate, produces the skills package), then wraps it with the extension source into the `.vsix`
 under `superbob/dist/`. Install it with:
 

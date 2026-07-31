@@ -10,7 +10,13 @@
 # claude-skills-library checkout and everything else keeps working.
 
 # Root of the SuperBob extension project (this directory).
-SB_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve this file's own location under bash OR zsh (the build runs under bash, but this
+# keeps an interactive `source` from resolving to the wrong dir).
+if [ -n "${ZSH_VERSION:-}" ]; then
+  SB_ROOT="${0:A:h}"
+else
+  SB_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
 
 # The claude-skills-library this extension packages. Override by exporting SB_LIBRARY.
 # Default: the parent directory, because SuperBob currently lives as a subfolder of the
