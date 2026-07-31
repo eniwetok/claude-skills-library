@@ -65,3 +65,35 @@ superbob/vsix/build-vsix.sh
 ```
 
 Nothing else changes. That is the whole point of `config.sh`.
+
+---
+
+## Where the skills come from
+
+SuperBob doesn't write these skills — it bundles open-source skills from the authors below,
+each under its own license. This is the subset of the root library that SuperBob actually
+ships (the excluded sources are not listed). SuperBob's own code (installer, kit system,
+`mission-control` router) is MIT.
+
+| Source | Author | License |
+|--------|--------|---------|
+| [obra/superpowers](https://github.com/obra/superpowers) | Jesse Vincent | MIT |
+| [phuryn/pm-skills](https://github.com/phuryn/pm-skills) | Paweł Huryn | MIT |
+| [affaan-m/ECC](https://github.com/affaan-m/ECC) | affaan-m | MIT |
+| [ruvnet/ruflo](https://github.com/ruvnet/ruflo) | ruvnet | MIT |
+| [zhangzhang-111-i/claude-skills](https://github.com/zhangzhang-111-i/claude-skills) | zhangzhang-111-i | MIT |
+| [elementalsouls/Claude-BugHunter](https://github.com/elementalsouls/Claude-BugHunter) | elementalsouls | MIT |
+| [ibelick/ui-skills](https://github.com/ibelick/ui-skills) | ibelick | MIT |
+| [hamelsmu/evals-skills](https://github.com/hamelsmu/evals-skills) | Hamel Husain | MIT |
+| [team-attention/agent-council](https://github.com/team-attention/agent-council) | team-attention | MIT |
+| [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | multica-ai | MIT |
+| [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) | Dietrich Gebert | MIT |
+| [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) | Peter Yang | MIT |
+| [anthropics/skills](https://github.com/anthropics/skills) | Anthropic | Apache 2.0 |
+| [anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) | Anthropic | Apache 2.0 |
+| [nexu-io/open-design](https://github.com/nexu-io/open-design) | nexu-io | Apache 2.0 |
+| [n8n-io/skills](https://github.com/n8n-io/skills) | n8n-io | Apache 2.0 |
+| [BehiSecc/VibeSec-Skill](https://github.com/BehiSecc/VibeSec-Skill) | BehiSecc | Apache 2.0 |
+
+Full attribution and license terms: [bob/LICENSES.md](bob/LICENSES.md). The user-facing copy
+shipped in the extension lives in [vsix/extension/README.md](vsix/extension/README.md).
