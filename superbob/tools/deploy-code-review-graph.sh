@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy the code-review-graph MCP tool into Bob and/or Claude Code.
+# Deploy the code-review-graph MCP tool into IBM Bob. (Repo tooling; not shipped.)
 # Installs the tool if missing, then registers it as an MCP server in each.
 # Idempotent — safe to run again. Requires Python (uv, pipx, or pip3).
 set -euo pipefail
@@ -26,7 +26,6 @@ import json, os, sys
 crg = sys.argv[1]
 entry = {"command": crg, "args": ["serve"]}
 targets = {
-    "Claude Code": os.path.expanduser("~/.claude.json"),
     "Bob":         os.path.expanduser("~/.bob/settings/mcp_settings.json"),
 }
 for label, p in targets.items():
@@ -42,5 +41,5 @@ for label, p in targets.items():
 PY
 
 echo ""
-echo "Done. Restart Bob / start a new Claude Code session to load it."
+echo "Done. Restart Bob to load it."
 echo "First use in a repo builds its code map (a few seconds); incremental after that."

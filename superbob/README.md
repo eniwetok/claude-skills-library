@@ -1,6 +1,6 @@
 # SuperBob (IBM Bob extension)
 
-**SuperBob is a way to use the [claude-skills-library](../README.md) inside IBM Bob.**
+**SuperBob is a way to use your [skills library](../README.md) inside IBM Bob.**
 
 It is a standalone extension project. It does **not** own or maintain the skills. It *packages*
 the library's skills into a `.vsix` you install in Bob, and it adds the Bob-side machinery
@@ -8,11 +8,11 @@ the library's skills into a `.vsix` you install in Bob, and it adds the Bob-side
 small, focused set of those skills per task.
 
 ```
-claude-skills-library   ── input ──▶   superbob/  ── builds ──▶  super-bob-skills-<ver>.vsix
+skills library         ── input ──▶   superbob/  ── builds ──▶  super-bob-skills-<ver>.vsix
 (skills/, packages/)                   (this project)             (installs into IBM Bob)
 ```
 
-The extension only ever manages `~/.bob/skills`. It does not touch Claude Code (`~/.claude`).
+The extension only ever manages `~/.bob/skills`. It touches nothing outside `~/.bob`.
 
 ---
 
@@ -21,7 +21,7 @@ The extension only ever manages `~/.bob/skills`. It does not touch Claude Code (
 ```
 superbob/
 ├── config.sh          Single source of truth for paths. SB_LIBRARY points at the
-│                       claude-skills-library (defaults to the parent repo for now).
+│                       skills library (defaults to the parent repo for now).
 ├── vsix/
 │   ├── extension/      The VS Code / Bob extension source (extension.js, package.json, icons, README).
 │   ├── build-vsix.sh   Builds the .vsix.
@@ -57,11 +57,10 @@ bobide --install-extension superbob/dist/super-bob-skills-<ver>.vsix --force
 
 The build reads the library from `SB_LIBRARY` (see `config.sh`). Right now SuperBob lives as a
 subfolder of the library repo, so `SB_LIBRARY` defaults to the parent directory. **To move
-SuperBob into its own repo later**, copy this `superbob/` folder out, then point it at a library
-checkout:
+SuperBob into its own repo later**, copy this `superbob/` folder out, then point it at a skills-library checkout:
 
 ```bash
-export SB_LIBRARY="$HOME/Documents/Skills"   # a claude-skills-library checkout
+export SB_LIBRARY="$HOME/Documents/Skills"   # a skills-library checkout
 superbob/vsix/build-vsix.sh
 ```
 

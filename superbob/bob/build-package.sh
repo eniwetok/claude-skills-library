@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
 # Build the Bob skills package (dist/bob-skills-package.zip) that the SuperBob .vsix ships.
-# Reads the claude-skills-library (SB_LIBRARY) as input; writes into the extension (SB_ROOT).
+# Reads the skills library (SB_LIBRARY) as input; writes into the extension (SB_ROOT).
 set -euo pipefail
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/config.sh"
 REPO="$SB_ROOT"          # SuperBob extension root (bob/, vsix/, dist/ live here)
-LIB="$SB_LIBRARY"        # the claude-skills-library this extension packages
+LIB="$SB_LIBRARY"        # the skills library this extension packages
 OUT="$SB_DIST"
 STAGE="$(mktemp -d)/skills-package"
 
 # GATE: refuse to build if the library has a broken reference. A mode or the
 # router pointing at a missing skill silently breaks lean mode, so it must never ship.
-LINT="$HOME/.claude/skills/skill-library-lint/scripts/lint.py"
-[ -f "$LINT" ] || LINT="$LIB/skills/skill-library-lint/scripts/lint.py"
+LINT="$LIB/skills/skill-library-lint/scripts/lint.py"
 if [ -f "$LINT" ]; then
   echo "Running skill-library-lint gate…"
   if ! python3 "$LINT"; then
@@ -46,9 +45,7 @@ while IFS= read -r f; do
   rsync -a --exclude '.DS_Store' "$d"/ "$STAGE/skills/$name"/ 2>/dev/null || true
 done < <(find "$LIB/packages" "$LIB/skills" -name SKILL.md 2>/dev/null)
 
-# target-specific meta skill, chosen at install time
-cp "$REPO/bob/meta/mission-control.bob.md"    "$STAGE/meta/"
-cp "$REPO/bob/meta/mission-control.claude.md" "$STAGE/meta/"
+cp "$REPO/bob/meta/mission-control.bob.md" "$STAGE/meta/"
 
 cp "$REPO"/bob/profiles/*.txt "$STAGE/profiles/"
 cp "$REPO"/bob/profiles/_meta.json "$STAGE/profiles/" 2>/dev/null || true

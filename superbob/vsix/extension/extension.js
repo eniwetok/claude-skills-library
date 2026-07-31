@@ -591,15 +591,6 @@ function activate(context) {
     vscode.commands.registerCommand('superBobSkills.status', () => {
       const p = activeProfile();
       vscode.window.showInformationMessage(p ? 'Active kit: ' + p : 'SuperBob not installed yet.');
-    }),
-    vscode.commands.registerCommand('superBobSkills.installCrg', () => {
-      // code-review-graph is an MCP TOOL (not a skill). Run the bundled deploy
-      // script in a terminal so the user sees the pip/uv install + MCP registration.
-      const script = path.join(context.extensionPath, 'deploy-code-review-graph.sh');
-      const term = vscode.window.createTerminal('SuperBob, code-review-graph');
-      term.show();
-      term.sendText('bash "' + script + '"');
-      vscode.window.showInformationMessage('Installing code-review-graph, watch the terminal. Restart Bob when it finishes.');
     })
   );
 

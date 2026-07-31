@@ -7,7 +7,7 @@ description: >
   mode", "turn on X mode", "SuperBob mode", "which mode", as well as "start working on",
   "help me build", "where do I start", "which skill should I use", "new project", or any
   task where the right skill is not obvious. Picks the right skills in order and loads a
-  kit's skills on request. Note: Claude Code's automatic hooks do NOT run in Bob.
+  kit's skills on request.
 ---
 
 ---
@@ -18,7 +18,6 @@ description: >
 `using-superpowers`.** Everything else, ~1,000 skills, sits UNLOADED in a vault:
 
 - IBM Bob: `~/.bob/skills-vault/<skill>/SKILL.md`
-- VS Code: `~/.claude/skills-vault/<skill>/SKILL.md`
 
 This keeps the starting context tiny (~500 tokens instead of ~67,000). The trade-off:
 the agent cannot auto-activate a vault skill, because its description isn't loaded. So
@@ -27,7 +26,7 @@ the agent cannot auto-activate a vault skill, because its description isn't load
 ### How to invoke a skill on demand
 1. Read the task and match it to an **intent** in the table below.
 2. For each skill that intent needs, **read its file** from the vault
-   (`~/.bob/skills-vault/<skill>/SKILL.md` or `~/.claude/skills-vault/<skill>/SKILL.md`)
+   (`~/.bob/skills-vault/<skill>/SKILL.md`)
    and follow it as if it were active.
 3. Announce which skill you are applying and why.
 4. Do not guess a skill's contents, read the file. Do not apply a skill the intent
@@ -93,19 +92,16 @@ how to resolve conflicts when several overlap.
 **Routing is not enforcement.** This skill tells you WHICH skills to run. For
 mission-critical software, being told is not enough, quality must be gated.
 
-### IMPORTANT, what is DIFFERENT in Bob vs Claude Code
+### IMPORTANT, enforcement in Bob
 
-Claude Code enforces four automatic guardrails via hooks (branch-guard, design-gate,
-format-on-save, dod-gate). **Those hooks DO NOT run in Bob.** Bob has no equivalent
-hook system, so nothing here is automatically enforced.
+Bob has no automatic enforcement hooks, so nothing here is automatically enforced.
 
 That means in Bob the five pillars below are a **discipline you must follow**, not a
 machine that stops you. Do not assume a gate fired, there is no gate. State explicitly
 when a check has been done, and never claim work is verified unless you actually ran the
 verification.
 
-If a change is genuinely mission-critical, do the final verification in Claude Code
-where the guardrails exist, or run the checks by hand and show the output.
+If a change is genuinely mission-critical, run the checks by hand and show the output.
 
 ### The Five Pillars, the checklist to hold yourself to
 
@@ -570,16 +566,13 @@ These apply across ALL workflows, not just specific ones:
 
 3. **`agent-self-evaluation`**, run after completing any non-trivial task for a structured self-scorecard.
 
-4. **`hookify-rules`**, for recurring rules ("always do X"). Note: hooks are a Claude Code
-   feature; in Bob there is no hook system, so such rules must be followed by discipline.
+4. **`hookify-rules`**, for recurring rules ("always do X"). Bob has no hook system, so
+   such rules must be followed by discipline.
 
-5. **NO automatic gates exist in Bob.** Claude Code has hooks that actually block bad work
-   (no edits on the main branch, no code before a plan, auto-formatting, refusing to finish
-   while tests fail). **None of them run here. Nothing will stop you.**
-   Therefore: run the checks yourself and state plainly which ones you ran. Never report
-   work as verified unless you actually ran the verification and can show the output.
-   For genuinely mission-critical changes, do the final verification pass in Claude Code
-   where the guardrails exist.
+5. **NO automatic gates exist in Bob.** Nothing will stop you from shipping bad work: no
+   block on editing the main branch, no code-before-a-plan check, no refusing to finish
+   while tests fail. Therefore: run the checks yourself and state plainly which ones you ran.
+   Never report work as verified unless you actually ran the verification and can show the output.
 
 6. **Close the loop, skill-coverage check after every task.** Answer the user FIRST, then ask:
    did this use case have a skill?

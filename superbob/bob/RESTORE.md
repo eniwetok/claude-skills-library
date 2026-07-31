@@ -19,19 +19,11 @@ rm -rf ~/.bob/skills
 tar -xzf ~/Documents/Skills/backups/bob-skills_<STAMP>.tar.gz -C ~/.bob
 ```
 
-## Restore Claude Code's skills
-
-```bash
-rm -rf ~/.claude/skills
-tar -xzf ~/Documents/Skills/backups/claude-skills_<STAMP>.tar.gz -C ~/.claude
-```
-
 ## Settings files
 
 `bob-settings_<STAMP>.json`  -> `~/.bob/settings.json`
-`claude-settings_<STAMP>.json` -> `~/.claude/settings.json`
 
 ## Nothing was deleted
 
 The full library is in `~/.bob/skills-vault/` (1015 skills). Switching profiles only
-changes `~/.bob/skills/`; the vault is never modified. `~/.claude/skills` was untouched.
+changes `~/.bob/skills/`; the vault is never modified.

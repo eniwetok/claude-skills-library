@@ -18,8 +18,8 @@ cd claude-skills-library
 ```
 
 That builds `~/.bob/skills-vault` from this repo, installs the profile switcher,
-and activates the small `code` profile. It backs up any existing `~/.bob/skills`
-first, and never touches `~/.claude/skills`.
+and activates a small kit. It backs up any existing `~/.bob/skills` first, and
+touches nothing outside `~/.bob`.
 
 ## Commands
 
@@ -52,8 +52,8 @@ Edit `profiles/*.txt` to change membership — one skill name per line.
 
 ## Important: Bob has no hooks
 
-Claude Code's four guardrails (branch-guard, design-gate, format-on-save, dod-gate)
-**do not run in Bob**. Nothing blocks bad work there. Bob's mission-control says so
-explicitly. Do final verification of mission-critical changes in Claude Code.
+Bob has no hook system, so nothing blocks bad work: no guard on the main branch, no
+code-before-a-plan check, no refusing to finish while tests fail. Bob's mission-control
+says so explicitly. Run the verification yourself and show the output.
 
 See RESTORE.md to undo everything.
