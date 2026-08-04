@@ -98,3 +98,21 @@ verified are real.
 - **[C] failure** — remove the vendor/crypto-dependent skill from the mode. It can stay in the
   vault for anyone who has that product installed; it just shouldn't be in a curated mode.
 - Rerun until exit code is `0`, then rebuild/commit.
+
+## Prompt-injection / malicious-skill scan
+
+`scripts/scan_injection.py [LIBRARY_ROOT]` inspects every `SKILL.md` **and its bundled scripts**
+for the real attack signals raised by Snyk's ToxicSkills research (skills have no signing, review,
+or sandbox):
+
+- **Critical** — a bundled script that executes remote/obfuscated code (`curl|bash`, reverse
+  shells, `eval(base64…)`) or reads secrets (`~/.ssh`, `.env`, `id_rsa`) and sends them out.
+- **High** — instruction override ("ignore previous instructions"), exfiltration, or safety
+  bypass in `SKILL.md` prose.
+- **Medium** — obfuscation (base64/zero-width/bidi), instructions hidden in HTML comments, and
+  skills requesting `Bash` in `allowed-tools`.
+
+Security-education skills (hunt-*, bughunter, redteam, vibesec…) are **tagged**, since attack
+strings are their subject matter, not injection. Run it when adding any new skill from an
+external source. Exit code: 2 on critical, 1 on non-security high, else 0. **Every critical/high
+must still be read by a human** — the scan surfaces candidates, it doesn't judge intent.
