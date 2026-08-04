@@ -637,6 +637,9 @@ function getWebviewHtml() {
   .mode-skills{margin-top:8px;padding-top:8px;border-top:1px solid var(--vscode-widget-border,#2a2a2a);color:var(--vscode-descriptionForeground);font-size:12px;line-height:1.7}
   details.builtins{margin-top:4px}
   details.builtins summary{cursor:pointer;color:var(--vscode-descriptionForeground);font-size:12px;padding:4px 0}
+  details.active-skills{margin-top:8px}
+  details.active-skills summary{cursor:pointer;color:var(--vscode-textLink-foreground,#4aa8d8);font-size:12px;padding:3px 0}
+  details.active-skills[open] summary{color:var(--vscode-descriptionForeground)}
   details.help{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:8px;padding:8px 12px;margin:12px 0}
   details.help summary{cursor:pointer;font-weight:600}
   .helpbody{margin-top:8px;color:var(--vscode-descriptionForeground);font-size:12.5px}
@@ -689,7 +692,10 @@ function getWebviewHtml() {
   <div class="active-card">
     <div><span class="dot"></span><span class="now" id="activeNow"></span></div>
     <div id="activeDesc"></div>
-    <div class="skills" id="activeSkills"></div>
+    <details class="active-skills">
+      <summary id="activeSkillsSummary">Loaded skills</summary>
+      <div class="skills" id="activeSkills"></div>
+    </details>
     <div id="addonsWrap" style="display:none;margin-top:9px;border-top:1px solid var(--vscode-widget-border,#2a2a2a);padding-top:9px">
       <div class="muted" style="font-size:11px;margin-bottom:7px">Optional, always on when enabled:</div>
       <div id="addons"></div>
@@ -840,6 +846,10 @@ function getWebviewHtml() {
     const ordered=[...S.core, ...extras];   // superpowers + mission-control first (always on)
     const cont=document.getElementById('activeSkills'); cont.innerHTML='';
     cont.appendChild(skillRows(ordered));
+    // one-line summary so the card stays a stable height; skills expand on demand
+    const kitCount=ordered.length - S.core.length;
+    document.getElementById('activeSkillsSummary').textContent =
+      ordered.length + ' skills loaded — ' + S.core.length + ' core' + (kitCount>0 ? (' + ' + kitCount + ' from the kit') : '') + ' · view';
     renderAddons();
 
     // your kits = the user's own (non-builtin) kits. Lean is the Auto/base state,
