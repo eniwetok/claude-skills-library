@@ -34,5 +34,23 @@
       "In cro-objections, use the customer's exact words; matching their language is what converts.",
       "Pick ONE north-star (return rate, not signups) so retention work has a scoreboard."
     ]
+  },
+  "pm-methodology": {
+    "tagline": "Take a product idea from a blank page to shipped, measured, and iterated — one anchor skill per phase.",
+    "when": "You want a repeatable process instead of ad-hoc PM work, or you are onboarding to a structured product lifecycle.",
+    "example": [
+      "Foundation: foundation-lean-canvas — capture the bet on one page (problem, users, value, the one metric).",
+      "Discover: discover-interview-synthesis — turn raw interviews into patterns and real needs.",
+      "Define: define-jtbd-canvas — frame the job the product is hired to do.",
+      "Develop: develop-solution-brief — shape the solution and its rationale before building.",
+      "Deliver: deliver-prd — write the PRD and hand off to build.",
+      "Measure: measure-experiment-design — design the experiment that tells you if it worked.",
+      "Iterate: iterate-retrospective — capture what you learned and decide the next move."
+    ],
+    "tips": [
+      "Run the phases in order — each phase feeds the next.",
+      "This kit is the spine; the full product-on-purpose set has more skills per phase (discover-market-sizing, deliver-user-stories, measure-experiment-results) when you need depth.",
+      "Pair with the product-frameworks kit for the JTBD / Hook / CRO thinking behind the phases."
+    ]
   }
 }

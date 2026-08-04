@@ -32,6 +32,7 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 21 | **BehiSecc/VibeSec** (proactive secure coding) | BehiSecc | [github.com/BehiSecc/VibeSec-Skill](https://github.com/BehiSecc/VibeSec-Skill) |
 | 22 | **petergyang/no-ai-slop** (sharper, more human writing) | Peter Yang | [github.com/petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) |
 | 23 | **ayghri/i-have-adhd** (concise, action-first output style) | ayghri | [github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) |
+| 24 | **product-on-purpose/pm-skills** (methodology-driven PM lifecycle · 68 skills) | Product on Purpose | [github.com/product-on-purpose/pm-skills](https://github.com/product-on-purpose/pm-skills) |
 
 ---
 
@@ -539,3 +540,19 @@ claude-skills-library/
 | Skill | Description | Installed |
 |-------|-------------|-----------|
 | [i-have-adhd](packages/i-have-adhd/) | Direct, action-first responses: next action first, numbered steps, specific time estimates, no filler | ✅ |
+
+---
+
+## Group 24 — product-on-purpose/pm-skills (68 skills · methodology-driven PM lifecycle)
+
+> A production-quality PM library built on a repeatable lifecycle: **Foundation → Discover →
+> Define → Develop → Deliver → Measure → Iterate**, plus Google-Ventures-style **Design Sprint**
+> and **Foundation Sprint** toolkits and PM utilities (pm-critic, workflow-orchestrator). Each
+> skill has a canonical output contract and refuses to fabricate data. Passed the injection scan
+> clean (0 findings).
+> **Upstream:** [github.com/product-on-purpose/pm-skills](https://github.com/product-on-purpose/pm-skills) — Apache 2.0
+> **Install:** `cp -r packages/product-on-purpose-pm/skills/* ~/.claude/skills/`
+
+In SuperBob this is the **`pm-methodology`** kit — one anchor skill per phase (foundation-lean-canvas,
+discover-interview-synthesis, define-jtbd-canvas, develop-solution-brief, deliver-prd,
+measure-experiment-design, iterate-retrospective); the full 68-skill set is in the vault for depth.

@@ -24,6 +24,7 @@ SuperBob's own code — the installer, the profile system, and the mission-contr
 | [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) | Dietrich Gebert | MIT |
 | [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) | Peter Yang | MIT |
 | [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) | ayghri | MIT |
+| [product-on-purpose/pm-skills](https://github.com/product-on-purpose/pm-skills) | Product on Purpose | Apache 2.0 |
 | [anthropics/skills](https://github.com/anthropics/skills) | Anthropic | Apache 2.0 |
 | [anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) | Anthropic | Apache 2.0 |
 | [nexu-io/open-design](https://github.com/nexu-io/open-design) | nexu-io | Apache 2.0 |

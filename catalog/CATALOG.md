@@ -647,3 +647,23 @@ Distinct from the generate/style writing skills - this one strips slop and detec
 | **i-have-adhd** | Shapes every reply to be direct and action-first: next action first, numbered steps, specific time estimates, no preamble/recap/closers. Persists until "stop adhd mode". | `/i-have-adhd`, toggle in SuperBob panel | ✅ installed |
 
 In SuperBob this is a **toggleable always-on add-on** (a new concept): it sits in the core box with `using-superpowers` + `mission-control` and layers on every kit, but unlike those it has an on/off switch — it's a preference (concise vs verbose). Off by default. The auto-rule instructs Bob to honor it whenever active.
+
+
+## Group 24 — product-on-purpose/pm-skills (68 skills · methodology-driven PM lifecycle)
+
+**Source:** [github.com/product-on-purpose/pm-skills](https://github.com/product-on-purpose/pm-skills) - Apache 2.0
+**Package:** packages/product-on-purpose-pm/ · scanned clean (0 injection findings)
+
+A repeatable product lifecycle as skills: **Foundation → Discover → Define → Develop → Deliver → Measure → Iterate**, plus **Design Sprint** and **Foundation Sprint** toolkits (`tool-*`) and PM utilities (`utility-pm-critic`, `utility-pm-workflow-orchestrator`, `utility-slideshow-creator`). Each skill has a canonical output contract and refuses to fabricate data (market sizes, OKR baselines, statistical significance).
+
+| Phase | Anchor skill (in the SuperBob `pm-methodology` kit) |
+|-------|------|
+| Foundation | foundation-lean-canvas |
+| Discover | discover-interview-synthesis |
+| Define | define-jtbd-canvas |
+| Develop | develop-solution-brief |
+| Deliver | deliver-prd |
+| Measure | measure-experiment-design |
+| Iterate | iterate-retrospective |
+
+Full 68 skills ship to the vault; the `pm-methodology` kit surfaces the 7-phase spine (~961 tokens). Pairs with the `product-frameworks` kit (JTBD / Hook Model / CRO thinking).

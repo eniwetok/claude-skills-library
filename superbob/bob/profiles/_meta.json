@@ -15,5 +15,6 @@
   "sample-rag-evals": "Sample custom kit. A small, focused kit for checking a RAG agent's answers. Edit it, delete it, or copy it as a starting point for your own.",
   "sample-content-writing": "Sample custom kit. A small kit for writing and cleaning up docs. Edit it, delete it, or copy it as a starting point for your own.",
   "wiki": "Document and onboard a codebase: understand a repo, generate a wiki and guided code tours, capture architecture and design decisions, and keep the docs useful.",
-  "product-frameworks": "The three PM thinking frameworks most tools skip - Jobs to Be Done (why users come), Hook Model (why they stay), CRO (why they convert) - plus discovery and retention-measurement to apply them."
+  "product-frameworks": "The three PM thinking frameworks most tools skip - Jobs to Be Done (why users come), Hook Model (why they stay), CRO (why they convert) - plus discovery and retention-measurement to apply them.",
+  "pm-methodology": "A repeatable product methodology (product-on-purpose): one anchor skill per phase - Foundation, Discover, Define (JTBD), Develop, Deliver (PRD), Measure (experiments), Iterate (retro). Walk a product idea end to end."
 }
