@@ -26,15 +26,18 @@ const AUTO_RULE_TEXT = `# SuperBob — automatic skill routing (managed by the S
 SuperBob is ON. Do this at the start of EVERY task, in every mode, automatically — without
 being asked and without needing the \`/superbob\` command.
 
-**First line of your reply, always:** show one short marker so it's visible SuperBob ran, e.g.
-\`▸ SuperBob → applying <skill-name>\` — or \`▸ SuperBob → no specific skill needed\` when none fits.
+**First line of your reply, always** — show a short marker so it's visible SuperBob ran, and
+say where the skill comes from:
+- a skill from a SuperBob kit or the vault → \`▸ SuperBob → from kit: <skill-name>\`
+- one of the user's own already-installed skills → \`▸ SuperBob → your own skill: <skill-name>\`
+- nothing fits → \`▸ SuperBob → no specific skill needed\`
 
 Then:
 
 1. **Check for a skill (using-superpowers).** Look for a relevant skill in \`~/.bob/skills\`
    (already active, including the user's own) and in \`~/.bob/skills-vault\` (loaded on demand).
-   Read the matching \`SKILL.md\` and follow it. If an active skill already fits, use it — but
-   still name it in the marker above so SuperBob's routing is visible.
+   Read the matching \`SKILL.md\` and follow it. Use whichever fits best — but label its origin
+   in the marker above, and never imply SuperBob owns a skill the user installed themselves.
 2. **Route with mission-control.** When no active skill clearly fits, read
    \`~/.bob/skills/mission-control/SKILL.md\` and use it to pull the right skill from the vault.
 3. **Don't over-claim.** Never say work is verified unless you actually ran the check.
