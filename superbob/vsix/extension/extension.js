@@ -42,6 +42,8 @@ Then:
    \`~/.bob/skills/mission-control/SKILL.md\` and use it to pull the right skill from the vault.
 3. **Don't over-claim.** Never say work is verified unless you actually ran the check.
 
+**Honor active add-ons.** If an optional add-on skill is active in \`~/.bob/skills\` (for example an output-style skill like \`i-have-adhd\`), follow it on every response for the whole session, regardless of its own invocation setting.
+
 Loading a specific kit with \`/superbob <kit>\` or the SuperBob sidebar is optional — the routing
 above is automatic. If SuperBob is switched **off** in the sidebar, this file is removed and Bob
 behaves normally.
@@ -65,6 +67,8 @@ Then:
    installed themselves — those are outside SuperBob's scope in this mode.
 4. **Don't over-claim.** Never say work is verified unless you actually ran the check.
 
+**Honor active add-ons.** If an optional add-on skill is active in \`~/.bob/skills\` (for example an output-style skill like \`i-have-adhd\`), follow it on every response for the whole session, regardless of its own invocation setting.
+
 Switch back to "All skills" in the SuperBob panel to let it route your own skills too. If SuperBob
 is switched **off**, this file is removed and Bob behaves normally.
 `;
@@ -81,6 +85,20 @@ const CORE = ['using-superpowers', 'mission-control']; // superpowers first, alw
 // Every shipped kit is a built-in "starter kit" (not deletable). "Your kits" is left for
 // the user's own creations, seeded with a couple of clearly-labelled sample kits.
 const BUILTIN = ['software-development', 'data-analysis', 'product-management', 'production-engineering', 'test-engineering', 'application-security', 'frontend-design', 'web-research', 'release-review', 'bug-fixing', 'code-simplification', 'rag-evaluation', 'content-writing', 'wiki'];
+
+// Optional always-on add-ons: skills that layer on EVERY kit (like CORE) but can be toggled.
+// Unlike CORE (mandatory), these are preferences the user turns on/off. They persist across
+// kit switches and are removed when SuperBob is off. Enabled set lives in ~/.bob/.superbob-addons.
+const ADDONS = [{
+  name: 'i-have-adhd',
+  title: 'ADHD mode (concise output)',
+  desc: "Shapes every reply to be direct and action-first: lead with the next step, number tasks, no preamble or filler. Turn off for verbose output."
+}];
+const ADDON_FILE = () => path.join(HOME, '.bob', '.superbob-addons');
+function readAddons() { try { return new Set(fs.readFileSync(ADDON_FILE(), 'utf8').split('\n').map(s => s.trim()).filter(Boolean)); } catch (e) { return new Set(); } }
+function writeAddons(set) { try { fs.writeFileSync(ADDON_FILE(), [...set].join('\n') + '\n'); } catch (e) {} }
+function enabledAddons() { const en = readAddons(); return ADDONS.filter(a => en.has(a.name) && fs.existsSync(path.join(BOB_VAULT, a.name))).map(a => a.name); }
+function addonStates() { const en = readAddons(); return ADDONS.filter(a => fs.existsSync(path.join(BOB_VAULT, a.name))).map(a => ({ name: a.name, title: a.title, desc: a.desc, on: en.has(a.name) })); }
 
 let statusItem;
 let panel;
@@ -177,6 +195,7 @@ function superbobOff() {
 function applySkillSet(skillNames, label) {
   if (!fs.existsSync(BOB_VAULT)) { vscode.window.showErrorMessage('SuperBob: not installed yet.'); return false; }
   const wanted = new Set(CORE);
+  for (const a of enabledAddons()) wanted.add(a);   // toggled always-on add-ons layer on every kit
   for (const n of skillNames) wanted.add(n);
   const staged = [...wanted].filter(s => fs.existsSync(path.join(BOB_VAULT, s)));
   if (staged.length < CORE.length) { vscode.window.showErrorMessage('SuperBob: nothing to load, aborted.'); return false; }
@@ -294,7 +313,8 @@ function stateMessage() {
     meta: readMeta(),
     skills: listVaultSkills(),
     tools: OPTIONAL_TOOLS.map(toolState),
-    scope: readScope()
+    scope: readScope(),
+    addons: addonStates()
   };
 }
 function postState() { const msg = stateMessage(); webviews.forEach(w => { try { w.postMessage(msg); } catch (e) {} }); }
@@ -323,6 +343,21 @@ async function handleMessage(m, context) {
   }
   if (m.type === 'deleteMode') { deleteCustomProfile(m.name); postState(); return; }
   if (m.type === 'openGuide') { openGuidePanel(m.kit, context); return; }
+  if (m.type === 'setAddon') {
+    const a = ADDONS.find(x => x.name === m.name); if (!a) { postState(); return; }
+    const en = readAddons(); if (m.on) en.add(a.name); else en.delete(a.name); writeAddons(en);
+    // reflect immediately in the active dir + manifest (unless SuperBob is off)
+    if (!isPoweredOff()) {
+      const managed = managedSet();
+      const dest = path.join(BOB_ACTIVE, a.name);
+      if (m.on && fs.existsSync(path.join(BOB_VAULT, a.name))) { fs.rmSync(dest, { recursive: true, force: true }); copyDir(path.join(BOB_VAULT, a.name), dest); managed.add(a.name); }
+      else if (!m.on) { fs.rmSync(dest, { recursive: true, force: true }); managed.delete(a.name); }
+      writeManaged([...managed]);
+      writeAutoRule();   // refresh the rule so Bob honors (or stops honoring) the add-on
+    }
+    vscode.window.showInformationMessage(a.title + (m.on ? ' on' : ' off') + '. Start a new conversation to apply.');
+    postState(); return;
+  }
   if (m.type === 'install') { await doInstall(context); postState(); return; }
   if (m.type === 'toolToggle') {
     const t = toolByName(m.tool); if (!t) { postState(); return; }
@@ -550,6 +585,10 @@ function getWebviewHtml() {
     <div><span class="dot"></span><span class="now" id="activeNow"></span></div>
     <div id="activeDesc"></div>
     <div class="skills" id="activeSkills"></div>
+    <div id="addonsWrap" style="display:none;margin-top:9px;border-top:1px solid var(--vscode-widget-border,#2a2a2a);padding-top:9px">
+      <div class="muted" style="font-size:11px;margin-bottom:7px">Optional, always on when enabled:</div>
+      <div id="addons"></div>
+    </div>
   </div>
 
   <h2>Your kits</h2>
@@ -641,6 +680,19 @@ function getWebviewHtml() {
     return d;
   }
 
+  function renderAddons(){
+    const wrap=document.getElementById('addonsWrap'); const c=document.getElementById('addons');
+    if(!wrap||!c) return;
+    const list=S.addons||[];
+    wrap.style.display=list.length?'block':'none'; c.innerHTML='';
+    list.forEach(a=>{
+      const row=document.createElement('div'); row.style.display='flex'; row.style.alignItems='flex-start'; row.style.gap='9px'; row.style.margin='6px 0';
+      row.innerHTML='<label class="pswitch" style="margin-top:1px"><input type="checkbox" class="addonsw" data-addon="'+a.name+'" '+(a.on?'checked':'')+'/><span class="track"></span><span class="knob"></span></label>'+
+        '<span><span style="font-weight:600">'+a.title+'</span><div class="muted" style="font-size:12px">'+a.desc+'</div></span>';
+      c.appendChild(row);
+    });
+  }
+
   function renderTools(){
     const sec=document.getElementById('toolsSection'); if(sec) sec.style.display=(S.tools&&S.tools.length)?'block':'none';
     const c=document.getElementById('tools'); if(!c) return; c.innerHTML='';
@@ -681,6 +733,7 @@ function getWebviewHtml() {
     const ordered=[...S.core, ...extras];   // superpowers + mission-control first (always on)
     const cont=document.getElementById('activeSkills'); cont.innerHTML='';
     cont.appendChild(skillRows(ordered));
+    renderAddons();
 
     // your kits = the user's own (non-builtin) kits. Lean is the Auto/base state,
     // controlled by the Auto toggle and shown in the active card, so it is not a card here.
@@ -754,6 +807,7 @@ function getWebviewHtml() {
     if(e.target.id==='powerToggle'){ vscode.postMessage({type:'setPower', on:e.target.checked}); }
     if(e.target.name==='scope' && e.target.checked){ vscode.postMessage({type:'setScope', scope:e.target.value}); }
     if(e.target.classList && e.target.classList.contains('toolsw')){ vscode.postMessage({type:'toolToggle', tool:e.target.dataset.tool, on:e.target.checked}); }
+    if(e.target.classList && e.target.classList.contains('addonsw')){ vscode.postMessage({type:'setAddon', name:e.target.dataset.addon, on:e.target.checked}); }
     if(e.target.id==='bstart'){ const p=e.target.value; sel=new Set(p&&S.profiles[p]?S.profiles[p].filter(n=>!S.core.includes(n)):[]); renderBuilder(); } });
 </script></body></html>`;
 }

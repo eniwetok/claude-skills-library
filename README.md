@@ -31,6 +31,7 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 20 | **dietrichgebert/ponytail** ("lazy senior engineer") | Dietrich Gebert | [github.com/dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) |
 | 21 | **BehiSecc/VibeSec** (proactive secure coding) | BehiSecc | [github.com/BehiSecc/VibeSec-Skill](https://github.com/BehiSecc/VibeSec-Skill) |
 | 22 | **petergyang/no-ai-slop** (sharper, more human writing) | Peter Yang | [github.com/petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) |
+| 23 | **ayghri/i-have-adhd** (concise, action-first output style) | ayghri | [github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) |
 
 ---
 
@@ -520,3 +521,18 @@ claude-skills-library/
 | Skill | Description | Installed |
 |-------|-------------|-----------|
 | [no-ai-slop](packages/no-ai-slop/) | Edit drafts to remove AI-slop patterns while keeping voice; or detect-only | ✅ |
+
+---
+
+## Group 23 — ayghri/i-have-adhd (1 skill · concise, action-first output)
+
+> Shapes output for an ADHD reader (and anyone who wants brevity): lead with the next action,
+> number multi-step work, no preamble or closers. In **SuperBob it's a toggleable always-on
+> add-on** — it sits with the core skills and layers on every kit, but has an on/off switch
+> (turn it off for verbose output).
+> **Upstream:** [github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) — MIT
+> **Install:** `cp -r packages/i-have-adhd/skills/* ~/.claude/skills/`
+
+| Skill | Description | Installed |
+|-------|-------------|-----------|
+| [i-have-adhd](packages/i-have-adhd/) | Direct, action-first responses: next action first, numbered steps, specific time estimates, no filler | ✅ |

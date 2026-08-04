@@ -635,3 +635,15 @@ Complements BugHunter (which *hunts* existing vulns) — vibesec *prevents* them
 | **no-ai-slop** | Edit drafts to remove 20+ AI-slop patterns while keeping the writer's voice; or detect (name each pattern, no rewrite) | 'less AI-sounding', 'make this clearer', 'is this AI slop', 'audit my writing' | installed |
 
 Distinct from the generate/style writing skills - this one strips slop and detects it. Wired into the SuperBob **writing** mode.
+
+
+## Group 23 — ayghri/i-have-adhd (1 skill · concise, action-first output)
+
+**Source:** [github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) - MIT
+**Package:** packages/i-have-adhd/
+
+| Skill | What it does | Triggers | Status |
+|-------|-------------|----------|--------|
+| **i-have-adhd** | Shapes every reply to be direct and action-first: next action first, numbered steps, specific time estimates, no preamble/recap/closers. Persists until "stop adhd mode". | `/i-have-adhd`, toggle in SuperBob panel | ✅ installed |
+
+In SuperBob this is a **toggleable always-on add-on** (a new concept): it sits in the core box with `using-superpowers` + `mission-control` and layers on every kit, but unlike those it has an on/off switch — it's a preference (concise vs verbose). Off by default. The auto-rule instructs Bob to honor it whenever active.
