@@ -16,5 +16,23 @@
       "Point Bob at the actual repo folder before you ask.",
       "Ask for it 'written to docs/' so you get real files, not just a chat answer."
     ]
+  },
+  "product-frameworks": {
+    "tagline": "The three PM thinking frameworks most tools skip: why users come (Jobs to Be Done), why they stay (Hook Model), and why they convert (CRO).",
+    "when": "Retention or growth is the problem — people try the product but don't stick, or don't convert — and you want discovery rooted in real motivation, not feature requests.",
+    "example": [
+      "Start with jobs-to-be-done: run switch interviews to find the real job and, crucially, the ANXIETY blocking the switch.",
+      "Use opportunity-solution-tree to map that job to a few solution bets instead of jumping to features.",
+      "Apply hook-model to design the return loop: internal trigger -> easy action -> variable reward -> investment. Run the ethics gate before shipping.",
+      "At first-use or the paywall, use cro-objections: list the 5 doubts a real visitor has and answer each with evidence, in their own words.",
+      "Prove it with cohort-analysis: does the retention curve flatten? That's the number that says the loop works.",
+      "value-proposition and north-star-metric keep the story and the one metric honest throughout."
+    ],
+    "tips": [
+      "Write the job solution-free (verb + object + context) before proposing anything.",
+      "Design the INTERNAL trigger first — an external notification alone never forms a habit.",
+      "In cro-objections, use the customer's exact words; matching their language is what converts.",
+      "Pick ONE north-star (return rate, not signups) so retention work has a scoreboard."
+    ]
   }
 }
