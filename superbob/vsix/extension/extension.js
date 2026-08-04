@@ -322,6 +322,7 @@ async function handleMessage(m, context) {
     postState(); return;
   }
   if (m.type === 'deleteMode') { deleteCustomProfile(m.name); postState(); return; }
+  if (m.type === 'openGuide') { openGuidePanel(m.kit, context); return; }
   if (m.type === 'install') { await doInstall(context); postState(); return; }
   if (m.type === 'toolToggle') {
     const t = toolByName(m.tool); if (!t) { postState(); return; }
@@ -389,6 +390,61 @@ function openPanel(context) {
   webviews.add(panel.webview);
   panel.webview.onDidReceiveMessage(m => handleMessage(m, context));
   panel.onDidDispose(() => { webviews.delete(panel.webview); panel = null; }, null, context.subscriptions);
+}
+
+// ---- per-kit "How to use" guide -------------------------------------------
+// An authored guide (bob/profiles/_guides.json) explains the synergy; when a kit has none,
+// we auto-generate a usable page from its skills + their descriptions. Every kit has a page.
+function readGuides() { try { return JSON.parse(fs.readFileSync(path.join(BOB_PROFILES, '_guides.json'), 'utf8')); } catch (e) { return {}; } }
+function guideFor(kit) {
+  const meta = readMeta(), g = readGuides()[kit] || {};
+  const skills = readList(path.join(BOB_PROFILES, kit + '.txt'))
+    .map(s => ({ name: s, desc: frontmatterTokens(path.join(BOB_VAULT, s)).desc }));
+  return {
+    kit,
+    tagline: g.tagline || meta[kit] || ('Skills for ' + kit.replace(/-/g, ' ') + '.'),
+    when: g.when || '',
+    skills,
+    example: g.example || [],
+    tips: g.tips || [],
+    authored: !!(g.example && g.example.length)
+  };
+}
+function esc(s) { return String(s || '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+function guideHtml(g) {
+  const skillRows = g.skills.map(s => '<div class="s"><div class="sn">' + esc(s.name) + '</div>' + (s.desc ? '<div class="sd">' + esc(s.desc) + '</div>' : '') + '</div>').join('');
+  const steps = g.example.length ? '<h2>Try it — a worked example</h2><ol>' + g.example.map(e => '<li>' + esc(e) + '</li>').join('') + '</ol>' : '';
+  const tips = g.tips.length ? '<h2>Tips</h2><ul>' + g.tips.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
+  const when = g.when ? '<p class="when"><b>When to reach for it:</b> ' + esc(g.when) + '</p>' : '';
+  const note = g.authored ? '' : '<p class="muted auto">This page was generated from the kit\'s skills. A hand-written walkthrough is coming.</p>';
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>
+    body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);max-width:720px;margin:0 auto;padding:28px 32px;line-height:1.6;font-size:14px}
+    h1{font-size:1.5rem;margin:0 0 4px} .tag{font-size:1.05rem;color:var(--vscode-descriptionForeground);margin:0 0 16px}
+    h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--vscode-descriptionForeground);margin:26px 0 10px;border-top:1px solid var(--vscode-widget-border,#333);padding-top:14px}
+    .when{background:var(--vscode-editorWidget-background);border-radius:8px;padding:10px 14px}
+    .s{padding:8px 0;border-top:1px solid var(--vscode-widget-border,#2a2a2a)} .s:first-child{border-top:0}
+    .sn{font-weight:600} .sd{color:var(--vscode-descriptionForeground);font-size:13px;margin-top:2px}
+    ol,ul{padding-left:22px;margin:0} li{margin:6px 0}
+    .muted{color:var(--vscode-descriptionForeground)} .auto{font-size:12px;font-style:italic;margin-top:6px}
+    .foot{margin-top:26px;border-top:1px solid var(--vscode-widget-border,#333);padding-top:12px;color:var(--vscode-descriptionForeground);font-size:13px}
+    code{background:var(--vscode-textCodeBlock-background,#222);padding:1px 5px;border-radius:4px}
+  </style></head><body>
+    <h1>${esc(g.kit)} kit</h1>
+    <p class="tag">${esc(g.tagline)}</p>
+    ${when}${note}
+    <h2>What's inside (${g.skills.length} skills)</h2>${skillRows}
+    ${steps}
+    ${tips}
+    <div class="foot">Load this kit from the SuperBob panel, or type <code>/superbob ${esc(g.kit)}</code> in chat. Then start a new conversation so the skills come online. The two core skills (using-superpowers, mission-control) are always on.</div>
+  </body></html>`;
+}
+let guidePanel;
+function openGuidePanel(kit, context) {
+  const g = guideFor(kit);
+  if (guidePanel) { guidePanel.title = 'How to use: ' + kit; guidePanel.webview.html = guideHtml(g); guidePanel.reveal(vscode.ViewColumn.Active); return; }
+  guidePanel = vscode.window.createWebviewPanel('superbobGuide', 'How to use: ' + kit, vscode.ViewColumn.Active, { enableScripts: false });
+  guidePanel.webview.html = guideHtml(g);
+  guidePanel.onDidDispose(() => { guidePanel = null; }, null, context.subscriptions);
 }
 
 function getWebviewHtml() {
@@ -657,6 +713,8 @@ function getWebviewHtml() {
       else { use.textContent='Use'; use.onclick=()=> vscode.postMessage(id==='__lean__'?{type:'applyLean'}:{type:'applyProfile',name:id}); }
       sp.appendChild(use);
     }
+    if(id!=='__lean__'){ const how=document.createElement('button'); how.className='linkbtn'; how.textContent='How to use';
+      how.title='open a plain-English guide for this kit'; how.onclick=()=> vscode.postMessage({type:'openGuide',kit:id}); sp.appendChild(how); }
     if(id!=='__lean__'){ const sk=document.createElement('button'); sk.className='linkbtn'; sk.textContent='skills';
       sk.onclick=()=>{ const el=d.querySelector('.mode-skills'); el.style.display = el.style.display==='none'?'block':'none'; }; sp.appendChild(sk); }
     if(deletable){ const del=document.createElement('button'); del.className='del'; del.textContent='🗑'; del.title='delete this kit';

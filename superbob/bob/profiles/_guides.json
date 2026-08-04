@@ -1,0 +1,20 @@
+{
+  "wiki": {
+    "tagline": "Turn a codebase you don't know into a clear, readable wiki.",
+    "when": "You've joined a new repo, you're documenting a project, or you want teammates to onboard by reading instead of asking around.",
+    "example": [
+      "Open the repo you want documented, load this kit, and start a new chat.",
+      "Say: \"Onboard this codebase and write a wiki to docs/.\"",
+      "codebase-onboarding maps the tech stack, the entry points, and the folder structure.",
+      "repo-scan inventories the files, and code-tour walks you through the important paths.",
+      "architecture and architecture-decision-records capture how it's built and why those choices were made.",
+      "documentation and docs-page turn all of that into linked Markdown pages; knowledge-ops keeps them organized.",
+      "You end up with a docs/ wiki a new teammate can read start to finish."
+    ],
+    "tips": [
+      "Load the kit, then start a fresh chat so the skills come online.",
+      "Point Bob at the actual repo folder before you ask.",
+      "Ask for it 'written to docs/' so you get real files, not just a chat answer."
+    ]
+  }
+}
