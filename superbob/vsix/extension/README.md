@@ -25,7 +25,7 @@ the right expert skill for the moment.
 - **Lean by default.** Bob loads about 200 tokens of skills instead of 67,000, so it stays fast and keeps its attention on your task.
 - **Auto mode.** Leave it on and SuperBob picks the right kit for each task. No setup for most work.
 - **Layers on your Bob mode.** One On/Off switch adds a kit's skills on top of Bob's Agent, Plan, or Ask mode. Off runs plain Bob.
-- **Switch three ways.** The sidebar panel, the `/superbob <kit>` command, or plain English ("use the test_engineering kit").
+- **Switch three ways.** The sidebar panel, the `/superbob <kit>` command, or plain English ("use the test-engineering kit").
 - **Build your own kits.** Group the skills you use for a recurring job; one click loads them.
 - **Your own skills stay untouched.** SuperBob only manages the skills it installed.
 
@@ -64,25 +64,25 @@ as you work. For most people that is the whole setup.
 Kits cover the whole software lifecycle. Reach for the ones that match the phase you're in.
 
 **Plan and research**
-- `product_management`: PRDs, roadmaps, prioritization, and go-to-market
-- `web_research`: research a topic and synthesize an answer
+- `product-management`: PRDs, roadmaps, prioritization, and go-to-market
+- `web-research`: research a topic and synthesize an answer
 
 **Design and build**
-- `production_engineering`: design and ship production-grade systems, including deploy and operate
-- `software_development`: write and change code, test-first, across your stack
-- `frontend_design`: build and polish web interfaces
+- `production-engineering`: design and ship production-grade systems, including deploy and operate
+- `software-development`: write and change code, test-first, across your stack
+- `frontend-design`: build and polish web interfaces
 
 **Test and review**
-- `test_engineering`: unit, end-to-end, and regression tests
-- `bug_fixing`: find and fix a specific bug, fast
-- `application_security`: find and fix vulnerabilities, and write secure code
-- `release_review`: review a change before it ships
-- `code_simplification`: cut over-engineering
+- `test-engineering`: unit, end-to-end, and regression tests
+- `bug-fixing`: find and fix a specific bug, fast
+- `application-security`: find and fix vulnerabilities, and write secure code
+- `release-review`: review a change before it ships
+- `code-simplification`: cut over-engineering
 
 **Analyze and document**
-- `data_analysis`: SQL, statistics, and judging AI output
-- `rag_evaluation`: score a RAG or search system
-- `content_writing`: write and edit docs and copy
+- `data-analysis`: SQL, statistics, and judging AI output
+- `rag-evaluation`: score a RAG or search system
+- `content-writing`: write and edit docs and copy
 
 Two **core** skills stay on under every kit: `mission-control` (picks the right skills for a task)
 and `using-superpowers` (checks for a matching skill before acting).
@@ -118,10 +118,10 @@ see what's inside and what each costs. Click **Unload** to turn a kit off.
 **Auto mode** *(simplest).* The top toggle. On means SuperBob picks per task. Off means you choose.
 
 **From the chat** *(hands-free).* Type `/` and pick `/superbob`, then a kit:
-- `/superbob software_development` loads that kit
+- `/superbob software-development` loads that kit
 - `/superbob` alone lists every kit with its description
 
-Plain words work too: "use the test_engineering kit." After switching by any method, start a new
+Plain words work too: "use the test-engineering kit." After switching by any method, start a new
 conversation so Bob re-reads its skills.
 
 ---
@@ -145,13 +145,13 @@ common jobs. Make your own when your work has a recurring shape they don't match
 evaluating a SQL agent, reviewing Terraform changes, or triaging support tickets.
 
 1. In the panel, click **+ Create your own kit**.
-2. **Name it** in lowercase, for example `sql_evals`. That becomes the label and the `/superbob sql_evals` command.
+2. **Name it** in lowercase, for example `sql-evals`. That becomes the label and the `/superbob sql-evals` command.
 3. Write a one-line **"what it's for"**, for example "Evaluating our SQL agent's answers." Describe the situation, not the skills. This is the cue Auto mode reads to know when to reach for it.
 4. Optionally **start from** an existing kit to prefill skills, then check or uncheck. Each skill shows a short description and its token cost.
 5. **Save.** It joins *Your kits* as a one-click kit, editable or removable anytime.
 
-The panel ships with two sample kits under **Your kits**, `sample_rag_evals` and
-`sample_content_writing`, so you can see what a small custom kit looks like. Edit them, delete
+The panel ships with two sample kits under **Your kits**, `sample-rag-evals` and
+`sample-content-writing`, so you can see what a small custom kit looks like. Edit them, delete
 them, or copy one as a starting point.
 
 **Keep kits lean.** The point is a small, focused context. Eight sharp skills beat thirty vague

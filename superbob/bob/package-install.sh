@@ -27,7 +27,7 @@ cp "$HERE"/profiles/*.txt "$PROF"/
 cp "$HERE/bob-profile" "$HOME/.bob/bob-profile"; chmod +x "$HOME/.bob/bob-profile"
 echo "  vault: $(ls -1 "$VAULT" | wc -l | tr -d ' ') skills"
 if [ "$FLAG" = "--all" ]; then "$HOME/.bob/bob-profile" all
-else "$HOME/.bob/bob-profile" software_development >/dev/null 2>&1 || true; "$HOME/.bob/bob-profile" status; fi
+else "$HOME/.bob/bob-profile" software-development >/dev/null 2>&1 || true; "$HOME/.bob/bob-profile" status; fi
 
 echo ""
 echo "Done. Restart Bob so skills load."

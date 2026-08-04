@@ -7,8 +7,10 @@ OUT="$SB_DIST"
 VER="$(node -e "console.log(require('$REPO/vsix/extension/package.json').version)")"
 NAME="$(node -e "console.log(require('$REPO/vsix/extension/package.json').name)")"
 
-# Ensure the payload exists (build it from the library if missing)
-[ -f "$OUT/bob-skills-package.zip" ] || "$REPO/bob/build-package.sh"
+# Always rebuild the payload from the library so the .vsix never ships a stale package
+# and the skill-library-lint gate always runs. (A cached zip previously shipped skills
+# that no longer matched the library and silently skipped the gate.)
+"$REPO/bob/build-package.sh"
 cp "$OUT/bob-skills-package.zip" "$REPO/vsix/extension/skills.zip"
 
 cd "$REPO/vsix"

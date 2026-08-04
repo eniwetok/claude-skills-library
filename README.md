@@ -28,6 +28,10 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 17 | **elementalsouls/Claude-BugHunter** | elementalsouls | [github.com/elementalsouls/Claude-BugHunter](https://github.com/elementalsouls/Claude-BugHunter) |
 | 18 | **ibelick/ui-skills** (Skills for Design Engineers) | ibelick | [github.com/ibelick/ui-skills](https://github.com/ibelick/ui-skills) |
 | 19 | **hamelsmu/evals-skills** (LLM eval methodology) | Hamel Husain | [github.com/hamelsmu/evals-skills](https://github.com/hamelsmu/evals-skills) |
+| 20 | **dietrichgebert/ponytail** ("lazy senior engineer") | Dietrich Gebert | [github.com/dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) |
+| 21 | **BehiSecc/VibeSec** (proactive secure coding) | BehiSecc | [github.com/BehiSecc/VibeSec-Skill](https://github.com/BehiSecc/VibeSec-Skill) |
+| 22 | **petergyang/no-ai-slop** (sharper, more human writing) | Peter Yang | [github.com/petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) |
+| 23 | **langchain-ai/openwiki** (CLI · self-updating code/knowledge wiki) | LangChain | [github.com/langchain-ai/openwiki](https://github.com/langchain-ai/openwiki) |
 
 ---
 
@@ -473,3 +477,68 @@ claude-skills-library/
 
 **The rule that matters:** never trust a judge you haven't calibrated against human labels.
 `write-judge-prompt` without `validate-evaluator` produces a number that means nothing.
+
+---
+
+## Group 20 — dietrichgebert/ponytail (6 skills · "lazy senior engineer")
+
+> Biases the agent toward minimal code — "the best code is the code you don't write."
+> Complements `karpathy-guidelines` with an aggressive delete/YAGNI instinct.
+> **Upstream:** [github.com/dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) — MIT
+> **Install:** `cp -r packages/ponytail/skills/* ~/.claude/skills/`
+
+| Skill | Description | Installed |
+|-------|-------------|-----------|
+| [ponytail](packages/ponytail/) | Forces the laziest working solution — YAGNI, stdlib before custom (levels: lite/full/ultra) | ✅ |
+| ponytail-review | Reviews a diff only for over-engineering — what to delete | ✅ |
+| ponytail-audit | Whole-repo bloat audit — ranked list of what to cut | ✅ |
+| ponytail-debt | Harvests `ponytail:` shortcut comments into a debt ledger | ✅ |
+| ponytail-gain | Scoreboard of ponytail's measured impact | ✅ |
+| ponytail-help | Quick-reference card for the ponytail skills | ✅ |
+
+---
+
+## Group 21 — BehiSecc/VibeSec (1 skill · proactive secure coding)
+
+> Write secure web code proactively (bug-hunter mindset). Complements BugHunter (which
+> *hunts* existing vulns) — vibesec *prevents* them at write time.
+> **Upstream:** [github.com/BehiSecc/VibeSec-Skill](https://github.com/BehiSecc/VibeSec-Skill) — Apache 2.0
+> **Install:** `cp -r packages/vibesec/skills/* ~/.claude/skills/`
+
+| Skill | Description | Installed |
+|-------|-------------|-----------|
+| [vibesec](packages/vibesec/) | Secure-by-default web code: access control, XSS/CSRF, SQLi/SSRF, auth, API security | ✅ |
+
+---
+
+## Group 22 — petergyang/no-ai-slop (1 skill · sharper, more human writing)
+
+> Strips 20+ AI-slop patterns from a draft while keeping the writer's voice, or detects them
+> (names each pattern, no rewrite). Distinct from the generate/style writing skills.
+> **Upstream:** [github.com/petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) — MIT
+> **Install:** `cp -r packages/no-ai-slop/skills/* ~/.claude/skills/`
+
+| Skill | Description | Installed |
+|-------|-------------|-----------|
+| [no-ai-slop](packages/no-ai-slop/) | Edit drafts to remove AI-slop patterns while keeping voice; or detect-only | ✅ |
+
+---
+
+## Group 23 — langchain-ai/openwiki (1 skill · CLI wrapper)
+
+> **⚠️ Networked Bob tool — opt-in, not in the lean kits.** OpenWiki calls a model, can
+> read connected accounts (Notion/Slack/Gmail/X), and has telemetry on by default. It is
+> **enabled from the SuperBob sidebar → Optional tools → OpenWiki** toggle, which installs
+> the `openwiki` CLI (through Bob's login shell, using Bob's env) and activates the skill.
+> It is kept **out of the egress-free kits** and runs inside Bob using Bob's environment
+> (`ANTHROPIC_API_KEY` etc. live in `~/.bob/.env`). The skill wraps the external CLI; it
+> does not embed it. **Upstream:** [github.com/langchain-ai/openwiki](https://github.com/langchain-ai/openwiki) — MIT
+
+**Bundle:** [zips/openwiki.zip](zips/openwiki.zip) · **In Bob:** flip the Optional-tools toggle (installs + enables). **Manual CLI:** `npm install -g openwiki` (needs Node + a model key in Bob's env).
+
+| Skill | Description | Installed |
+|-------|-------------|-----------|
+| [openwiki](skills/openwiki/) | Generate/update a self-updating linked-Markdown wiki for a repo (code mode) or from connected sources (personal mode); node-graph visualizer; CI-friendly. Guidance for when/how to run the `openwiki` CLI. | ✅ |
+
+Reach for it when the user wants a **persisted, self-updating, visualizable** wiki on disk
+(OKF/Markdown) — the gap it fills over the in-session `wiki*` and `codebase-onboarding` skills.

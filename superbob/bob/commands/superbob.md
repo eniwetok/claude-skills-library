@@ -1,6 +1,6 @@
 ---
 description: Switch SuperBob kit, loads that kit's skills for this conversation
-argument-hint: <kit> (e.g. software_development, data_analysis, application_security, auto; blank lists them)
+argument-hint: <kit> (e.g. software-development, data-analysis, application-security, auto; blank lists them)
 ---
 Switch SuperBob to the "$1" kit.
 

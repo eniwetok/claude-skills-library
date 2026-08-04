@@ -34,8 +34,8 @@ You swap kits depending on what you're doing.
 ## Using it
 
 ```bash
-~/.bob/bob-profile software_development   # load one kit
-~/.bob/bob-profile test_engineering ui    # combine two
+~/.bob/bob-profile software-development   # load one kit
+~/.bob/bob-profile test-engineering ui    # combine two
 ~/.bob/bob-profile status                 # what's loaded right now
 ~/.bob/bob-profile list                   # show all kits
 ~/.bob/bob-profile all                    # everything (~67k tokens, not recommended)
@@ -44,10 +44,10 @@ You swap kits depending on what you're doing.
 **Restart the Bob conversation after switching.** Bob reads skills when a conversation
 starts, so a change mid-conversation has no effect.
 
-The kits, by kind of work: `software_development`, `production_engineering`,
-`test_engineering`, `bug_fixing`, `application_security`, `release_review`,
-`code_simplification`, `frontend_design`, `product_management`, `web_research`,
-`data_analysis`, `rag_evaluation`, `content_writing`.
+The kits, by kind of work: `software-development`, `production-engineering`,
+`test-engineering`, `bug-fixing`, `application-security`, `release-review`,
+`code-simplification`, `frontend-design`, `product-management`, `web-research`,
+`data-analysis`, `rag-evaluation`, `content-writing`.
 
 Two core skills stay on under every kit: `mission-control` (picks the right skills for a
 task) and `using-superpowers` (checks for a matching skill before acting).

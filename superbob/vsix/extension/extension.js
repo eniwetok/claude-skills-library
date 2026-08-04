@@ -15,13 +15,43 @@ const HOME = os.homedir();
 const BOB_VAULT = path.join(HOME, '.bob', 'skills-vault');
 const BOB_ACTIVE = path.join(HOME, '.bob', 'skills');
 const BOB_PROFILES = path.join(HOME, '.bob', 'profiles');
+const BOB_RULES = path.join(HOME, '.bob', 'rules');   // Bob's global custom-rules dir (all modes)
+
+// A global rule that makes SuperBob automatic: Bob injects every file in ~/.bob/rules into
+// each conversation, so this removes the need to type /superbob to "run" SuperBob. It is
+// written whenever SuperBob is on and removed when it's switched off, so it tracks the toggle.
+const AUTO_RULE_FILE = () => path.join(BOB_RULES, 'superbob-auto.md');
+const AUTO_RULE_TEXT = `# SuperBob — automatic skill routing (managed by the SuperBob extension; do not edit by hand)
+
+SuperBob is ON. Do this at the start of EVERY task, in every mode, automatically — without
+being asked and without needing the \`/superbob\` command.
+
+**First line of your reply, always:** show one short marker so it's visible SuperBob ran, e.g.
+\`▸ SuperBob → applying <skill-name>\` — or \`▸ SuperBob → no specific skill needed\` when none fits.
+
+Then:
+
+1. **Check for a skill (using-superpowers).** Look for a relevant skill in \`~/.bob/skills\`
+   (already active, including the user's own) and in \`~/.bob/skills-vault\` (loaded on demand).
+   Read the matching \`SKILL.md\` and follow it. If an active skill already fits, use it — but
+   still name it in the marker above so SuperBob's routing is visible.
+2. **Route with mission-control.** When no active skill clearly fits, read
+   \`~/.bob/skills/mission-control/SKILL.md\` and use it to pull the right skill from the vault.
+3. **Don't over-claim.** Never say work is verified unless you actually ran the check.
+
+Loading a specific kit with \`/superbob <kit>\` or the SuperBob sidebar is optional — the routing
+above is automatic. If SuperBob is switched **off** in the sidebar, this file is removed and Bob
+behaves normally.
+`;
+function writeAutoRule() { try { fs.mkdirSync(BOB_RULES, { recursive: true }); fs.writeFileSync(AUTO_RULE_FILE(), AUTO_RULE_TEXT); } catch (e) {} }
+function removeAutoRule() { try { fs.rmSync(AUTO_RULE_FILE(), { force: true }); } catch (e) {} }
 
 // Lean mode: only these two skills stay loaded; mission-control routes to the rest
 // from the vault on demand. Keeps starting context tiny (~200 tokens vs ~67,000).
 const CORE = ['using-superpowers', 'mission-control']; // superpowers first, always check for a skill before acting
 // Every shipped kit is a built-in "starter kit" (not deletable). "Your kits" is left for
 // the user's own creations, seeded with a couple of clearly-labelled sample kits.
-const BUILTIN = ['software_development', 'data_analysis', 'product_management', 'production_engineering', 'test_engineering', 'application_security', 'frontend_design', 'web_research', 'release_review', 'bug_fixing', 'code_simplification', 'rag_evaluation', 'content_writing'];
+const BUILTIN = ['software-development', 'data-analysis', 'product-management', 'production-engineering', 'test-engineering', 'application-security', 'frontend-design', 'web-research', 'release-review', 'bug-fixing', 'code-simplification', 'rag-evaluation', 'content-writing'];
 
 let statusItem;
 let panel;
@@ -108,6 +138,7 @@ function superbobOff() {
     }
   } else { fs.mkdirSync(BOB_ACTIVE, { recursive: true }); }
   writeManaged([]);   // SuperBob manages nothing while off
+  removeAutoRule();   // stop auto-routing: Bob behaves normally when off
   fs.writeFileSync(path.join(BOB_ACTIVE, '.profile'), 'off');
   updateStatus();
   return true;
@@ -135,6 +166,7 @@ function applySkillSet(skillNames, label) {
   }
   fs.writeFileSync(path.join(BOB_ACTIVE, '.profile'), label);
   writeManaged(staged);   // the manifest is exactly what SuperBob just placed
+  writeAutoRule();        // SuperBob is on → make routing automatic (no /superbob needed)
   const kept = externalActiveSkills().length;
   if (kept) vscode.window.setStatusBarMessage('SuperBob kept ' + kept + ' of your own skill(s) untouched', 4000);
   updateStatus();
@@ -150,7 +182,7 @@ function readMeta() { try { return JSON.parse(fs.readFileSync(META(), 'utf8')); 
 function writeMeta(m) { try { fs.writeFileSync(META(), JSON.stringify(m, null, 2)); } catch (e) {} }
 
 function saveCustomProfile(name, skills, desc) {
-  const clean = name.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '');  // snake_case, matches the built-in kits
+  const clean = name.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '');  // kebab-case, matches the built-in kits and the skills
   if (!clean) return null;
   fs.mkdirSync(BOB_PROFILES, { recursive: true });
   const body = skills.filter(s => !CORE.includes(s)).join('\n') + '\n';
@@ -164,6 +196,49 @@ function deleteCustomProfile(name) {
   const m = readMeta(); if (m[name]) { delete m[name]; writeMeta(m); }
   if (fs.existsSync(f)) { fs.unlinkSync(f); return true; }
   return false;
+}
+
+// ---- optional external tools (opt-in, install + network) -------------------
+// Some skills wrap a real CLI that must be installed and calls out to the network.
+// They are NOT part of the lean/egress-free kits. They live here as opt-in toggles:
+// turning one ON installs the CLI (through Bob's login shell, so it uses Bob's env)
+// and activates the skill; OFF deactivates it. The skill is activated as a user-owned
+// skill (never written to the managed manifest), so kit switches never touch it.
+const OPTIONAL_TOOLS = [{
+  name: 'openwiki',
+  title: 'OpenWiki',
+  desc: "Self-updating code/knowledge wiki (langchain-ai/openwiki). Turning this on installs the openwiki CLI and runs it inside Bob using Bob's environment. It calls a model, so it needs a model key in Bob's env.",
+  pkg: 'openwiki',
+  bin: 'openwiki',
+  keyVars: ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GEMINI_API_KEY']
+}];
+function toolByName(n) { return OPTIONAL_TOOLS.find(t => t.name === n); }
+// Run through a login shell so we pick up Bob's / the user's real PATH and env
+// (GUI-launched apps otherwise miss node/npm and shell exports).
+function loginShell(cmd) { return '/bin/zsh -lc ' + JSON.stringify(cmd); }
+function cliInstalled(bin) { try { cp.execSync(loginShell('command -v ' + bin), { stdio: 'ignore' }); return true; } catch (e) { return false; } }
+function toolActive(name) { return fs.existsSync(path.join(BOB_ACTIVE, name, 'SKILL.md')); }
+function bobEnvHasKey(vars) {
+  const files = [path.join(HOME, '.bob', '.env'), path.join(HOME, '.openwiki', '.env')];
+  const blob = files.map(f => { try { return fs.readFileSync(f, 'utf8'); } catch (e) { return ''; } }).join('\n');
+  return vars.some(v => process.env[v] || new RegExp('^' + v + '=', 'm').test(blob));
+}
+function toolState(t) { return { name: t.name, title: t.title, desc: t.desc, pkg: t.pkg, installed: cliInstalled(t.bin), active: toolActive(t.name), hasKey: bobEnvHasKey(t.keyVars) }; }
+function activateTool(name) {
+  const src = path.join(BOB_VAULT, name);
+  if (!fs.existsSync(src)) return false;
+  const dest = path.join(BOB_ACTIVE, name);
+  fs.rmSync(dest, { recursive: true, force: true });
+  copyDir(src, dest);   // NOT added to the managed manifest → treated as the user's own skill, preserved across kit switches
+  return true;
+}
+function deactivateTool(name) { fs.rmSync(path.join(BOB_ACTIVE, name), { recursive: true, force: true }); return true; }
+function execAsync(cmd) { return new Promise(res => cp.exec(cmd, { maxBuffer: 1024 * 1024 * 16 }, (err, so, se) => res({ err, stdout: so, stderr: se }))); }
+async function installTool(t) {
+  return await vscode.window.withProgress(
+    { location: vscode.ProgressLocation.Notification, title: 'Installing ' + t.title + ' (' + t.pkg + ')…', cancellable: false },
+    async () => { const r = await execAsync(loginShell('npm install -g ' + t.pkg)); return r.err ? { ok: false, err: ((r.stderr || r.err.message || '') + '').slice(-400) } : { ok: true }; }
+  );
 }
 
 function updateStatus() {
@@ -192,7 +267,8 @@ function stateMessage() {
     builtin: BUILTIN,
     profiles: profs,
     meta: readMeta(),
-    skills: listVaultSkills()
+    skills: listVaultSkills(),
+    tools: OPTIONAL_TOOLS.map(toolState)
   };
 }
 function postState() { const msg = stateMessage(); webviews.forEach(w => { try { w.postMessage(msg); } catch (e) {} }); }
@@ -221,6 +297,27 @@ async function handleMessage(m, context) {
   }
   if (m.type === 'deleteMode') { deleteCustomProfile(m.name); postState(); return; }
   if (m.type === 'install') { await doInstall(context); postState(); return; }
+  if (m.type === 'toolToggle') {
+    const t = toolByName(m.tool); if (!t) { postState(); return; }
+    if (m.on) {
+      let ok = cliInstalled(t.bin);
+      if (!ok) {
+        const r = await installTool(t); ok = r.ok;
+        if (!ok) {
+          vscode.window.showErrorMessage(t.title + ": couldn't install " + t.pkg + ". Install it yourself in Bob's terminal: npm install -g " + t.pkg + (r.err ? ('  ·  ' + r.err) : ''));
+          postState(); return;
+        }
+      }
+      activateTool(t.name);
+      const st = toolState(t);
+      if (!st.hasKey) vscode.window.showWarningMessage(t.title + " is on, but no model key is set in Bob's environment. Add one (e.g. ANTHROPIC_API_KEY) to ~/.bob/.env, then start a new conversation.");
+      else vscode.window.showInformationMessage(t.title + ' enabled. Start a new conversation to load the skill.');
+    } else {
+      deactivateTool(t.name);
+      vscode.window.showInformationMessage(t.title + ' disabled.');
+    }
+    postState(); return;
+  }
   if (m.type === 'openDocs') {
     try { await vscode.commands.executeCommand('extension.open', 'felipe-campo.super-bob-skills'); }
     catch (e) { vscode.commands.executeCommand('workbench.extensions.search', 'SuperBob'); }
@@ -330,7 +427,7 @@ function getWebviewHtml() {
 </div>
 <div id="main" style="display:none">
   <h1>SuperBob</h1>
-  <div class="muted">Load just the skills each task needs, on top of your current Bob mode.</div>
+  <div class="muted">Loads just the skills each task needs, on top of your current Bob mode. Runs automatically while it's on — no <code>/superbob</code> command needed.</div>
 
   <div class="powerbar">
     <label class="pswitch"><input type="checkbox" id="powerToggle" checked/><span class="track"></span><span class="knob"></span></label>
@@ -363,7 +460,7 @@ function getWebviewHtml() {
   <div id="builder" style="display:none">
     <div style="font-weight:600;margin-bottom:4px">Create your own kit</div>
     <div class="muted" style="margin-bottom:8px">A kit is a named set of skills you load together for one kind of work.</div>
-    <input type="text" id="bname" placeholder="Name it, e.g. sql_evals"/>
+    <input type="text" id="bname" placeholder="Name it, e.g. sql-evals"/>
     <input type="text" id="bdesc" placeholder="What's it for?, e.g. Evaluating our SQL agent's answers"/>
     <div class="muted" style="margin-bottom:6px">Optional, start from an existing mode, then check the skills to include:</div>
     <select id="bstart"></select>
@@ -377,6 +474,10 @@ function getWebviewHtml() {
   </div>
   </div><!-- /hideWhenOff -->
 
+  <h2>Optional tools</h2>
+  <div class="muted" style="margin:-6px 0 8px;font-size:12px">External CLIs that run inside Bob. Off by default. Turning one on installs it and lets it call out to the network, kept separate from the lean kits.</div>
+  <div id="tools"></div>
+
   <details class="help">
     <summary>❔ How to use SuperBob</summary>
     <div class="helpbody">
@@ -384,7 +485,7 @@ function getWebviewHtml() {
       <ol>
         <li>Leave <b>Auto mode</b> on and SuperBob picks the skills for each task. That's the whole setup.</li>
         <li>Or turn Auto off and click a kit's <b>Use</b> button. Click <b>skills</b> to see what's inside and what it costs.</li>
-        <li>Or, in the Bob chat, type <code>/superbob software_development</code> (or any kit). <code>/superbob</code> alone lists them.</li>
+        <li>Or, in the Bob chat, type <code>/superbob software-development</code> (or any kit). <code>/superbob</code> alone lists them.</li>
         <li>After switching, <b>start a new conversation</b> so the skills load.</li>
         <li>Use <b>+ Create your own kit</b> to save your own set of skills.</li>
       </ol>
@@ -432,6 +533,20 @@ function getWebviewHtml() {
     return d;
   }
 
+  function renderTools(){
+    const c=document.getElementById('tools'); if(!c) return; c.innerHTML='';
+    (S.tools||[]).forEach(t=>{
+      const status = t.active ? (t.hasKey?'Enabled':'Enabled — add a model key to Bob’s env') : (t.installed?'Installed, off':'Not installed');
+      const row=document.createElement('div'); row.className='mode'+(t.active?' on':'');
+      const top=document.createElement('div'); top.className='mode-top'; top.style.display='flex'; top.style.alignItems='center'; top.style.justifyContent='space-between';
+      top.innerHTML='<span class="mode-name">'+t.title+'</span>'+
+        '<label class="pswitch"><input type="checkbox" class="toolsw" data-tool="'+t.name+'" '+(t.active?'checked':'')+'/><span class="track"></span><span class="knob"></span></label>';
+      const md=document.createElement('div'); md.className='mode-desc'; md.textContent=t.desc;
+      const st=document.createElement('div'); st.className='muted'; st.style.fontSize='12px'; st.style.marginTop='4px'; st.textContent=status;
+      row.appendChild(top); row.appendChild(md); row.appendChild(st); c.appendChild(row);
+    });
+  }
+
   function render(){
     document.getElementById('notinstalled').style.display=S.installed?'none':'block';
     document.getElementById('main').style.display=S.installed?'block':'none';
@@ -442,6 +557,7 @@ function getWebviewHtml() {
     document.getElementById('powerToggle').checked=!off;
     document.getElementById('powerState').textContent=off?'off':'on';
     document.getElementById('offbanner').style.display=off?'block':'none';
+    renderTools();   // optional tools are independent of SuperBob on/off
     if(off) return;   // nothing else to render while off
     const am=activeMode();
     // active card
@@ -524,6 +640,7 @@ function getWebviewHtml() {
   document.addEventListener('input',e=>{ if(e.target.id==='bsearch') renderBuilder(); });
   document.addEventListener('change',e=>{ if(e.target.id==='autoToggle'){ if(e.target.checked) vscode.postMessage({type:'applyLean'}); }
     if(e.target.id==='powerToggle'){ vscode.postMessage({type:'setPower', on:e.target.checked}); }
+    if(e.target.classList && e.target.classList.contains('toolsw')){ vscode.postMessage({type:'toolToggle', tool:e.target.dataset.tool, on:e.target.checked}); }
     if(e.target.id==='bstart'){ const p=e.target.value; sel=new Set(p&&S.profiles[p]?S.profiles[p].filter(n=>!S.core.includes(n)):[]); renderBuilder(); } });
 </script></body></html>`;
 }
