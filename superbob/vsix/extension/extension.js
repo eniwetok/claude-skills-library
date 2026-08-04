@@ -238,6 +238,25 @@ function saveCustomProfile(name, skills, desc) {
   if (desc && desc.trim()) { const m = readMeta(); m[clean] = desc.trim(); writeMeta(m); }
   return clean;
 }
+// Save a custom kit WITH its reference/augmentation info: the profile + meta (what Auto mode reads
+// to pick it) + an authored "How to use" guide (tagline/when/example/tips) — first-class, not an
+// afterthought. The tagline and when-to-use are what let SuperBob route to this kit correctly.
+function saveCustomKit(name, skills, desc, when, example, tips) {
+  const clean = saveCustomProfile(name, skills, desc);   // writes profile + meta[name]=desc
+  if (!clean) return null;
+  const ex = (example || []).map(s => (s + '').trim()).filter(Boolean);
+  const tp = (tips || []).map(s => (s + '').trim()).filter(Boolean);
+  const w = (when || '').trim();
+  if (desc || w || ex.length || tp.length) {
+    try {
+      const gp = path.join(BOB_PROFILES, '_guides.json');
+      let g = {}; try { g = JSON.parse(fs.readFileSync(gp, 'utf8')); } catch (e) {}
+      g[clean] = { tagline: (desc || '').trim(), when: w, example: ex, tips: tp };
+      fs.writeFileSync(gp, JSON.stringify(g, null, 2) + '\n');
+    } catch (e) {}
+  }
+  return clean;
+}
 function deleteCustomProfile(name) {
   if (BUILTIN.includes(name)) return false;   // never delete built-ins
   const f = path.join(BOB_PROFILES, name + '.txt');
@@ -336,11 +355,13 @@ async function handleMessage(m, context) {
     postState(); return;
   }
   if (m.type === 'saveMode') {
-    const saved = saveCustomProfile(m.name, m.skills, m.desc);
-    if (saved) vscode.window.showInformationMessage('Saved mode "' + saved + '".');
-    else vscode.window.showErrorMessage('Give the mode a valid name.');
+    const saved = saveCustomKit(m.name, m.skills, m.desc, m.when, m.example, m.tips);
+    if (saved) { vscode.window.showInformationMessage('Saved kit "' + saved + '". It\'s under Your kits with a How-to-use page.'); if (builderPanel) builderPanel.dispose(); }
+    else vscode.window.showErrorMessage('Give the kit a valid lowercase name.');
     postState(); return;
   }
+  if (m.type === 'openBuilder') { openBuilderPanel(context); return; }
+  if (m.type === 'closeBuilder') { if (builderPanel) builderPanel.dispose(); return; }
   if (m.type === 'deleteMode') { deleteCustomProfile(m.name); postState(); return; }
   if (m.type === 'openGuide') { openGuidePanel(m.kit, context); return; }
   if (m.type === 'setAddon') {
@@ -482,6 +503,85 @@ function openGuidePanel(kit, context) {
   guidePanel.onDidDispose(() => { guidePanel = null; }, null, context.subscriptions);
 }
 
+// ---- kit builder (its own page) -------------------------------------------
+let builderPanel;
+function openBuilderPanel(context) {
+  if (builderPanel) { builderPanel.reveal(vscode.ViewColumn.Active); return; }
+  builderPanel = vscode.window.createWebviewPanel('superbobBuilder', 'Create a SuperBob kit', vscode.ViewColumn.Active, { enableScripts: true, retainContextWhenHidden: true });
+  builderPanel.webview.html = builderHtml(listVaultSkills());
+  builderPanel.webview.onDidReceiveMessage(m => handleMessage(m, context));
+  builderPanel.onDidDispose(() => { builderPanel = null; }, null, context.subscriptions);
+}
+function builderHtml(vault) {
+  const nonce = 'sbb' + Date.now();
+  const data = JSON.stringify(vault.filter(s => !CORE.includes(s.name)).map(s => ({ n: s.name, d: s.desc, t: s.tokens })));
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';"/>
+<style>
+  body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);max-width:640px;margin:0 auto;padding:24px 28px;font-size:13px;line-height:1.5}
+  h1{font-size:1.35rem;margin:0 0 4px} .muted{color:var(--vscode-descriptionForeground)} .sub{margin:0 0 18px}
+  label{display:block;font-weight:600;margin:16px 0 5px} label .muted{font-weight:400;font-size:12px}
+  input,textarea{width:100%;box-sizing:border-box;background:var(--vscode-input-background);color:var(--vscode-input-foreground);border:1px solid var(--vscode-input-border,#555);border-radius:6px;padding:7px 9px;font-family:inherit;font-size:13px}
+  textarea{resize:vertical}
+  .list{max-height:230px;overflow:auto;border:1px solid var(--vscode-widget-border,#333);border-radius:6px;margin-top:6px}
+  .row{display:flex;gap:8px;padding:7px 9px;border-top:1px solid var(--vscode-widget-border,#2a2a2a);cursor:pointer;align-items:flex-start}
+  .row:first-child{border-top:0} .row input{width:auto;margin-top:2px}
+  .row .n{font-weight:600} .row .d{color:var(--vscode-descriptionForeground);font-size:12px}
+  .actions{display:flex;gap:8px;margin-top:20px}
+  button{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border:0;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px}
+  button.sec{background:var(--vscode-button-secondaryBackground,#3a3a3a);color:var(--vscode-button-secondaryForeground,#ccc)}
+  .hint{background:var(--vscode-editorWidget-background);border-radius:6px;padding:8px 11px;font-size:12px;margin-top:4px}
+</style></head><body>
+  <h1>Create a SuperBob kit</h1>
+  <p class="sub muted">A kit is a set of skills you load together for one kind of work — plus the context that tells <b>you</b> and SuperBob's <b>Auto mode</b> when to reach for it. Fill the context in here; it powers routing and the "How to use" page.</p>
+
+  <label>Name <span class="muted">(lowercase, e.g. sql-evals)</span></label>
+  <input id="name" placeholder="sql-evals"/>
+
+  <label>What it's for <span class="muted">— Auto mode reads this to pick the kit</span></label>
+  <input id="tagline" placeholder="Evaluating our SQL agent's answers"/>
+  <div class="hint muted">Describe the <b>situation</b>, not the skills. This is the cue Auto mode matches a task against.</div>
+
+  <label>When to reach for it <span class="muted">(optional)</span></label>
+  <textarea id="when" rows="2" placeholder="You're checking whether the SQL agent's answers are correct and safe before shipping."></textarea>
+
+  <label>Skills <span class="muted" id="cnt"></span></label>
+  <input id="search" placeholder="Search skills…"/>
+  <div class="list" id="list"></div>
+
+  <label>Worked example <span class="muted">(one step per line — optional; shows in "How to use")</span></label>
+  <textarea id="example" rows="4" placeholder="Load the kit and start a new chat.&#10;Paste the question and the agent's answer.&#10;Score retrieval and answer quality separately."></textarea>
+
+  <label>Tips <span class="muted">(one per line — optional)</span></label>
+  <textarea id="tips" rows="3" placeholder="Keep it lean — 8 sharp skills beat 30 vague ones.&#10;Start a new chat after loading so the skills come online."></textarea>
+
+  <div class="actions"><button id="save">Save kit</button><button class="sec" id="cancel">Cancel</button></div>
+
+<script nonce="${nonce}">
+  const vscode=acquireVsCodeApi(); const SK=${data}; const sel=new Set();
+  const list=document.getElementById('list');
+  function count(){ document.getElementById('cnt').textContent='· '+(sel.size+2)+' skills (incl. 2 core)'; }
+  function render(){ const q=(document.getElementById('search').value||'').toLowerCase(); list.innerHTML='';
+    SK.forEach(s=>{ if(q && !(s.n.includes(q)||(s.d||'').toLowerCase().includes(q))) return;
+      const row=document.createElement('label'); row.className='row';
+      const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=sel.has(s.n);
+      cb.onchange=()=>{ cb.checked?sel.add(s.n):sel.delete(s.n); count(); };
+      const mid=document.createElement('div'); mid.innerHTML='<div class="n">'+s.n+'</div>'+(s.d?'<div class="d">'+s.d+'</div>':'');
+      row.appendChild(cb); row.appendChild(mid); list.appendChild(row); });
+  }
+  document.getElementById('search').addEventListener('input',render);
+  document.getElementById('cancel').onclick=()=>vscode.postMessage({type:'closeBuilder'});
+  document.getElementById('save').onclick=()=>{
+    const lines=id=>document.getElementById(id).value.split('\\n').map(x=>x.trim()).filter(Boolean);
+    vscode.postMessage({type:'saveMode',
+      name:document.getElementById('name').value, desc:document.getElementById('tagline').value,
+      when:document.getElementById('when').value, skills:[...sel],
+      example:lines('example'), tips:lines('tips')});
+  };
+  render(); count();
+</script></body></html>`;
+}
+
 function getWebviewHtml() {
   const nonce = 'sb' + Date.now();
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/>
@@ -518,11 +618,11 @@ function getWebviewHtml() {
   .offbanner{padding:9px 11px;margin:0 0 12px;border-radius:8px;font-size:12.5px;line-height:1.5;background:var(--vscode-inputValidation-warningBackground,#3b2e1e);border:1px solid var(--vscode-inputValidation-warningBorder,#6b5424)}
   .mode{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:8px;padding:10px 12px;margin-bottom:7px}
   .mode.on{border-color:var(--vscode-focusBorder,#0e639c)}
-  .mode-top{display:flex;align-items:center;gap:10px}
+  .mode-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .mode-name{font-weight:600}
   .mode-top .cnt{color:var(--vscode-descriptionForeground);font-size:12px}
-  .mode-top .badge{font-size:10px;color:var(--vscode-charts-green,#3fb950);border:1px solid currentColor;border-radius:8px;padding:0 7px}
-  .mode-top .sp{margin-left:auto}
+  .mode-top .badge{font-size:10px;color:var(--vscode-charts-green,#3fb950);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap}
+  .mode-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
   button{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border:0;border-radius:5px;padding:5px 13px;cursor:pointer;font-size:12px}
   button.sec{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground)}
   button:hover{filter:brightness(1.12)}
@@ -757,7 +857,8 @@ function getWebviewHtml() {
     const top=document.createElement('div'); top.className='mode-top';
     const count = id==='__lean__' ? 'essentials only' : skills.length+' skills';
     top.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'');
-    const sp=document.createElement('span'); sp.className='sp';
+    d.appendChild(top);   // name row is its own row; actions go on a second row for a stable layout
+    const sp=document.createElement('div'); sp.className='mode-actions';
     // Active Lean needs no button: it's the base state, and the "active" badge already
     // shows it. A disabled "On" button just looks broken (you click it and nothing happens).
     if(isActive && id==='__lean__'){ /* badge only */ }
@@ -773,7 +874,7 @@ function getWebviewHtml() {
       sk.onclick=()=>{ const el=d.querySelector('.mode-skills'); el.style.display = el.style.display==='none'?'block':'none'; }; sp.appendChild(sk); }
     if(deletable){ const del=document.createElement('button'); del.className='del'; del.textContent='🗑'; del.title='delete this kit';
       del.onclick=()=> vscode.postMessage({type:'deleteMode',name:id}); sp.appendChild(del); }
-    top.appendChild(sp); d.appendChild(top);
+    d.appendChild(sp);   // actions row (Use/Unload · How to use · skills · delete) below the name
     const md=document.createElement('div'); md.className='mode-desc'; md.textContent=descFor(id); d.appendChild(md);
     if(id!=='__lean__'){ const s=document.createElement('div'); s.className='mode-skills'; s.style.display='none';
       s.appendChild(skillRows(skills)); d.appendChild(s); }
@@ -797,7 +898,7 @@ function getWebviewHtml() {
     document.getElementById('bcount').textContent=(sel.size+2)+' skills (incl. 2 core)';
   }
   document.addEventListener('click',e=>{
-    if(e.target.id==='createBtn') openBuilder();
+    if(e.target.id==='createBtn') vscode.postMessage({type:'openBuilder'});
     if(e.target.id==='bcancel') closeBuilder();
     if(e.target.id==='installBtn') vscode.postMessage({type:'install'});
     if(e.target.id==='docsBtn') vscode.postMessage({type:'openDocs'});
