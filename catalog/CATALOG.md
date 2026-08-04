@@ -635,15 +635,3 @@ Complements BugHunter (which *hunts* existing vulns) — vibesec *prevents* them
 | **no-ai-slop** | Edit drafts to remove 20+ AI-slop patterns while keeping the writer's voice; or detect (name each pattern, no rewrite) | 'less AI-sounding', 'make this clearer', 'is this AI slop', 'audit my writing' | installed |
 
 Distinct from the generate/style writing skills - this one strips slop and detects it. Wired into the SuperBob **writing** mode.
-
-
-## Group 23 — langchain-ai/openwiki (1 skill · CLI wrapper · networked)
-
-**Source:** [github.com/langchain-ai/openwiki](https://github.com/langchain-ai/openwiki) - MIT
-**Skill:** skills/openwiki/ · **Bundle:** zips/openwiki.zip · **Enable in Bob:** SuperBob sidebar → Optional tools → OpenWiki toggle (installs the CLI via Bob's login shell + activates the skill). Needs Node + a model key in Bob's env.
-
-| Skill | What it does | Triggers | Status |
-|-------|-------------|----------|--------|
-| **openwiki** | Wraps the `openwiki` CLI: generate/update a self-updating linked-Markdown wiki for a repo (code mode) or from connected sources — Notion/Slack/Gmail/X (personal mode); node-graph visualizer; CI-ready. Guidance for when/how to invoke it. | 'openwiki', 'generate a code wiki', 'document this repo', 'auto-update the docs', 'personal knowledge wiki' | ✅ installed |
-
-⚠️ **Networked, NOT in SuperBob.** Calls an LLM provider, can read connected accounts, telemetry on by default (disable with `OPENWIKI_TELEMETRY_DISABLED=1`). Excluded from SuperBob's egress-free kits — Claude Code / general-library use only. Fills the "persisted, self-updating, on-disk wiki" gap over the in-session `wiki*` and `codebase-onboarding`/`code-review-graph` skills.

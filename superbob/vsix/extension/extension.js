@@ -233,14 +233,10 @@ function deleteCustomProfile(name) {
 // turning one ON installs the CLI (through Bob's login shell, so it uses Bob's env)
 // and activates the skill; OFF deactivates it. The skill is activated as a user-owned
 // skill (never written to the managed manifest), so kit switches never touch it.
-const OPTIONAL_TOOLS = [{
-  name: 'openwiki',
-  title: 'OpenWiki',
-  desc: "Self-updating code/knowledge wiki (langchain-ai/openwiki). Turning this on installs the openwiki CLI and runs it inside Bob using Bob's environment. It calls a model, so it needs a model key in Bob's env.",
-  pkg: 'openwiki',
-  bin: 'openwiki',
-  keyVars: ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GEMINI_API_KEY']
-}];
+// No optional external tools. (OpenWiki was removed: on an IBM-gateway Bob the shell
+// carries no model credential, so a third-party CLI has nothing to authenticate with.
+// Use Bob's own model-backed wiki skills — codebase-onboarding / wiki — instead.)
+const OPTIONAL_TOOLS = [];
 function toolByName(n) { return OPTIONAL_TOOLS.find(t => t.name === n); }
 // Run through a login shell so we pick up Bob's / the user's real PATH and env
 // (GUI-launched apps otherwise miss node/npm and shell exports).
@@ -248,7 +244,7 @@ function loginShell(cmd) { return '/bin/zsh -lc ' + JSON.stringify(cmd); }
 function cliInstalled(bin) { try { cp.execSync(loginShell('command -v ' + bin), { stdio: 'ignore' }); return true; } catch (e) { return false; } }
 function toolActive(name) { return fs.existsSync(path.join(BOB_ACTIVE, name, 'SKILL.md')); }
 function bobEnvHasKey(vars) {
-  const files = [path.join(HOME, '.bob', '.env'), path.join(HOME, '.openwiki', '.env')];
+  const files = [path.join(HOME, '.bob', '.env')];
   const blob = files.map(f => { try { return fs.readFileSync(f, 'utf8'); } catch (e) { return ''; } }).join('\n');
   return vars.some(v => process.env[v] || new RegExp('^' + v + '=', 'm').test(blob));
 }
@@ -262,16 +258,6 @@ function activateTool(name) {
   return true;
 }
 function deactivateTool(name) { fs.rmSync(path.join(BOB_ACTIVE, name), { recursive: true, force: true }); return true; }
-// Detect an existing OpenWiki wiki in the open workspace so we update it, never overwrite it.
-function existingWikiInfo() {
-  try {
-    const hits = (vscode.workspace.workspaceFolders || [])
-      .map(f => f.uri.fsPath)
-      .filter(dir => fs.existsSync(path.join(dir, 'openwiki')));
-    if (hits.length) return 'An existing openwiki/ wiki was found in ' + hits.map(h => path.basename(h)).join(', ') + '.';
-  } catch (e) {}
-  return '';
-}
 function execAsync(cmd) { return new Promise(res => cp.exec(cmd, { maxBuffer: 1024 * 1024 * 16 }, (err, so, se) => res({ err, stdout: so, stderr: se }))); }
 async function installTool(t) {
   return await vscode.window.withProgress(
@@ -354,23 +340,17 @@ async function handleMessage(m, context) {
           postState(); return;
         }
       }
-      // 2) Activate the skill.
+      // 2) Activate the skill, then report clearly.
       activateTool(t.name);
-      // 3) Existing-wiki detection so we never clobber an existing repo's wiki.
-      const existing = t.name === 'openwiki' ? existingWikiInfo() : '';
-      // 4) Report result clearly (this is the visible confirmation that was missing before).
       const st = toolState(t);
-      if (!st.hasKey) {
-        vscode.window.showWarningMessage(t.title + ' is installed and on, but no model key is set in Bob\'s environment. Add one (e.g. ANTHROPIC_API_KEY) to ~/.bob/.env, then start a new conversation.');
+      if (!st.hasKey && t.keyVars && t.keyVars.length) {
+        vscode.window.showWarningMessage(t.title + ' is installed and on, but no model key is set in Bob\'s environment. Add one to ~/.bob/.env, then start a new conversation.');
       } else {
-        let msg = t.title + ' installed and enabled. Start a new conversation to use it.';
-        if (existing) msg = t.title + ' enabled. ' + existing + ' It will UPDATE that wiki, not overwrite it. Start a new conversation.';
-        vscode.window.showInformationMessage(msg);
+        vscode.window.showInformationMessage(t.title + ' installed and enabled. Start a new conversation to use it.');
       }
     } else {
       deactivateTool(t.name);
-      if (t.name === 'openwiki') vscode.window.showWarningMessage('OpenWiki disabled. Your existing wiki files are kept, but they will no longer auto-update when the code changes. Re-enable any time to resume updates.');
-      else vscode.window.showInformationMessage(t.title + ' disabled.');
+      vscode.window.showInformationMessage(t.title + ' disabled.');
     }
     postState(); return;
   }
@@ -544,9 +524,11 @@ function getWebviewHtml() {
   </div>
   </div><!-- /hideWhenOff -->
 
-  <h2>Optional tools</h2>
-  <div class="muted" style="margin:-6px 0 8px;font-size:12px">External CLIs that run inside Bob. Off by default. Turning one on installs it and lets it call out to the network, kept separate from the lean kits.</div>
-  <div id="tools"></div>
+  <div id="toolsSection" style="display:none">
+    <h2>Optional tools</h2>
+    <div class="muted" style="margin:-6px 0 8px;font-size:12px">External CLIs that run inside Bob. Off by default.</div>
+    <div id="tools"></div>
+  </div>
 
   <details class="help">
     <summary>❔ How to use SuperBob</summary>
@@ -604,6 +586,7 @@ function getWebviewHtml() {
   }
 
   function renderTools(){
+    const sec=document.getElementById('toolsSection'); if(sec) sec.style.display=(S.tools&&S.tools.length)?'block':'none';
     const c=document.getElementById('tools'); if(!c) return; c.innerHTML='';
     (S.tools||[]).forEach(t=>{
       const status = t.active ? (t.hasKey?'Enabled':'Enabled — add a model key to Bob’s env') : (t.installed?'Installed, off':'Not installed');

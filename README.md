@@ -31,7 +31,6 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 20 | **dietrichgebert/ponytail** ("lazy senior engineer") | Dietrich Gebert | [github.com/dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) |
 | 21 | **BehiSecc/VibeSec** (proactive secure coding) | BehiSecc | [github.com/BehiSecc/VibeSec-Skill](https://github.com/BehiSecc/VibeSec-Skill) |
 | 22 | **petergyang/no-ai-slop** (sharper, more human writing) | Peter Yang | [github.com/petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) |
-| 23 | **langchain-ai/openwiki** (CLI · self-updating code/knowledge wiki) | LangChain | [github.com/langchain-ai/openwiki](https://github.com/langchain-ai/openwiki) |
 
 ---
 
@@ -521,24 +520,3 @@ claude-skills-library/
 | Skill | Description | Installed |
 |-------|-------------|-----------|
 | [no-ai-slop](packages/no-ai-slop/) | Edit drafts to remove AI-slop patterns while keeping voice; or detect-only | ✅ |
-
----
-
-## Group 23 — langchain-ai/openwiki (1 skill · CLI wrapper)
-
-> **⚠️ Networked Bob tool — opt-in, not in the lean kits.** OpenWiki calls a model, can
-> read connected accounts (Notion/Slack/Gmail/X), and has telemetry on by default. It is
-> **enabled from the SuperBob sidebar → Optional tools → OpenWiki** toggle, which installs
-> the `openwiki` CLI (through Bob's login shell, using Bob's env) and activates the skill.
-> It is kept **out of the egress-free kits** and runs inside Bob using Bob's environment
-> (`ANTHROPIC_API_KEY` etc. live in `~/.bob/.env`). The skill wraps the external CLI; it
-> does not embed it. **Upstream:** [github.com/langchain-ai/openwiki](https://github.com/langchain-ai/openwiki) — MIT
-
-**Bundle:** [zips/openwiki.zip](zips/openwiki.zip) · **In Bob:** flip the Optional-tools toggle (installs + enables). **Manual CLI:** `npm install -g openwiki` (needs Node + a model key in Bob's env).
-
-| Skill | Description | Installed |
-|-------|-------------|-----------|
-| [openwiki](skills/openwiki/) | Generate/update a self-updating linked-Markdown wiki for a repo (code mode) or from connected sources (personal mode); node-graph visualizer; CI-friendly. Guidance for when/how to run the `openwiki` CLI. | ✅ |
-
-Reach for it when the user wants a **persisted, self-updating, visualizable** wiki on disk
-(OKF/Markdown) — the gap it fills over the in-session `wiki*` and `codebase-onboarding` skills.
