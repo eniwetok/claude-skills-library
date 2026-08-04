@@ -21,7 +21,7 @@ const BOB_RULES = path.join(HOME, '.bob', 'rules');   // Bob's global custom-rul
 // each conversation, so this removes the need to type /superbob to "run" SuperBob. It is
 // written whenever SuperBob is on and removed when it's switched off, so it tracks the toggle.
 const AUTO_RULE_FILE = () => path.join(BOB_RULES, 'superbob-auto.md');
-const AUTO_RULE_TEXT = `# SuperBob — automatic skill routing (managed by the SuperBob extension; do not edit by hand)
+const AUTO_RULE_ALL = `# SuperBob — automatic skill routing (managed by the SuperBob extension; do not edit by hand)
 
 SuperBob is ON. Do this at the start of EVERY task, in every mode, automatically — without
 being asked and without needing the \`/superbob\` command.
@@ -46,7 +46,33 @@ Loading a specific kit with \`/superbob <kit>\` or the SuperBob sidebar is optio
 above is automatic. If SuperBob is switched **off** in the sidebar, this file is removed and Bob
 behaves normally.
 `;
-function writeAutoRule() { try { fs.mkdirSync(BOB_RULES, { recursive: true }); fs.writeFileSync(AUTO_RULE_FILE(), AUTO_RULE_TEXT); } catch (e) {} }
+// Scope variant: SuperBob routes ONLY its own vault/kit skills and leaves the user's own alone.
+const AUTO_RULE_SUPERBOB_ONLY = `# SuperBob — automatic skill routing (managed by the SuperBob extension; do not edit by hand)
+
+SuperBob is ON, scoped to its OWN skills only. Do this at the start of EVERY task, in every
+mode, automatically — without being asked and without needing the \`/superbob\` command.
+
+**First line of your reply, always** — show a short marker so it's visible SuperBob ran:
+- a skill from a SuperBob kit or the vault → \`▸ SuperBob → from kit: <skill-name>\`
+- nothing in SuperBob fits → \`▸ SuperBob → no matching skill (using Bob normally)\`
+
+Then:
+
+1. **Check SuperBob's skills only (using-superpowers).** Look in \`~/.bob/skills-vault\` and the
+   active core skills. If one fits, read its \`SKILL.md\` and follow it.
+2. **Route with mission-control** when unsure which SuperBob skill applies.
+3. **Leave the user's own skills to Bob.** Do NOT reach for, apply, or manage skills the user
+   installed themselves — those are outside SuperBob's scope in this mode.
+4. **Don't over-claim.** Never say work is verified unless you actually ran the check.
+
+Switch back to "All skills" in the SuperBob panel to let it route your own skills too. If SuperBob
+is switched **off**, this file is removed and Bob behaves normally.
+`;
+// Which skills SuperBob routes: 'all' (yours + SuperBob, default) or 'superbob-only'.
+const SCOPE_FILE = () => path.join(HOME, '.bob', '.superbob-scope');
+function readScope() { try { return fs.readFileSync(SCOPE_FILE(), 'utf8').trim() === 'superbob-only' ? 'superbob-only' : 'all'; } catch (e) { return 'all'; } }
+function writeScope(s) { try { fs.writeFileSync(SCOPE_FILE(), (s === 'superbob-only' ? 'superbob-only' : 'all') + '\n'); } catch (e) {} }
+function writeAutoRule() { try { fs.mkdirSync(BOB_RULES, { recursive: true }); fs.writeFileSync(AUTO_RULE_FILE(), readScope() === 'superbob-only' ? AUTO_RULE_SUPERBOB_ONLY : AUTO_RULE_ALL); } catch (e) {} }
 function removeAutoRule() { try { fs.rmSync(AUTO_RULE_FILE(), { force: true }); } catch (e) {} }
 
 // Lean mode: only these two skills stay loaded; mission-control routes to the rest
@@ -236,6 +262,16 @@ function activateTool(name) {
   return true;
 }
 function deactivateTool(name) { fs.rmSync(path.join(BOB_ACTIVE, name), { recursive: true, force: true }); return true; }
+// Detect an existing OpenWiki wiki in the open workspace so we update it, never overwrite it.
+function existingWikiInfo() {
+  try {
+    const hits = (vscode.workspace.workspaceFolders || [])
+      .map(f => f.uri.fsPath)
+      .filter(dir => fs.existsSync(path.join(dir, 'openwiki')));
+    if (hits.length) return 'An existing openwiki/ wiki was found in ' + hits.map(h => path.basename(h)).join(', ') + '.';
+  } catch (e) {}
+  return '';
+}
 function execAsync(cmd) { return new Promise(res => cp.exec(cmd, { maxBuffer: 1024 * 1024 * 16 }, (err, so, se) => res({ err, stdout: so, stderr: se }))); }
 async function installTool(t) {
   return await vscode.window.withProgress(
@@ -271,7 +307,8 @@ function stateMessage() {
     profiles: profs,
     meta: readMeta(),
     skills: listVaultSkills(),
-    tools: OPTIONAL_TOOLS.map(toolState)
+    tools: OPTIONAL_TOOLS.map(toolState),
+    scope: readScope()
   };
 }
 function postState() { const msg = stateMessage(); webviews.forEach(w => { try { w.postMessage(msg); } catch (e) {} }); }
@@ -303,22 +340,46 @@ async function handleMessage(m, context) {
   if (m.type === 'toolToggle') {
     const t = toolByName(m.tool); if (!t) { postState(); return; }
     if (m.on) {
-      let ok = cliInstalled(t.bin);
-      if (!ok) {
-        const r = await installTool(t); ok = r.ok;
-        if (!ok) {
-          vscode.window.showErrorMessage(t.title + ": couldn't install " + t.pkg + ". Install it yourself in Bob's terminal: npm install -g " + t.pkg + (r.err ? ('  ·  ' + r.err) : ''));
+      // 1) Install the CLI (with explicit consent) if it isn't already present.
+      if (!cliInstalled(t.bin)) {
+        const choice = await vscode.window.showWarningMessage(
+          t.title + ' needs to install its command-line tool (`npm install -g ' + t.pkg + '`). This downloads from the network and runs inside Bob using Bob\'s environment. Install it now?',
+          { modal: true, detail: 'Nothing is installed until you confirm. You can disable ' + t.title + ' any time.' },
+          'Install'
+        );
+        if (choice !== 'Install') { postState(); return; }   // cancelled → stay off, UI reverts via postState
+        const r = await installTool(t);
+        if (!r.ok) {
+          vscode.window.showErrorMessage(t.title + ": couldn't install " + t.pkg + ". Run it yourself in Bob's terminal: npm install -g " + t.pkg + (r.err ? ('  ·  ' + r.err) : ''));
           postState(); return;
         }
       }
+      // 2) Activate the skill.
       activateTool(t.name);
+      // 3) Existing-wiki detection so we never clobber an existing repo's wiki.
+      const existing = t.name === 'openwiki' ? existingWikiInfo() : '';
+      // 4) Report result clearly (this is the visible confirmation that was missing before).
       const st = toolState(t);
-      if (!st.hasKey) vscode.window.showWarningMessage(t.title + " is on, but no model key is set in Bob's environment. Add one (e.g. ANTHROPIC_API_KEY) to ~/.bob/.env, then start a new conversation.");
-      else vscode.window.showInformationMessage(t.title + ' enabled. Start a new conversation to load the skill.');
+      if (!st.hasKey) {
+        vscode.window.showWarningMessage(t.title + ' is installed and on, but no model key is set in Bob\'s environment. Add one (e.g. ANTHROPIC_API_KEY) to ~/.bob/.env, then start a new conversation.');
+      } else {
+        let msg = t.title + ' installed and enabled. Start a new conversation to use it.';
+        if (existing) msg = t.title + ' enabled. ' + existing + ' It will UPDATE that wiki, not overwrite it. Start a new conversation.';
+        vscode.window.showInformationMessage(msg);
+      }
     } else {
       deactivateTool(t.name);
-      vscode.window.showInformationMessage(t.title + ' disabled.');
+      if (t.name === 'openwiki') vscode.window.showWarningMessage('OpenWiki disabled. Your existing wiki files are kept, but they will no longer auto-update when the code changes. Re-enable any time to resume updates.');
+      else vscode.window.showInformationMessage(t.title + ' disabled.');
     }
+    postState(); return;
+  }
+  if (m.type === 'setScope') {
+    writeScope(m.scope);
+    if (!isPoweredOff()) writeAutoRule();   // rewrite the live rule to match the new scope
+    vscode.window.showInformationMessage(readScope() === 'superbob-only'
+      ? 'SuperBob will route only its own skills and leave your own skills alone. Start a new conversation.'
+      : 'SuperBob will route all skills — yours and its own. Start a new conversation.');
     postState(); return;
   }
   if (m.type === 'openDocs') {
@@ -443,6 +504,12 @@ function getWebviewHtml() {
   <div class="hideWhenOff">
   <label class="autobar"><input type="checkbox" id="autoToggle"/><span><span class="t">Auto mode</span> <span class="muted">(recommended). SuperBob picks the right skills for each task.</span></span></label>
 
+  <div class="scopebar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 8px;font-size:12px">
+    <span class="muted">SuperBob handles:</span>
+    <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="radio" name="scope" value="all" style="width:auto;margin:0"/> All skills <span class="muted">(yours + SuperBob)</span></label>
+    <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="radio" name="scope" value="superbob-only" style="width:auto;margin:0"/> SuperBob only</label>
+  </div>
+
   <div class="active-card">
     <div><span class="dot"></span><span class="now" id="activeNow"></span></div>
     <div id="activeDesc"></div>
@@ -566,6 +633,7 @@ function getWebviewHtml() {
     // active card
     document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode': am==='__custom__'?'custom set': (am||', '));
     document.getElementById('autoToggle').checked = (am==='__lean__');
+    { const sc=(S.scope==='superbob-only')?'superbob-only':'all'; document.querySelectorAll('input[name=scope]').forEach(r=>{ r.checked=(r.value===sc); }); }
     document.getElementById('activeDesc').textContent = (am && am!=='__custom__') ? descFor(am) : (am==='__custom__'?'A custom set of skills you picked.':'');
     // Show only what SuperBob loaded (core + the kit's skills). The user's own skills are
     // deliberately not listed here: they're kept untouched, but listing 30+ of them is noise.
@@ -643,6 +711,7 @@ function getWebviewHtml() {
   document.addEventListener('input',e=>{ if(e.target.id==='bsearch') renderBuilder(); });
   document.addEventListener('change',e=>{ if(e.target.id==='autoToggle'){ if(e.target.checked) vscode.postMessage({type:'applyLean'}); }
     if(e.target.id==='powerToggle'){ vscode.postMessage({type:'setPower', on:e.target.checked}); }
+    if(e.target.name==='scope' && e.target.checked){ vscode.postMessage({type:'setScope', scope:e.target.value}); }
     if(e.target.classList && e.target.classList.contains('toolsw')){ vscode.postMessage({type:'toolToggle', tool:e.target.dataset.tool, on:e.target.checked}); }
     if(e.target.id==='bstart'){ const p=e.target.value; sel=new Set(p&&S.profiles[p]?S.profiles[p].filter(n=>!S.core.includes(n)):[]); renderBuilder(); } });
 </script></body></html>`;

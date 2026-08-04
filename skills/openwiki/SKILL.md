@@ -72,9 +72,21 @@ packaging trick removes those, because it's a networked CLI.
 
 Run from the repo root. Output is written to `openwiki/` in the repo.
 
+**Never clobber an existing wiki.** Before running anything, check whether an `openwiki/`
+folder already exists in the repo:
+- **If it exists** → the wiki is already set up. Use `openwiki --update` (refresh), never
+  `--init`. Do not overwrite or re-initialize it.
+- **If it does not exist** → this is a first run; use `openwiki --init`.
+
 ```bash
-openwiki --init        # build the code wiki for the first time
-openwiki --update      # refresh it after code changes
+[ -d openwiki ] && openwiki --update || openwiki --init
+```
+
+Or explicitly:
+
+```bash
+openwiki --init        # FIRST time only (no openwiki/ folder yet)
+openwiki --update      # every time after — refresh with the latest changes
 ```
 
 - Exclude paths with a gitignore-style **`.openwikiignore`** at the repo root.
