@@ -209,6 +209,9 @@ All 14 skills ✅ installed in `~/.claude/skills/`
 | [cowork-package](skills/cowork-package/) | Package skills into Cowork-ready zips — one skill per zip, verified | `install X into cowork`, `package for cowork` | ✅ |
 | [mission-control](skills/mission-control/) | **Master orchestrator** — classifies task type, routes to the right skills in order, resolves all overlap conflicts across G1–G17 | `start working on`, `which skill`, `new session` | ✅ |
 | [pm-agent](skills/pm-agent/) | Multi-product PM agent — orchestrates pm-skills, writes weekly reports across a portfolio | `/pm-agent`, `weekly PM run` | ✅ |
+| [jobs-to-be-done](skills/jobs-to-be-done/) | JTBD lens — functional/emotional/social jobs, four forces of progress, switch interviews, job statements | `what job is the customer hiring us for`, `discovery interview` | ✅ |
+| [hook-model](skills/hook-model/) | Habit design — Trigger→Action→Variable Reward→Investment, with the ethics gate | `retention`, `how do we get users back`, `habit loop` | ✅ |
+| [cro-objections](skills/cro-objections/) | Objection→counter-objection conversion optimization, research-first (not "best practices") | `why aren't people converting`, `audit this landing page` | ✅ |
 | [skill-library-lint](skills/skill-library-lint/) | Integrity gate for the mode library — fails if any mode or the router points at a missing skill, or a mode pulls in a vendor/crypto dependency | `lint the skill library`, `did I break a mode`, `check the modes` | ✅ |
 | pptx-from-template | Brand-faithful PowerPoint builder — edit from template, never regenerate from scratch | `from my template`, `match our deck` | ✅ local |
 | update-skills-library | Sync this repo from all upstream sources, rebuild zips, push | `update skills library` | ✅ local |

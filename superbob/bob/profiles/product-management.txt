@@ -18,3 +18,6 @@ swot-analysis
 stakeholder-map
 retro
 release-notes
+jobs-to-be-done
+hook-model
+cro-objections
