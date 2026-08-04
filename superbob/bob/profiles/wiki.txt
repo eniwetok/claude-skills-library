@@ -1,0 +1,10 @@
+codebase-onboarding
+code-tour
+repo-scan
+documentation
+docs-page
+documentation-lookup
+architecture
+architecture-decision-records
+system-design
+knowledge-ops
