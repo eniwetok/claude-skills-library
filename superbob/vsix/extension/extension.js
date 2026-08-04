@@ -227,6 +227,8 @@ function applyProfile(names) {
 }
 const META = () => path.join(BOB_PROFILES, '_meta.json');
 function readMeta() { try { return JSON.parse(fs.readFileSync(META(), 'utf8')); } catch (e) { return {}; } }
+const PROV = () => path.join(BOB_PROFILES, '_provenance.json');
+function readProvenance() { try { return JSON.parse(fs.readFileSync(PROV(), 'utf8')); } catch (e) { return {}; } }
 function writeMeta(m) { try { fs.writeFileSync(META(), JSON.stringify(m, null, 2)); } catch (e) {} }
 
 function saveCustomProfile(name, skills, desc) {
@@ -333,7 +335,8 @@ function stateMessage() {
     skills: listVaultSkills(),
     tools: OPTIONAL_TOOLS.map(toolState),
     scope: readScope(),
-    addons: addonStates()
+    addons: addonStates(),
+    provenance: readProvenance()
   };
 }
 function postState() { const msg = stateMessage(); webviews.forEach(w => { try { w.postMessage(msg); } catch (e) {} }); }
@@ -610,6 +613,8 @@ function getWebviewHtml() {
   .pswitch .track{position:absolute;inset:0;border-radius:999px;background:var(--vscode-input-background,#3a3a3a);border:1px solid var(--vscode-widget-border,#555);transition:.15s}
   .pswitch .knob{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--vscode-descriptionForeground,#aaa);transition:.15s}
   .pswitch input:checked ~ .track{background:var(--vscode-charts-green,#3fa76a);border-color:transparent}
+  .pswitch.blue input:checked ~ .track{background:var(--vscode-charts-blue,#3794ff);border-color:transparent}
+  .sorc{color:var(--vscode-descriptionForeground);font-size:11px;opacity:.85;margin-top:2px;font-style:italic}
   .pswitch input:checked ~ .knob{left:17px;background:#fff}
   .pswitch input:focus-visible ~ .track{outline:2px solid var(--vscode-focusBorder,#5a9);outline-offset:1px}
   .powerbar .t b{color:var(--vscode-charts-green,#89d185)}
@@ -775,7 +780,8 @@ function getWebviewHtml() {
     names.forEach(n=>{ const s=skillInfo(n); const core=S.core.includes(n);
       const r=document.createElement('div'); r.className='skrow';
       const desc=SHORT[n]||s.desc;
-      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">always on</span>':'')+'</span><span class="stk">'+fmtTok(s.tokens)+'</span></div>'+(desc?'<div class="sd">'+desc+'</div>':'');
+      const origin=(S.provenance&&S.provenance[n])||'';
+      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">always on</span>':'')+'</span><span class="stk">'+fmtTok(s.tokens)+'</span></div>'+(desc?'<div class="sd">'+desc+'</div>':'')+(origin?'<div class="sorc">from '+origin+'</div>':'');
       d.appendChild(r); });
     return d;
   }
@@ -854,30 +860,29 @@ function getWebviewHtml() {
 
   function modeCard(id,label,skills,isActive,deletable){
     const d=document.createElement('div'); d.className='mode'+(isActive?' on':'');
-    const top=document.createElement('div'); top.className='mode-top';
     const count = id==='__lean__' ? 'essentials only' : skills.length+' skills';
-    top.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'');
-    d.appendChild(top);   // name row is its own row; actions go on a second row for a stable layout
+    // Row 1: a BLUE load/unload toggle on the left (kits differ from the green power/add-on
+    // toggles), then the name + count + active badge. Stable regardless of state.
+    const top=document.createElement('div'); top.className='mode-top';
+    const tog=document.createElement('label'); tog.className='pswitch blue'; tog.title=isActive?'unload this kit (back to Auto)':'load this kit';
+    tog.innerHTML='<input type="checkbox" class="kitsw" data-kit="'+id+'" '+(isActive?'checked':'')+'/><span class="track"></span><span class="knob"></span>';
+    top.appendChild(tog);
+    const nm=document.createElement('span'); nm.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'');
+    top.appendChild(nm);
+    d.appendChild(top);
+    // Row 2: Learn more (the kit guide) · skills (with provenance) · delete
     const sp=document.createElement('div'); sp.className='mode-actions';
-    // Active Lean needs no button: it's the base state, and the "active" badge already
-    // shows it. A disabled "On" button just looks broken (you click it and nothing happens).
-    if(isActive && id==='__lean__'){ /* badge only */ }
-    else {
-      const use=document.createElement('button');
-      if(isActive){ use.textContent='Unload'; use.title='turn this kit off (back to Auto)'; use.onclick=()=>vscode.postMessage({type:'applyLean'}); }
-      else { use.textContent='Use'; use.onclick=()=> vscode.postMessage(id==='__lean__'?{type:'applyLean'}:{type:'applyProfile',name:id}); }
-      sp.appendChild(use);
-    }
-    if(id!=='__lean__'){ const how=document.createElement('button'); how.className='linkbtn'; how.textContent='How to use';
-      how.title='open a plain-English guide for this kit'; how.onclick=()=> vscode.postMessage({type:'openGuide',kit:id}); sp.appendChild(how); }
-    if(id!=='__lean__'){ const sk=document.createElement('button'); sk.className='linkbtn'; sk.textContent='skills';
-      sk.onclick=()=>{ const el=d.querySelector('.mode-skills'); el.style.display = el.style.display==='none'?'block':'none'; }; sp.appendChild(sk); }
+    const how=document.createElement('button'); how.className='linkbtn'; how.textContent='Learn more';
+    how.title='how to use this kit'; how.onclick=()=> vscode.postMessage({type:'openGuide',kit:id}); sp.appendChild(how);
+    const sk=document.createElement('button'); sk.className='linkbtn'; sk.textContent='skills';
+    sk.title='the skills in this kit and where each comes from';
+    sk.onclick=()=>{ const el=d.querySelector('.mode-skills'); el.style.display = el.style.display==='none'?'block':'none'; }; sp.appendChild(sk);
     if(deletable){ const del=document.createElement('button'); del.className='del'; del.textContent='🗑'; del.title='delete this kit';
       del.onclick=()=> vscode.postMessage({type:'deleteMode',name:id}); sp.appendChild(del); }
-    d.appendChild(sp);   // actions row (Use/Unload · How to use · skills · delete) below the name
+    d.appendChild(sp);
     const md=document.createElement('div'); md.className='mode-desc'; md.textContent=descFor(id); d.appendChild(md);
-    if(id!=='__lean__'){ const s=document.createElement('div'); s.className='mode-skills'; s.style.display='none';
-      s.appendChild(skillRows(skills)); d.appendChild(s); }
+    const s=document.createElement('div'); s.className='mode-skills'; s.style.display='none';
+    s.appendChild(skillRows(skills)); d.appendChild(s);
     return d;
   }
 
@@ -910,6 +915,7 @@ function getWebviewHtml() {
     if(e.target.name==='scope' && e.target.checked){ vscode.postMessage({type:'setScope', scope:e.target.value}); }
     if(e.target.classList && e.target.classList.contains('toolsw')){ vscode.postMessage({type:'toolToggle', tool:e.target.dataset.tool, on:e.target.checked}); }
     if(e.target.classList && e.target.classList.contains('addonsw')){ vscode.postMessage({type:'setAddon', name:e.target.dataset.addon, on:e.target.checked}); }
+    if(e.target.classList && e.target.classList.contains('kitsw')){ vscode.postMessage(e.target.checked?{type:'applyProfile',name:e.target.dataset.kit}:{type:'applyLean'}); }
     if(e.target.id==='bstart'){ const p=e.target.value; sel=new Set(p&&S.profiles[p]?S.profiles[p].filter(n=>!S.core.includes(n)):[]); renderBuilder(); } });
 </script></body></html>`;
 }
