@@ -599,9 +599,11 @@ function getWebviewHtml() {
   .active-card .now{font-weight:600;font-size:1rem}
   .active-card .skills{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
   .pill{font-size:11px;background:var(--vscode-badge-background,#333);color:var(--vscode-badge-foreground,#ccc);border-radius:10px;padding:2px 9px}
-  .sklist{margin-top:8px}
+  .sklist{margin-top:4px}
   .skrow{padding:6px 0;border-top:1px solid var(--vscode-widget-border,#2a2a2a)}
   .skrow:first-child{border-top:0}
+  .skgroup{margin-top:8px}
+  .skgroup-h{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--vscode-descriptionForeground);font-weight:600}
   .skrow .sh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
   .skrow .sn{font-weight:600}
   .skrow .sn .ao{font-size:9px;color:var(--vscode-charts-blue,#4aa8d8);border:1px solid currentColor;border-radius:7px;padding:0 5px;margin-left:5px;text-transform:uppercase}
@@ -845,7 +847,13 @@ function getWebviewHtml() {
     const extras=S.activeSet.filter(n=>!S.core.includes(n) && !ext.has(n) && !addonNames.has(n));   // the kit's own skills
     const ordered=[...S.core, ...extras];   // superpowers + mission-control first (always on)
     const cont=document.getElementById('activeSkills'); cont.innerHTML='';
-    cont.appendChild(skillRows(ordered));
+    // Group by what loaded each skill: the always-on core, then the active kit. That's the
+    // kit-level provenance (why it's loaded); each row still shows its author origin.
+    function group(title, names){ if(!names.length) return; const g=document.createElement('div'); g.className='skgroup';
+      const h=document.createElement('div'); h.className='skgroup-h'; h.textContent=title; g.appendChild(h); g.appendChild(skillRows(names)); cont.appendChild(g); }
+    group('Always on · core', S.core);
+    const kitTitle = am==='__lean__' ? '' : (am==='__custom__' ? 'From your custom set' : ('From kit · '+am));
+    group(kitTitle, extras);
     // one-line summary so the card stays a stable height; skills expand on demand
     const kitCount=ordered.length - S.core.length;
     document.getElementById('activeSkillsSummary').textContent =
