@@ -92,7 +92,7 @@ const BUILTIN = ['software-development', 'data-analysis', 'product-management', 
 const ADDONS = [{
   name: 'i-have-adhd',
   title: 'ADHD mode (concise output)',
-  desc: "Shapes every reply to be direct and action-first: lead with the next step, number tasks, no preamble or filler. Turn off for verbose output."
+  desc: "Concise, action-first replies. Off = verbose."
 }];
 const ADDON_FILE = () => path.join(HOME, '.bob', '.superbob-addons');
 function readAddons() { try { return new Set(fs.readFileSync(ADDON_FILE(), 'utf8').split('\n').map(s => s.trim()).filter(Boolean)); } catch (e) { return new Set(); } }
@@ -686,9 +686,9 @@ function getWebviewHtml() {
     const list=S.addons||[];
     wrap.style.display=list.length?'block':'none'; c.innerHTML='';
     list.forEach(a=>{
-      const row=document.createElement('div'); row.style.display='flex'; row.style.alignItems='flex-start'; row.style.gap='9px'; row.style.margin='6px 0';
-      row.innerHTML='<label class="pswitch" style="margin-top:1px"><input type="checkbox" class="addonsw" data-addon="'+a.name+'" '+(a.on?'checked':'')+'/><span class="track"></span><span class="knob"></span></label>'+
-        '<span><span style="font-weight:600">'+a.title+'</span><div class="muted" style="font-size:12px">'+a.desc+'</div></span>';
+      const row=document.createElement('div'); row.style.display='flex'; row.style.alignItems='center'; row.style.gap='9px'; row.style.margin='5px 0';
+      row.innerHTML='<label class="pswitch"><input type="checkbox" class="addonsw" data-addon="'+a.name+'" '+(a.on?'checked':'')+'/><span class="track"></span><span class="knob"></span></label>'+
+        '<span style="font-size:12px"><span style="font-weight:600">'+a.title+'</span> <span class="muted">'+a.desc+'</span></span>';
       c.appendChild(row);
     });
   }
@@ -729,7 +729,8 @@ function getWebviewHtml() {
     // Show only what SuperBob loaded (core + the kit's skills). The user's own skills are
     // deliberately not listed here: they're kept untouched, but listing 30+ of them is noise.
     const ext=new Set(S.external||[]);
-    const extras=S.activeSet.filter(n=>!S.core.includes(n) && !ext.has(n));   // the kit's own skills
+    const addonNames=new Set((S.addons||[]).map(a=>a.name));   // add-ons are shown as toggles below, not as skill rows
+    const extras=S.activeSet.filter(n=>!S.core.includes(n) && !ext.has(n) && !addonNames.has(n));   // the kit's own skills
     const ordered=[...S.core, ...extras];   // superpowers + mission-control first (always on)
     const cont=document.getElementById('activeSkills'); cont.innerHTML='';
     cont.appendChild(skillRows(ordered));
