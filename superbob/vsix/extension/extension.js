@@ -508,7 +508,7 @@ function guideHtml(g) {
   const desc = g.description ? '<p class="desc">' + esc(g.description) + '</p>' : '';
   const when = g.when ? '<p class="when"><b>When to reach for it:</b> ' + esc(g.when) + '</p>' : '';
   const outline = g.outline.length ? '<h2>How it flows</h2><ol class="outline">' + g.outline.map(o => '<li>' + esc(o) + '</li>').join('') + '</ol>' : '';
-  const examples = g.examples.length ? '<h2>Ways to use it (' + g.examples.length + ')</h2><ol>' + g.examples.map(e => '<li>' + esc(e) + '</li>').join('') + '</ol>' : '';
+  const examples = g.examples.length ? '<h2>How to use it</h2><p class="usehint">Load the kit, start a new chat, then say what you need in plain language. It picks the right skills. For example:</p><ol class="uses">' + g.examples.map(e => '<li>' + esc(e) + '</li>').join('') + '</ol>' : '';
   const tips = g.tips.length ? '<h2>Tips</h2><ul>' + g.tips.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
   const note = g.authored ? '' : '<p class="muted auto">Generated from the kit\'s skills. A fuller walkthrough is coming.</p>';
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>
@@ -521,6 +521,7 @@ function guideHtml(g) {
     .sn{font-weight:600} .sd{color:var(--vscode-descriptionForeground);font-size:13px;margin-top:2px}
     .sorc{color:var(--vscode-descriptionForeground);font-size:12px;opacity:.8;font-style:italic;margin-top:1px}
     ol,ul{padding-left:22px;margin:0} li{margin:7px 0} .outline li{margin:4px 0}
+    .usehint{color:var(--vscode-descriptionForeground);font-size:13px;margin:0 0 10px} .uses li{margin:9px 0}
     .muted{color:var(--vscode-descriptionForeground)} .auto{font-size:12px;font-style:italic;margin-top:6px}
     .foot{margin-top:26px;border-top:1px solid var(--vscode-widget-border,#333);padding-top:12px;color:var(--vscode-descriptionForeground);font-size:13px}
     code{background:var(--vscode-textCodeBlock-background,#222);padding:1px 5px;border-radius:4px}

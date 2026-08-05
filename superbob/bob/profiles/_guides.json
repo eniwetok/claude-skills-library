@@ -64,11 +64,11 @@
       "Verify the checks before calling it done"
     ],
     "examples": [
-      "Add a scheduled export endpoint for a dashboard, test first, with retry and error handling.",
-      "Refactor the query builder that turns a report definition into SQL, keeping the tests green.",
-      "Build a caching layer for expensive aggregations behind a clean API.",
-      "Add a new visualization type to the rendering pipeline with unit and integration tests.",
-      "Wire a REST data-source connector with typed models and failure handling."
+      "Say \"add a scheduled CSV export for this dashboard\". It writes the failing test first, builds the endpoint with retry and error handling, then runs the checks before calling it done.",
+      "Say \"refactor the report-to-SQL builder\". It keeps the tests green, applies your stack patterns, and cuts dead complexity as it goes.",
+      "Say \"add a caching layer for these expensive aggregations\". It shapes a clean API, writes the tests, and keeps the design minimal.",
+      "Say \"add a heatmap to the render pipeline\". It tests first, implements the visualization, then adds integration coverage.",
+      "Say \"build a REST connector for this data source\". It writes typed models and failure handling, tests them, and verifies before done."
     ],
     "tips": [
       "Name your stack so it pulls the right patterns.",
@@ -86,11 +86,11 @@
       "SQL and statistics for the numbers"
     ],
     "examples": [
-      "Judge whether the natural-language-to-query feature returns the right result set, calibrated against analyst labels.",
-      "Profile which report types most often produce empty or wrong visualizations, by failure mode.",
-      "Score an AI summary of a dashboard for factual accuracy against the underlying data.",
-      "Run cohort SQL on usage events to find where users abandon the report builder.",
-      "Set up a statistics check on query latency across data sources."
+      "Say \"is the natural-language-to-query feature returning the right results?\". It runs error-analysis on real traces, builds a Pass/Fail judge, and calibrates it against analyst labels before scoring.",
+      "Say \"where do users abandon the report builder?\". It writes the cohort SQL over usage events and reads the drop-off.",
+      "Say \"grade these AI dashboard summaries for accuracy\". It builds a judge, validates it against human labels, then scores the batch.",
+      "Say \"which report types fail most, and why?\". error-analysis groups the failures by mode so you fix the biggest one first.",
+      "Say \"check query latency across data sources\". It runs the statistics and separates real differences from noise."
     ],
     "tips": [
       "An uncalibrated judge is a random number.",
@@ -108,11 +108,11 @@
       "north-star-metric and gtm-strategy to ship and measure"
     ],
     "examples": [
-      "Turn scattered requests for a new chart type into a prioritized, spec'd capability.",
-      "Write the PRD for a natural-language query experience, with success metrics.",
-      "Rank a quarter of dashboard and reporting asks with RICE.",
-      "Frame an embedded-analytics initiative and its go-to-market.",
-      "Define the north-star metric for the report-authoring experience."
+      "Say \"we keep getting requests for a new chart type, what should we do?\". jobs-to-be-done finds the real need, then it specs a capability and ranks it with RICE.",
+      "Say \"write the PRD for a natural-language query experience\". create-prd drafts it with success metrics; user-stories breaks it down.",
+      "Say \"rank this quarter's reporting asks\". prioritization-frameworks scores them so the order is defensible.",
+      "Say \"frame an embedded-analytics bet for leadership\". It writes the initiative and the go-to-market.",
+      "Say \"what is the north-star metric for report authoring?\". north-star-metric picks the one number and explains why."
     ],
     "tips": [
       "Describe the situation, not the skills.",
@@ -129,11 +129,11 @@
       "runbook and incident-response for operations"
     ],
     "examples": [
-      "Design the deployment for a query engine that must scale with concurrent report runs.",
-      "Containerize the scheduling service and roll it out with zero downtime.",
-      "Write the runbook for a data-source outage that stalls dashboards.",
-      "Add autoscaling for the rendering workers under heavy export load.",
-      "Stand up an incident playbook for slow dashboards during peak reporting."
+      "Say \"design the deployment for a query engine that scales with concurrent runs\". system-design shapes it; deployment-patterns makes it production-ready.",
+      "Say \"roll out the scheduling service with zero downtime\". It containerizes the service and stages the rollout.",
+      "Say \"the data source is down and dashboards are stalling, what do we do?\". incident-response walks the playbook; runbook captures it for next time.",
+      "Say \"add autoscaling for the export workers\". It sizes it to load and wires the infrastructure as code.",
+      "Say \"write the runbook for slow dashboards at peak\". It documents the checks and the fixes step by step."
     ],
     "tips": [
       "Write the runbook before you need it.",
@@ -150,11 +150,11 @@
       "verification-before-completion"
     ],
     "examples": [
-      "Write end-to-end tests for the report builder, from data source to rendered chart.",
-      "Add regression tests for an export bug that keeps coming back.",
-      "Cover the natural-language query parser with unit tests across edge phrasings.",
-      "Test drill-through navigation across linked dashboards.",
-      "Add a suite for scheduled-report delivery under failure conditions."
+      "Say \"test the report builder end to end\". testing-strategy scopes it, then it writes tests from data source to rendered chart.",
+      "Say \"this export bug keeps coming back\". It adds a regression test that fails on the bug and passes on the fix.",
+      "Say \"cover the natural-language parser\". It writes unit tests across edge phrasings.",
+      "Say \"test drill-through across linked dashboards\". It writes the end-to-end flow, asserting the carried filter.",
+      "Say \"test scheduled delivery under failure\". It covers timeouts, retries, and partial failures."
     ],
     "tips": [
       "Test behavior, not implementation.",
@@ -172,11 +172,11 @@
       "a clean, reproducible report"
     ],
     "examples": [
-      "Audit the embedded-dashboard iframe flow for XSS and clickjacking.",
-      "Check row-level and object-level access on shared reports for IDOR.",
-      "Test the data-source connector for SSRF via user-supplied URLs.",
-      "Review the query API for SQL injection in filter expressions.",
-      "Harden sharing links so tokens cannot be guessed or replayed."
+      "Say \"audit the embedded-dashboard iframe flow\". bb-methodology scopes it; hunt-xss and related skills probe for injection and clickjacking.",
+      "Say \"can users open reports they should not?\". hunt-idor tests row-level and object-level access on shared reports.",
+      "Say \"is the data-source connector safe from SSRF?\". hunt-ssrf tests user-supplied URLs and internal reachability.",
+      "Say \"review the query API for injection\". hunt-sqli works the filter expressions; vibesec shows how to prevent it at write-time.",
+      "Say \"harden our sharing links\". It checks tokens for guessability and replay, then reports the fixes."
     ],
     "tips": [
       "hunt-* finds; vibesec prevents.",
@@ -194,11 +194,11 @@
       "fixing-accessibility"
     ],
     "examples": [
-      "Design the report-builder canvas so drag and drop is obvious and forgiving.",
-      "Make the filter panel keyboard-navigable and screen-reader friendly.",
-      "Add subtle motion to chart transitions when data updates.",
-      "Build a consistent color and type system for dashboard widgets.",
-      "Polish the empty and loading states of a slow visualization."
+      "Say \"make the report-builder canvas easy to use\". frontend-design lays out drag and drop so it is obvious and forgiving.",
+      "Say \"make the filter panel accessible\". fixing-accessibility makes it keyboard and screen-reader friendly.",
+      "Say \"add motion to chart transitions\". motion animates data updates without distracting.",
+      "Say \"give the dashboard widgets a consistent look\". design-system sets the color and type rules.",
+      "Say \"polish the loading and empty states\". It designs the states so a slow visualization still feels intentional."
     ],
     "tips": [
       "Accessibility is not a phase, bake it in.",
@@ -215,11 +215,11 @@
       "research-synthesis into a cited answer"
     ],
     "examples": [
-      "Compare how competing BI tools do natural-language query, with sources.",
-      "Survey the state of embedded-analytics pricing models.",
-      "Research accessibility standards for data visualizations.",
-      "Find evidence on what drives adoption of self-service reporting.",
-      "Summarize approaches to semantic layers across the market."
+      "Say \"how do competitors do natural-language query?\". deep-research plans it, the search skills gather, research-synthesis returns a cited answer.",
+      "Say \"survey embedded-analytics pricing models\". It compiles the landscape with sources.",
+      "Say \"what are the accessibility standards for charts?\". It finds and summarizes them.",
+      "Say \"what drives adoption of self-service reporting?\". It gathers the evidence and synthesizes it.",
+      "Say \"compare semantic-layer approaches\". It lays out the options with trade-offs and sources."
     ],
     "tips": [
       "Ask for sources so you can check the claims.",
@@ -236,11 +236,11 @@
       "verification-before-completion and karpathy-guidelines"
     ],
     "examples": [
-      "Review a change to the query builder for correctness and injection risk before release.",
-      "Gate a new export format on test coverage and edge cases.",
-      "Check a permissions refactor on shared dashboards for access regressions.",
-      "Review a rendering-performance change for correctness under large datasets.",
-      "Vet a data-source connector update before it reaches customers."
+      "Say \"review this query-builder change before release\". code-review checks correctness and injection risk; verification confirms the claims.",
+      "Say \"is this new export format ready?\". It gates the change on test coverage and edge cases.",
+      "Say \"did this permissions refactor break access on shared dashboards?\". It hunts for access regressions.",
+      "Say \"review this rendering-performance change\". It checks correctness under large datasets.",
+      "Say \"vet this connector update before customers get it\". It reviews security and tests, then gives a go or no-go."
     ],
     "tips": [
       "Run it before you merge, not after.",
@@ -257,11 +257,11 @@
       "error-handling to fix it right"
     ],
     "examples": [
-      "Track down why a scheduled report intermittently delivers an empty file.",
-      "Fix a chart that renders blank only for one data source.",
-      "Find why drill-through loses the applied filter.",
-      "Diagnose a slow dashboard that is fast in staging.",
-      "Resolve a natural-language query that returns the wrong aggregation."
+      "Say \"a scheduled report intermittently delivers an empty file\". systematic-debugging reproduces and isolates the cause; error-handling fixes it so it stays fixed.",
+      "Say \"this chart is blank only for one data source\". It reproduces against that source and patches the root cause.",
+      "Say \"drill-through loses the applied filter\". It traces where the filter drops and fixes it.",
+      "Say \"the dashboard is slow in prod but fast in staging\". It isolates the difference, using caveman-debug if the trail goes cold.",
+      "Say \"this query returns the wrong aggregation\". It finds the real cause, not the symptom."
     ],
     "tips": [
       "Reproduce before you fix.",
@@ -278,11 +278,11 @@
       "keep the simplest thing that works"
     ],
     "examples": [
-      "Cut a bespoke caching layer down to a small memoization where the query engine already helps.",
-      "Collapse three near-duplicate chart adapters into one.",
-      "Remove a config abstraction no dashboard actually uses.",
-      "Simplify an export pipeline that grew five options nobody selects.",
-      "Delete dead code paths in the filter parser."
+      "Say \"this caching layer feels heavier than it needs to be\". ponytail-review ranks what to cut and keeps the simplest thing that works.",
+      "Say \"we have three near-duplicate chart adapters\". It collapses them into one.",
+      "Say \"find bloat across the repo\". ponytail-audit gives a ranked list of what to remove.",
+      "Say \"simplify the export pipeline\". It cuts the options nobody selects.",
+      "Say \"clean up the filter parser\". It deletes the dead code paths."
     ],
     "tips": [
       "Eight sharp lines beat fifty clever ones.",
@@ -299,11 +299,11 @@
       "write-judge-prompt and validate-evaluator"
     ],
     "examples": [
-      "Evaluate an assistant that answers questions over your reports, retrieval first.",
-      "Measure whether the docs-search feature returns the right passages.",
-      "Score answer faithfulness for a metric-explanation assistant.",
-      "Find whether failures come from retrieval or from generation.",
-      "Calibrate a judge for 'did the answer cite the right dashboard'."
+      "Say \"is our report-QA assistant any good?\". evaluate-rag scores retrieval first, then answer quality, so you know which half to fix.",
+      "Say \"does docs-search return the right passages?\". It measures retrieval precision on real queries.",
+      "Say \"are the metric explanations faithful to the data?\". It scores answer faithfulness with a calibrated judge.",
+      "Say \"are our failures retrieval or generation?\". error-analysis splits them so you fix the right bug.",
+      "Say \"calibrate a judge for citing the right dashboard\". validate-evaluator checks it against human labels first."
     ],
     "tips": [
       "Never trust an uncalibrated judge.",
@@ -320,11 +320,11 @@
       "ux-copy and brand-voice for tone, seo if needed"
     ],
     "examples": [
-      "Write release notes for a new visualization type in plain language.",
-      "Rewrite an error message for a failed data-source connection so it actually helps.",
-      "Draft onboarding copy for the report builder.",
-      "Clean the AI slop out of a feature announcement.",
-      "Write tooltip and empty-state copy for the dashboard editor."
+      "Say \"write release notes for the new visualization type\". draft-content writes them, no-ai-slop strips the AI tells.",
+      "Say \"rewrite this data-source error message so it helps\". ux-copy makes it clear and actionable.",
+      "Say \"draft onboarding copy for the report builder\". It writes it in your brand voice.",
+      "Say \"does this announcement sound like AI?\". no-ai-slop names the tells and rewrites them.",
+      "Say \"write tooltip and empty-state copy for the editor\". It writes concise, human microcopy."
     ],
     "tips": [
       "Run no-ai-slop after drafting, not instead of it.",
