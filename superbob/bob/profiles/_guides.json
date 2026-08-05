@@ -52,5 +52,179 @@
       "This kit is the spine; the full product-on-purpose set has more skills per phase (discover-market-sizing, deliver-user-stories, measure-experiment-results) when you need depth.",
       "Pair with the product-frameworks kit for the JTBD / Hook / CRO thinking behind the phases."
     ]
+  },
+  "software-development": {
+    "tagline": "Write and change code the way a senior engineer would — test-first, patterned, and hard to regret.",
+    "when": "You're building or refactoring a feature and want it done right, not just working.",
+    "example": [
+      "Describe the feature; it starts test-first (tdd-workflow) — the failing test before the code.",
+      "It applies your stack's patterns (python / react / go / fastapi / django…) and api-design + system-design for the shape.",
+      "ponytail and karpathy-guidelines keep it minimal and free of the common LLM mistakes.",
+      "verification-before-completion runs the checks before it ever says 'done'."
+    ],
+    "tips": [
+      "Name your stack so it pulls the right patterns.",
+      "Keep changes small — it won't claim verified without running the check."
+    ]
+  },
+  "data-analysis": {
+    "tagline": "Work with data and judge AI output without fooling yourself.",
+    "when": "You're doing analytics, or measuring how good an AI/LLM pipeline actually is.",
+    "example": [
+      "Start with error-analysis on real traces — categorize the failures before counting anything.",
+      "write-judge-prompt to build a binary Pass/Fail evaluator for the subjective calls.",
+      "validate-evaluator to calibrate that judge against human labels — never trust an uncalibrated one.",
+      "SQL + statistics for the actual numbers."
+    ],
+    "tips": [
+      "Calibrate the judge before you believe its score.",
+      "Separate retrieval quality from answer quality."
+    ]
+  },
+  "product-management": {
+    "tagline": "The full PM toolkit — from a fuzzy idea to a shipped, measured feature.",
+    "when": "You're planning and strategizing, not coding: PRDs, roadmaps, prioritization, go-to-market.",
+    "example": [
+      "jobs-to-be-done to find the real need behind the request.",
+      "create-prd + user-stories to spec it.",
+      "prioritization-frameworks (RICE) to rank what to build.",
+      "north-star-metric + gtm-strategy to ship and measure it."
+    ],
+    "tips": [
+      "Describe the situation, not the skills.",
+      "Pair with pm-methodology (the process) and product-frameworks (the thinking)."
+    ]
+  },
+  "production-engineering": {
+    "tagline": "Design, ship, and operate production-grade systems — not just make it run on your laptop.",
+    "when": "You're deploying, operating, or hardening real infrastructure.",
+    "example": [
+      "system-design + deployment-patterns to shape it for production.",
+      "docker / kubernetes / terraform to actually ship it.",
+      "runbook + incident-response for when it breaks at 3am."
+    ],
+    "tips": [
+      "For a specific prod bug, pair with the bug-fixing kit.",
+      "Write the runbook before you need it."
+    ]
+  },
+  "test-engineering": {
+    "tagline": "Make the tests actually catch things — unit, end-to-end, and regression.",
+    "when": "You're writing or hardening a test suite you'll trust.",
+    "example": [
+      "testing-strategy decides what to test at each level (and what not to).",
+      "Write the unit, end-to-end, and regression tests.",
+      "verification-before-completion so green means green."
+    ],
+    "tips": [
+      "Test behavior, not implementation details.",
+      "A test that never fails is testing nothing."
+    ]
+  },
+  "application-security": {
+    "tagline": "Find and fix vulnerabilities the way an attacker would — then write code that resists them.",
+    "when": "You're running an audit or pen-test, or hardening a feature before it ships.",
+    "example": [
+      "bb-methodology to plan the hunt and scope it.",
+      "The hunt-* skills work each vulnerability class (xss, sqli, ssrf, idor, auth-bypass…).",
+      "vibesec to prevent them at write-time, not just find them.",
+      "A clean, reproducible report at the end."
+    ],
+    "tips": [
+      "hunt-* finds them; vibesec prevents them.",
+      "Reproduce every finding before you report it."
+    ]
+  },
+  "frontend-design": {
+    "tagline": "Build interfaces people actually enjoy — polished, accessible, and alive.",
+    "when": "You're working on anything users see on screen.",
+    "example": [
+      "frontend-design for the structure and layout.",
+      "design-system + frontend patterns for consistency.",
+      "motion for how it feels.",
+      "fixing-accessibility so everyone can use it."
+    ],
+    "tips": [
+      "Accessibility isn't optional — bake it in.",
+      "Motion with restraint; it should guide, not distract."
+    ]
+  },
+  "web-research": {
+    "tagline": "Dig into a topic and come back with a synthesized answer — not 40 open tabs.",
+    "when": "You need to understand something you don't yet know.",
+    "example": [
+      "deep-research plans the search — what to look for and why.",
+      "exa-search / x-research gather the raw material.",
+      "research-synthesis turns it into a clear answer with sources."
+    ],
+    "tips": [
+      "Ask for sources so you can check the claims.",
+      "search-first before guessing from memory."
+    ]
+  },
+  "release-review": {
+    "tagline": "The gate before you ship — catch what a tired reviewer would miss.",
+    "when": "You're right before a merge or a release.",
+    "example": [
+      "code-review across dimensions (correctness, security, simplicity, tests).",
+      "security-audit + a check that tests actually cover the change.",
+      "verification-before-completion, and karpathy-guidelines for the common LLM slip-ups."
+    ],
+    "tips": [
+      "Run it before you merge, not after.",
+      "One confirmed blocker beats ten vague nits."
+    ]
+  },
+  "bug-fixing": {
+    "tagline": "Find the root cause fast — not the symptom.",
+    "when": "Something's broken and you need it fixed now.",
+    "example": [
+      "systematic-debugging to isolate the actual cause (reproduce first).",
+      "caveman-debug (print statements) when the trail goes cold.",
+      "error-handling to fix it properly, not just silence it."
+    ],
+    "tips": [
+      "Reproduce before you fix.",
+      "Fix the cause, not the log line."
+    ]
+  },
+  "code-simplification": {
+    "tagline": "Cut the over-engineering — the best code is the code you didn't write.",
+    "when": "A diff or a repo feels bloated and you want it lean.",
+    "example": [
+      "ponytail-review on the diff — a ranked list of what to delete.",
+      "ponytail-audit for whole-repo bloat.",
+      "Keep the laziest working solution: stdlib before custom, one line before fifty."
+    ],
+    "tips": [
+      "Eight sharp lines beat fifty clever ones.",
+      "Delete first; add back only what you miss."
+    ]
+  },
+  "rag-evaluation": {
+    "tagline": "Prove your RAG or search system actually works — retrieval and answer, scored separately.",
+    "when": "You're measuring or improving a retrieval/RAG agent.",
+    "example": [
+      "evaluate-rag scores retrieval quality and answer quality as separate concerns.",
+      "error-analysis on the failures to find the pattern.",
+      "write-judge-prompt + validate-evaluator for a judge you've actually calibrated."
+    ],
+    "tips": [
+      "Never trust a judge you haven't calibrated against humans.",
+      "Bad retrieval and bad generation are different bugs — don't blend them."
+    ]
+  },
+  "content-writing": {
+    "tagline": "Write and edit docs and copy that sound human — not AI.",
+    "when": "You're writing docs or marketing copy, or cleaning up a draft.",
+    "example": [
+      "draft-content / copywriting for the first pass.",
+      "no-ai-slop to strip the 20+ AI tells while keeping your voice.",
+      "ux-copy / brand-voice for tone; seo if it's for search."
+    ],
+    "tips": [
+      "Run no-ai-slop after drafting, not instead of it.",
+      "Match the brand voice — generic copy converts no one."
+    ]
   }
 }

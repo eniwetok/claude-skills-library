@@ -700,7 +700,7 @@ function getWebviewHtml() {
 </div>
 <div id="main" style="display:none">
   <h1>SuperBob</h1>
-  <div class="muted">Loads just the skills each task needs, on top of your current Bob mode. Runs automatically while it's on — no <code>/superbob</code> command needed.</div>
+  <div class="muted">Expert skill <b>kits</b> for Bob — the right skills load per task, automatically. Leave <b>Auto</b> on, or flip a kit's blue toggle. Each kit has a <b>Learn more</b> guide with a worked example.</div>
 
   <div class="powerbar">
     <label class="pswitch"><input type="checkbox" id="powerToggle" checked/><span class="track"></span><span class="knob"></span></label>
@@ -769,13 +769,13 @@ function getWebviewHtml() {
   <details class="help">
     <summary>❔ How to use SuperBob</summary>
     <div class="helpbody">
-      <p>Pick a <b>kit</b> for what you're doing. SuperBob loads just those skills so the agent stays fast.</p>
+      <p>A <b>kit</b> is a set of expert skills for one kind of work. SuperBob loads only the current kit, so Bob stays fast and focused.</p>
       <ol>
-        <li>Leave <b>Auto mode</b> on and SuperBob picks the skills for each task. That's the whole setup.</li>
-        <li>Or turn Auto off and click a kit's <b>Use</b> button. Click <b>skills</b> to see what's inside and what it costs.</li>
+        <li>Leave <b>Auto mode</b> on and SuperBob picks the skills for each task. For most work, that's the whole setup.</li>
+        <li>Or flip a kit's <b>blue toggle</b> on to load it. Click <b>Learn more</b> for its pitch and a worked example; <b>skills</b> shows what's inside and where each comes from.</li>
         <li>Or, in the Bob chat, type <code>/superbob software-development</code> (or any kit). <code>/superbob</code> alone lists them.</li>
         <li>After switching, <b>start a new conversation</b> so the skills load.</li>
-        <li>Use <b>+ Create your own kit</b> to save your own set of skills.</li>
+        <li>Use <b>+ Create your own kit</b> to build one, with its own guide.</li>
       </ol>
       <button class="sec" id="docsBtn">Open full guide ↗</button>
     </div>
