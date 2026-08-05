@@ -229,6 +229,26 @@ const META = () => path.join(BOB_PROFILES, '_meta.json');
 function readMeta() { try { return JSON.parse(fs.readFileSync(META(), 'utf8')); } catch (e) { return {}; } }
 const PROV = () => path.join(BOB_PROFILES, '_provenance.json');
 function readProvenance() { try { return JSON.parse(fs.readFileSync(PROV(), 'utf8')); } catch (e) { return {}; } }
+
+// ---- per-kit prerequisites (data-driven) ----------------------------------
+// A kit can require a Bob plugin/tool before it can be enabled. Config lives in
+// ~/.bob/profiles/_prereqs.json: { "<kit>": { label, check } }. Detectors below resolve `check`.
+const PREREQ_FILE = () => path.join(BOB_PROFILES, '_prereqs.json');
+function readPrereqs() { try { return JSON.parse(fs.readFileSync(PREREQ_FILE(), 'utf8')); } catch (e) { return {}; } }
+const PREREQ_DETECTORS = {
+  propel: () => fs.existsSync(path.join(HOME, '.bob', 'propel')) || fs.existsSync(path.join(HOME, '.bob', '.propel-analytics.json'))
+};
+function prereqMet(kit) {
+  const p = readPrereqs()[kit];
+  if (!p) return true;
+  const det = PREREQ_DETECTORS[p.check];
+  return det ? det() : true;   // unknown detector → don't block
+}
+function kitPrereqStates() {
+  const out = {}; const all = readPrereqs();
+  for (const k of Object.keys(all)) out[k] = { label: all[k].label || 'a required plugin', met: prereqMet(k) };
+  return out;
+}
 function writeMeta(m) { try { fs.writeFileSync(META(), JSON.stringify(m, null, 2)); } catch (e) {} }
 
 function saveCustomProfile(name, skills, desc) {
@@ -336,7 +356,8 @@ function stateMessage() {
     tools: OPTIONAL_TOOLS.map(toolState),
     scope: readScope(),
     addons: addonStates(),
-    provenance: readProvenance()
+    provenance: readProvenance(),
+    prereqs: kitPrereqStates()
   };
 }
 function postState() { const msg = stateMessage(); webviews.forEach(w => { try { w.postMessage(msg); } catch (e) {} }); }
@@ -344,6 +365,11 @@ function postState() { const msg = stateMessage(); webviews.forEach(w => { try {
 async function handleMessage(m, context) {
   if (m.type === 'ready') { postState(); return; }
   if (m.type === 'applyProfile') {
+    if (!prereqMet(m.name)) {   // gate: some kits require a plugin (e.g. Propel) before they can load
+      const p = readPrereqs()[m.name];
+      vscode.window.showWarningMessage('The "' + m.name + '" kit needs ' + (p && p.label || 'a required plugin') + '. Install/enable it in Bob first, then try again.');
+      postState(); return;
+    }
     if (applyProfile([m.name])) vscode.window.showInformationMessage('Loaded "' + m.name + '" kit. Start a new conversation to apply.');
     postState(); return;
   }
@@ -629,6 +655,8 @@ function getWebviewHtml() {
   .mode-name{font-weight:600}
   .mode-top .cnt{color:var(--vscode-descriptionForeground);font-size:12px}
   .mode-top .badge{font-size:10px;color:var(--vscode-charts-green,#3fb950);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap}
+  .lockbadge{font-size:10px;color:var(--vscode-descriptionForeground);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap}
+  .pswitch input:disabled ~ .track{opacity:.4} .pswitch input:disabled ~ .knob{opacity:.4}
   .mode-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
   button{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border:0;border-radius:5px;padding:5px 13px;cursor:pointer;font-size:12px}
   button.sec{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground)}
@@ -881,11 +909,12 @@ function getWebviewHtml() {
     const count = id==='__lean__' ? 'essentials only' : skills.length+' skills';
     // Row 1: a BLUE load/unload toggle on the left (kits differ from the green power/add-on
     // toggles), then the name + count + active badge. Stable regardless of state.
+    const pre=(S.prereqs||{})[id]; const locked=pre && !pre.met;   // kit needs a plugin that isn't installed
     const top=document.createElement('div'); top.className='mode-top';
-    const tog=document.createElement('label'); tog.className='pswitch blue'; tog.title=isActive?'unload this kit (back to Auto)':'load this kit';
-    tog.innerHTML='<input type="checkbox" class="kitsw" data-kit="'+id+'" '+(isActive?'checked':'')+'/><span class="track"></span><span class="knob"></span>';
+    const tog=document.createElement('label'); tog.className='pswitch blue'; tog.title=locked?('needs '+pre.label):(isActive?'unload this kit (back to Auto)':'load this kit');
+    tog.innerHTML='<input type="checkbox" class="kitsw" data-kit="'+id+'" '+(isActive?'checked':'')+(locked?' disabled':'')+'/><span class="track"></span><span class="knob"></span>';
     top.appendChild(tog);
-    const nm=document.createElement('span'); nm.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'');
+    const nm=document.createElement('span'); nm.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'')+(locked?' <span class="lockbadge">🔒 needs '+pre.label.replace(/^the /,'')+'</span>':'');
     top.appendChild(nm);
     d.appendChild(top);
     // Row 2: Learn more (the kit guide) · skills (with provenance) · delete
