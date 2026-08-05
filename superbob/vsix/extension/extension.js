@@ -365,12 +365,14 @@ function postState() { const msg = stateMessage(); webviews.forEach(w => { try {
 async function handleMessage(m, context) {
   if (m.type === 'ready') { postState(); return; }
   if (m.type === 'applyProfile') {
-    if (!prereqMet(m.name)) {   // gate: some kits require a plugin (e.g. Propel) before they can load
-      const p = readPrereqs()[m.name];
-      vscode.window.showWarningMessage('The "' + m.name + '" kit needs ' + (p && p.label || 'a required plugin') + '. Install/enable it in Bob first, then try again.');
+    const names = Array.isArray(m.names) ? m.names : [m.name];   // one or several kits (stacked)
+    const blocked = names.find(n => !prereqMet(n));   // gate: any kit that needs a missing plugin
+    if (blocked) {
+      const p = readPrereqs()[blocked];
+      vscode.window.showWarningMessage('The "' + blocked + '" kit needs ' + (p && p.label || 'a required plugin') + '. Install/enable it in Bob first, then try again.');
       postState(); return;
     }
-    if (applyProfile([m.name])) vscode.window.showInformationMessage('Loaded "' + m.name + '" kit. Start a new conversation to apply.');
+    if (applyProfile(names)) vscode.window.showInformationMessage(names.length > 1 ? ('Loaded ' + names.length + ' kits (' + names.join(' + ') + '). Start a new conversation.') : ('Loaded "' + names[0] + '" kit. Start a new conversation to apply.'));
     postState(); return;
   }
   if (m.type === 'applyLean') { applyProfile([]); vscode.window.showInformationMessage('Auto mode on. SuperBob picks skills per task. Start a new conversation.'); postState(); return; }
@@ -772,7 +774,7 @@ function getWebviewHtml() {
       <p>A <b>kit</b> is a set of expert skills for one kind of work. SuperBob loads only the current kit, so Bob stays fast and focused.</p>
       <ol>
         <li>Leave <b>Auto mode</b> on and SuperBob picks the skills for each task. For most work, that's the whole setup.</li>
-        <li>Or flip a kit's <b>blue toggle</b> on to load it. Click <b>Learn more</b> for its pitch and a worked example; <b>skills</b> shows what's inside and where each comes from.</li>
+        <li>Or flip a kit's <b>blue toggle</b> on to load it — <b>stack several</b> and their skills combine. Click <b>Learn more</b> for its pitch and a worked example; <b>skills</b> shows what's inside and where each comes from.</li>
         <li>Or, in the Bob chat, type <code>/superbob software-development</code> (or any kit). <code>/superbob</code> alone lists them.</li>
         <li>After switching, <b>start a new conversation</b> so the skills load.</li>
         <li>Use <b>+ Create your own kit</b> to build one, with its own guide.</li>
@@ -791,6 +793,8 @@ function getWebviewHtml() {
 
   function activeMode(){ if(!S.active) return null; if(S.active.indexOf('lean')===0) return '__lean__';
     if(S.active.indexOf('core + ')===0) return S.active.slice(7).split(' ')[0]; return '__custom__'; }
+  // All active kits (multiple can be loaded at once). Parsed from the 'core + kitA kitB' label.
+  function activeKits(){ if(!S.active || S.active.indexOf('core + ')!==0) return []; return S.active.slice(7).split(' ').filter(k=>k && (S.profiles[k]!==undefined)); }
   function curated(){ const set=new Set(); Object.values(S.profiles).forEach(a=>a.forEach(n=>set.add(n))); S.core.forEach(n=>set.delete(n)); return [...set].sort(); }
   function descOf(n){ const s=S.skills.find(x=>x.name===n); return s?s.desc:''; }
   const DESCR={
@@ -863,29 +867,30 @@ function getWebviewHtml() {
     renderTools();   // optional tools are independent of SuperBob on/off
     if(off) return;   // nothing else to render while off
     const am=activeMode();
-    // active card
-    document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode': am==='__custom__'?'custom set': (am||', '));
+    const AK=activeKits();   // the set of active kits (0, 1, or many)
+    // active card title: Auto / one or more kit names / custom
+    document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode' : AK.length ? AK.join(' + ') : (am==='__custom__'?'custom set':'—'));
     document.getElementById('autoToggle').checked = (am==='__lean__');
     { const sc=(S.scope==='superbob-only')?'superbob-only':'all'; document.querySelectorAll('input[name=scope]').forEach(r=>{ r.checked=(r.value===sc); }); }
-    document.getElementById('activeDesc').textContent = (am && am!=='__custom__') ? descFor(am) : (am==='__custom__'?'A custom set of skills you picked.':'');
-    // Show only what SuperBob loaded (core + the kit's skills). The user's own skills are
-    // deliberately not listed here: they're kept untouched, but listing 30+ of them is noise.
+    document.getElementById('activeDesc').textContent = AK.length===1 ? descFor(AK[0]) : AK.length>1 ? (AK.length+' kits stacked — their skills are combined.') : (am==='__custom__'?'A custom set of skills you picked.':'');
+    // Show only what SuperBob loaded (core + the kits' skills). The user's own skills are kept untouched, not listed.
     const ext=new Set(S.external||[]);
-    const addonNames=new Set((S.addons||[]).map(a=>a.name));   // add-ons are shown as toggles below, not as skill rows
-    const extras=S.activeSet.filter(n=>!S.core.includes(n) && !ext.has(n) && !addonNames.has(n));   // the kit's own skills
-    const ordered=[...S.core, ...extras];   // superpowers + mission-control first (always on)
+    const addonNames=new Set((S.addons||[]).map(a=>a.name));
+    const extras=S.activeSet.filter(n=>!S.core.includes(n) && !ext.has(n) && !addonNames.has(n));
     const cont=document.getElementById('activeSkills'); cont.innerHTML='';
-    // Group by what loaded each skill: the always-on core, then the active kit. That's the
-    // kit-level provenance (why it's loaded); each row still shows its author origin.
+    // Group by what loaded each skill: core, then one group PER active kit (a skill in two kits
+    // shows under each). That's the kit-level provenance; each row still shows its author origin.
     function group(title, names){ if(!names.length) return; const g=document.createElement('div'); g.className='skgroup';
       const h=document.createElement('div'); h.className='skgroup-h'; h.textContent=title; g.appendChild(h); g.appendChild(skillRows(names)); cont.appendChild(g); }
     group('Always on · core', S.core);
-    const kitTitle = am==='__lean__' ? '' : (am==='__custom__' ? 'From your custom set' : ('From kit · '+am));
-    group(kitTitle, extras);
-    // one-line summary so the card stays a stable height; skills expand on demand
-    const kitCount=ordered.length - S.core.length;
+    const grouped=new Set();
+    AK.forEach(k=>{ const ks=(S.profiles[k]||[]).filter(n=>extras.includes(n)); ks.forEach(n=>grouped.add(n)); group('From kit · '+k, ks); });
+    const ungrouped=extras.filter(n=>!grouped.has(n));   // custom / leftover skills not in any active kit
+    group(AK.length?'Also loaded':'From your custom set', ungrouped);
+    // one-line summary; stable height
+    const total=S.core.length+extras.length;
     document.getElementById('activeSkillsSummary').textContent =
-      ordered.length + ' skills loaded — ' + S.core.length + ' core' + (kitCount>0 ? (' + ' + kitCount + ' from the kit') : '') + ' · view';
+      total + ' skills loaded — ' + S.core.length + ' core' + (extras.length? (' + ' + extras.length + ' from ' + (AK.length||1) + ' kit' + ((AK.length||1)>1?'s':'')) : '') + ' · view';
     renderAddons();
 
     // your kits = the user's own (non-builtin) kits. Lean is the Auto/base state,
@@ -893,10 +898,10 @@ function getWebviewHtml() {
     const your=document.getElementById('yourModes'); your.innerHTML='';
     const mine=Object.keys(S.profiles).filter(p=>!S.builtin.includes(p));
     if(!mine.length){ your.innerHTML='<div class="muted" style="font-size:12px;padding:6px 0">No kits yet.</div>'; }
-    mine.forEach(p=>{ your.appendChild(modeCard(p, p, S.profiles[p], am===p, true)); });
+    mine.forEach(p=>{ your.appendChild(modeCard(p, p, S.profiles[p], AK.includes(p), true)); });
     // built-in modes
     const bi=document.getElementById('builtinModes'); bi.innerHTML='';
-    S.builtin.forEach(p=>{ if(S.profiles[p]) bi.appendChild(modeCard(p, p, S.profiles[p], am===p, false)); });
+    S.builtin.forEach(p=>{ if(S.profiles[p]) bi.appendChild(modeCard(p, p, S.profiles[p], AK.includes(p), false)); });
     document.getElementById('builtinSummary').textContent='Starter kits (built-in · '+S.builtin.filter(p=>S.profiles[p]).length+')';
     // builder start-from options
     const bs=document.getElementById('bstart'); if(bs && bs.options.length===0){
@@ -962,7 +967,11 @@ function getWebviewHtml() {
     if(e.target.name==='scope' && e.target.checked){ vscode.postMessage({type:'setScope', scope:e.target.value}); }
     if(e.target.classList && e.target.classList.contains('toolsw')){ vscode.postMessage({type:'toolToggle', tool:e.target.dataset.tool, on:e.target.checked}); }
     if(e.target.classList && e.target.classList.contains('addonsw')){ vscode.postMessage({type:'setAddon', name:e.target.dataset.addon, on:e.target.checked}); }
-    if(e.target.classList && e.target.classList.contains('kitsw')){ vscode.postMessage(e.target.checked?{type:'applyProfile',name:e.target.dataset.kit}:{type:'applyLean'}); }
+    if(e.target.classList && e.target.classList.contains('kitsw')){
+      const kit=e.target.dataset.kit; const cur=activeKits();
+      const next = e.target.checked ? [...new Set([...cur, kit])] : cur.filter(k=>k!==kit);
+      vscode.postMessage(next.length ? {type:'applyProfile', names:next} : {type:'applyLean'});
+    }
     if(e.target.id==='bstart'){ const p=e.target.value; sel=new Set(p&&S.profiles[p]?S.profiles[p].filter(n=>!S.core.includes(n)):[]); renderBuilder(); } });
 </script></body></html>`;
 }
