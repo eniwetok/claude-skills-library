@@ -19,7 +19,7 @@
   },
   "product-frameworks": {
     "tagline": "The three PM thinking frameworks most tools skip: why users come (Jobs to Be Done), why they stay (Hook Model), and why they convert (CRO).",
-    "when": "Retention or growth is the problem — people try the product but don't stick, or don't convert — and you want discovery rooted in real motivation, not feature requests.",
+    "when": "Retention or growth is the problem, people try the product but don't stick, or don't convert, and you want discovery rooted in real motivation, not feature requests.",
     "example": [
       "Start with jobs-to-be-done: run switch interviews to find the real job and, crucially, the ANXIETY blocking the switch.",
       "Use opportunity-solution-tree to map that job to a few solution bets instead of jumping to features.",
@@ -30,51 +30,67 @@
     ],
     "tips": [
       "Write the job solution-free (verb + object + context) before proposing anything.",
-      "Design the INTERNAL trigger first — an external notification alone never forms a habit.",
+      "Design the INTERNAL trigger first, an external notification alone never forms a habit.",
       "In cro-objections, use the customer's exact words; matching their language is what converts.",
       "Pick ONE north-star (return rate, not signups) so retention work has a scoreboard."
     ]
   },
   "pm-methodology": {
-    "tagline": "Take a product idea from a blank page to shipped, measured, and iterated — one anchor skill per phase.",
+    "tagline": "Take a product idea from a blank page to shipped, measured, and iterated, one anchor skill per phase.",
     "when": "You want a repeatable process instead of ad-hoc PM work, or you are onboarding to a structured product lifecycle.",
     "example": [
-      "Foundation: foundation-lean-canvas — capture the bet on one page (problem, users, value, the one metric).",
-      "Discover: discover-interview-synthesis — turn raw interviews into patterns and real needs.",
-      "Define: define-jtbd-canvas — frame the job the product is hired to do.",
-      "Develop: develop-solution-brief — shape the solution and its rationale before building.",
-      "Deliver: deliver-prd — write the PRD and hand off to build.",
-      "Measure: measure-experiment-design — design the experiment that tells you if it worked.",
-      "Iterate: iterate-retrospective — capture what you learned and decide the next move."
+      "Foundation: foundation-lean-canvas, capture the bet on one page (problem, users, value, the one metric).",
+      "Discover: discover-interview-synthesis, turn raw interviews into patterns and real needs.",
+      "Define: define-jtbd-canvas, frame the job the product is hired to do.",
+      "Develop: develop-solution-brief, shape the solution and its rationale before building.",
+      "Deliver: deliver-prd, write the PRD and hand off to build.",
+      "Measure: measure-experiment-design, design the experiment that tells you if it worked.",
+      "Iterate: iterate-retrospective, capture what you learned and decide the next move."
     ],
     "tips": [
-      "Run the phases in order — each phase feeds the next.",
+      "Run the phases in order, each phase feeds the next.",
       "This kit is the spine; the full product-on-purpose set has more skills per phase (discover-market-sizing, deliver-user-stories, measure-experiment-results) when you need depth.",
       "Pair with the product-frameworks kit for the JTBD / Hook / CRO thinking behind the phases."
     ]
   },
   "software-development": {
-    "tagline": "Ship code a senior would approve — test-first, your stack's patterns, nothing over-built.",
-    "when": "Building or refactoring a feature you'll have to maintain.",
-    "example": [
-      "Say what you're building. It writes the failing test first, then the code (tdd-workflow).",
-      "It applies your stack's patterns (python / react / go / fastapi / django) and shapes the API and system design.",
-      "ponytail and karpathy-guidelines cut over-engineering and the usual LLM slips.",
-      "It runs the checks before it calls anything done."
+    "tagline": "Ship code a senior would approve. Test first, your stack's patterns, nothing over-built.",
+    "jtbd": "When I add or change a feature in the product, I want it correct and maintainable, so I can ship without fear of regressions.",
+    "description": "Drives a feature from intent to merged code the disciplined way: a failing test first, your stack's idioms, a sane API and system shape, and a verification pass before it claims done. It keeps changes small and free of over-engineering.",
+    "outline": [
+      "Write the failing test first (tdd-workflow)",
+      "Apply your stack's patterns and shape the API and system design",
+      "Trim over-engineering with ponytail and karpathy-guidelines",
+      "Verify the checks before calling it done"
+    ],
+    "examples": [
+      "Add a scheduled export endpoint for a dashboard, test first, with retry and error handling.",
+      "Refactor the query builder that turns a report definition into SQL, keeping the tests green.",
+      "Build a caching layer for expensive aggregations behind a clean API.",
+      "Add a new visualization type to the rendering pipeline with unit and integration tests.",
+      "Wire a REST data-source connector with typed models and failure handling."
     ],
     "tips": [
-      "Name your stack.",
-      "It won't claim 'verified' without running the check."
+      "Name your stack so it pulls the right patterns.",
+      "It will not claim 'verified' without running the check."
     ]
   },
   "data-analysis": {
     "tagline": "Analyze data and grade AI output without fooling yourself.",
-    "when": "Doing analytics, or measuring how good an AI pipeline actually is.",
-    "example": [
-      "error-analysis reads real traces and names the failure modes before you count anything.",
-      "write-judge-prompt builds a Pass/Fail evaluator for the subjective calls.",
-      "validate-evaluator calibrates that judge against human labels.",
-      "SQL and statistics do the numbers."
+    "jtbd": "When I have data or an AI pipeline to assess, I want an honest read, so I can act on findings that hold up.",
+    "description": "Reads real traces, names the failure modes, builds and calibrates a Pass/Fail judge, and runs the SQL and statistics. It refuses to trust a score it has not validated against human labels.",
+    "outline": [
+      "error-analysis on real traces",
+      "write-judge-prompt for a Pass/Fail evaluator",
+      "validate-evaluator against human labels",
+      "SQL and statistics for the numbers"
+    ],
+    "examples": [
+      "Judge whether the natural-language-to-query feature returns the right result set, calibrated against analyst labels.",
+      "Profile which report types most often produce empty or wrong visualizations, by failure mode.",
+      "Score an AI summary of a dashboard for factual accuracy against the underlying data.",
+      "Run cohort SQL on usage events to find where users abandon the report builder.",
+      "Set up a statistics check on query latency across data sources."
     ],
     "tips": [
       "An uncalibrated judge is a random number.",
@@ -82,13 +98,21 @@
     ]
   },
   "product-management": {
-    "tagline": "From fuzzy idea to shipped, measured feature — the whole PM toolkit.",
-    "when": "Planning and strategy, not code: PRDs, roadmaps, prioritization, go-to-market.",
-    "example": [
-      "jobs-to-be-done finds the real need behind the ask.",
-      "create-prd and user-stories spec it.",
-      "prioritization-frameworks (RICE) ranks what's worth building.",
-      "north-star-metric and gtm-strategy ship and measure it."
+    "tagline": "From fuzzy idea to shipped, measured feature. The whole PM toolkit.",
+    "jtbd": "When I own a product area, I want to pick the right problem and spec it well, so I can ship something that moves a metric.",
+    "description": "Takes a request or a pile of evidence to a grounded PRD, a ranked backlog, and a measurable launch. It finds the real job behind the ask before it writes a line of spec.",
+    "outline": [
+      "jobs-to-be-done to find the real need",
+      "create-prd and user-stories to spec it",
+      "prioritization-frameworks (RICE) to rank",
+      "north-star-metric and gtm-strategy to ship and measure"
+    ],
+    "examples": [
+      "Turn scattered requests for a new chart type into a prioritized, spec'd capability.",
+      "Write the PRD for a natural-language query experience, with success metrics.",
+      "Rank a quarter of dashboard and reporting asks with RICE.",
+      "Frame an embedded-analytics initiative and its go-to-market.",
+      "Define the north-star metric for the report-authoring experience."
     ],
     "tips": [
       "Describe the situation, not the skills.",
@@ -96,39 +120,63 @@
     ]
   },
   "production-engineering": {
-    "tagline": "Design, ship, and run production systems — past 'works on my laptop'.",
-    "when": "Deploying, operating, or hardening real infrastructure.",
-    "example": [
-      "system-design and deployment-patterns shape it for production.",
-      "docker / kubernetes / terraform ship it.",
-      "runbook and incident-response for when it breaks at 3am."
+    "tagline": "Design, ship, and run production systems. Past 'works on my laptop'.",
+    "jtbd": "When I take a service to production, I want it to deploy cleanly and survive incidents, so I can sleep.",
+    "description": "Shapes a system for production, ships it with containers and infrastructure as code, and gives you the runbooks and incident playbooks for when it breaks. It plans for failure, not just the happy path.",
+    "outline": [
+      "system-design and deployment-patterns",
+      "docker, kubernetes, terraform to ship it",
+      "runbook and incident-response for operations"
+    ],
+    "examples": [
+      "Design the deployment for a query engine that must scale with concurrent report runs.",
+      "Containerize the scheduling service and roll it out with zero downtime.",
+      "Write the runbook for a data-source outage that stalls dashboards.",
+      "Add autoscaling for the rendering workers under heavy export load.",
+      "Stand up an incident playbook for slow dashboards during peak reporting."
     ],
     "tips": [
       "Write the runbook before you need it.",
-      "For a specific prod bug, add the bug-fixing kit."
+      "For a specific production bug, add the bug-fixing kit."
     ]
   },
   "test-engineering": {
-    "tagline": "Tests that actually catch regressions — unit, end-to-end, and back.",
-    "when": "Writing or hardening a suite you'll trust to gate a release.",
-    "example": [
-      "testing-strategy decides what to test at each level, and what to skip.",
-      "It writes the unit, end-to-end, and regression tests.",
-      "verification-before-completion, so green means green."
+    "tagline": "Tests that actually catch regressions. Unit, end to end, and back.",
+    "jtbd": "When I need to trust a release, I want tests that fail when behavior breaks, so I can ship with confidence.",
+    "description": "Decides what to test at each level, writes the unit, end-to-end, and regression suites, and verifies that green means green. It tests behavior, not implementation.",
+    "outline": [
+      "testing-strategy: what to test where",
+      "unit, end-to-end, and regression suites",
+      "verification-before-completion"
+    ],
+    "examples": [
+      "Write end-to-end tests for the report builder, from data source to rendered chart.",
+      "Add regression tests for an export bug that keeps coming back.",
+      "Cover the natural-language query parser with unit tests across edge phrasings.",
+      "Test drill-through navigation across linked dashboards.",
+      "Add a suite for scheduled-report delivery under failure conditions."
     ],
     "tips": [
       "Test behavior, not implementation.",
-      "A test that can't fail tests nothing."
+      "A test that cannot fail tests nothing."
     ]
   },
   "application-security": {
-    "tagline": "Break it like an attacker, then write code that resists — audit to fix.",
-    "when": "Running an audit or pen-test, or hardening a feature before ship.",
-    "example": [
-      "bb-methodology scopes and plans the hunt.",
-      "The hunt-* skills work each class: xss, sqli, ssrf, idor, auth-bypass.",
-      "vibesec prevents them at write-time, not just finds them.",
-      "You get a clean, reproducible report."
+    "tagline": "Break it like an attacker, then write code that resists. Audit to fix.",
+    "jtbd": "When a feature handles data or access, I want its weaknesses found before an attacker does, so I can ship it safely.",
+    "description": "Scopes the hunt, works each vulnerability class the way an attacker would, prevents the same bugs at write-time, and hands you a reproducible report. Finding and preventing are both in scope.",
+    "outline": [
+      "bb-methodology to scope the hunt",
+      "hunt-* skills per class (xss, sqli, ssrf, idor, auth)",
+      "vibesec to prevent at write-time",
+      "a clean, reproducible report"
+    ],
+    "examples": [
+      "Audit the embedded-dashboard iframe flow for XSS and clickjacking.",
+      "Check row-level and object-level access on shared reports for IDOR.",
+      "Test the data-source connector for SSRF via user-supplied URLs.",
+      "Review the query API for SQL injection in filter expressions.",
+      "Harden sharing links so tokens cannot be guessed or replayed."
     ],
     "tips": [
       "hunt-* finds; vibesec prevents.",
@@ -136,25 +184,42 @@
     ]
   },
   "frontend-design": {
-    "tagline": "Interfaces people enjoy — polished, accessible, and alive.",
-    "when": "Anything users see on screen.",
-    "example": [
-      "frontend-design lays out the structure.",
-      "design-system and frontend patterns keep it consistent.",
-      "motion gives it feel; fixing-accessibility makes it usable by everyone."
+    "tagline": "Interfaces people enjoy. Polished, accessible, and alive.",
+    "jtbd": "When I build something users see, I want it clear, accessible, and pleasant, so people actually use it.",
+    "description": "Lays out structure, keeps it consistent with a design system, adds motion for feel, and fixes accessibility so everyone can use it. Polish and inclusion are the point, not an afterthought.",
+    "outline": [
+      "frontend-design for structure",
+      "design-system and patterns for consistency",
+      "motion for feel",
+      "fixing-accessibility"
+    ],
+    "examples": [
+      "Design the report-builder canvas so drag and drop is obvious and forgiving.",
+      "Make the filter panel keyboard-navigable and screen-reader friendly.",
+      "Add subtle motion to chart transitions when data updates.",
+      "Build a consistent color and type system for dashboard widgets.",
+      "Polish the empty and loading states of a slow visualization."
     ],
     "tips": [
-      "Accessibility isn't a phase — bake it in.",
+      "Accessibility is not a phase, bake it in.",
       "Motion should guide, not perform."
     ]
   },
   "web-research": {
-    "tagline": "A synthesized answer with sources — not 40 open tabs.",
-    "when": "You need to understand something you don't yet know.",
-    "example": [
-      "deep-research plans what to look for and why.",
-      "exa-search and x-research gather the material.",
-      "research-synthesis turns it into an answer you can cite."
+    "tagline": "A synthesized answer with sources. Not 40 open tabs.",
+    "jtbd": "When I need to understand a space fast, I want a grounded answer I can cite, so I can decide without a week of reading.",
+    "description": "Plans the search, gathers the material, and synthesizes it into an answer with sources. It looks things up rather than guessing from memory.",
+    "outline": [
+      "deep-research plans the search",
+      "exa-search and x-research gather",
+      "research-synthesis into a cited answer"
+    ],
+    "examples": [
+      "Compare how competing BI tools do natural-language query, with sources.",
+      "Survey the state of embedded-analytics pricing models.",
+      "Research accessibility standards for data visualizations.",
+      "Find evidence on what drives adoption of self-service reporting.",
+      "Summarize approaches to semantic layers across the market."
     ],
     "tips": [
       "Ask for sources so you can check the claims.",
@@ -162,12 +227,20 @@
     ]
   },
   "release-review": {
-    "tagline": "The last gate before ship — catch what a tired reviewer misses.",
-    "when": "Right before a merge or release.",
-    "example": [
-      "code-review across correctness, security, simplicity, and tests.",
-      "security-audit, plus a check that tests cover the change.",
-      "verification-before-completion and karpathy-guidelines for the common slips."
+    "tagline": "The last gate before ship. Catch what a tired reviewer misses.",
+    "jtbd": "When a change is about to merge, I want the hidden risks surfaced, so I do not ship a regression.",
+    "description": "Reviews a change across correctness, security, simplicity, and tests, and verifies the claims before you merge. One confirmed blocker beats ten vague nits.",
+    "outline": [
+      "code-review across dimensions",
+      "security-audit and a test-coverage check",
+      "verification-before-completion and karpathy-guidelines"
+    ],
+    "examples": [
+      "Review a change to the query builder for correctness and injection risk before release.",
+      "Gate a new export format on test coverage and edge cases.",
+      "Check a permissions refactor on shared dashboards for access regressions.",
+      "Review a rendering-performance change for correctness under large datasets.",
+      "Vet a data-source connector update before it reaches customers."
     ],
     "tips": [
       "Run it before you merge, not after.",
@@ -175,12 +248,20 @@
     ]
   },
   "bug-fixing": {
-    "tagline": "Root cause, not symptom — fixed fast.",
-    "when": "Something's broken and you need it working now.",
-    "example": [
-      "Reproduce, then systematic-debugging isolates the real cause.",
-      "Stuck? caveman-debug drops in prints to see what's actually happening.",
-      "error-handling fixes it properly — no silent catch."
+    "tagline": "Root cause, not symptom. Fixed fast.",
+    "jtbd": "When something is broken, I want the actual cause found and fixed, so it stays fixed.",
+    "description": "Reproduces the failure, isolates the real cause, and fixes it properly. It chases the cause, not the log line.",
+    "outline": [
+      "reproduce, then systematic-debugging to isolate",
+      "caveman-debug when the trail goes cold",
+      "error-handling to fix it right"
+    ],
+    "examples": [
+      "Track down why a scheduled report intermittently delivers an empty file.",
+      "Fix a chart that renders blank only for one data source.",
+      "Find why drill-through loses the applied filter.",
+      "Diagnose a slow dashboard that is fast in staging.",
+      "Resolve a natural-language query that returns the wrong aggregation."
     ],
     "tips": [
       "Reproduce before you fix.",
@@ -188,25 +269,41 @@
     ]
   },
   "code-simplification": {
-    "tagline": "Delete the over-engineering — the best code is the code you didn't write.",
-    "when": "A diff or repo feels bloated and you want it lean.",
-    "example": [
-      "ponytail-review reads the diff and ranks what to cut.",
-      "ponytail-audit finds bloat across the whole repo.",
-      "It keeps the laziest working solution: stdlib before custom, one line before fifty."
+    "tagline": "Delete the over-engineering. The best code is the code you did not write.",
+    "jtbd": "When a change feels heavier than the problem, I want the excess cut, so the code stays easy to change.",
+    "description": "Reads a diff or a repo and ranks what to remove, keeping the laziest working solution. It prefers standard library over custom, and one line over fifty.",
+    "outline": [
+      "ponytail-review ranks what to cut in a diff",
+      "ponytail-audit finds repo-wide bloat",
+      "keep the simplest thing that works"
+    ],
+    "examples": [
+      "Cut a bespoke caching layer down to a small memoization where the query engine already helps.",
+      "Collapse three near-duplicate chart adapters into one.",
+      "Remove a config abstraction no dashboard actually uses.",
+      "Simplify an export pipeline that grew five options nobody selects.",
+      "Delete dead code paths in the filter parser."
     ],
     "tips": [
       "Eight sharp lines beat fifty clever ones.",
-      "Delete first; add back only what you miss."
+      "Delete first, add back only what you miss."
     ]
   },
   "rag-evaluation": {
-    "tagline": "Prove your RAG works — retrieval and answer, scored apart.",
-    "when": "Measuring or improving a retrieval / RAG agent.",
-    "example": [
-      "evaluate-rag scores retrieval quality and answer quality separately.",
-      "error-analysis finds the pattern in the failures.",
-      "write-judge-prompt and validate-evaluator give you a judge you've calibrated."
+    "tagline": "Prove your RAG works. Retrieval and answer, scored apart.",
+    "jtbd": "When I run a retrieval or RAG feature, I want to know if it is actually good, so I can improve the weak half.",
+    "description": "Scores retrieval and answer quality as separate concerns, finds the pattern in the failures, and gives you a calibrated judge. Bad retrieval and bad generation are different bugs.",
+    "outline": [
+      "evaluate-rag scores retrieval and answer separately",
+      "error-analysis on the failures",
+      "write-judge-prompt and validate-evaluator"
+    ],
+    "examples": [
+      "Evaluate an assistant that answers questions over your reports, retrieval first.",
+      "Measure whether the docs-search feature returns the right passages.",
+      "Score answer faithfulness for a metric-explanation assistant.",
+      "Find whether failures come from retrieval or from generation.",
+      "Calibrate a judge for 'did the answer cite the right dashboard'."
     ],
     "tips": [
       "Never trust an uncalibrated judge.",
@@ -214,16 +311,24 @@
     ]
   },
   "content-writing": {
-    "tagline": "Docs and copy that sound human — not AI.",
-    "when": "Writing docs or copy, or cleaning up a draft.",
-    "example": [
-      "draft-content or copywriting for the first pass.",
-      "no-ai-slop strips the AI tells while keeping your voice.",
-      "ux-copy and brand-voice set the tone; seo if it's for search."
+    "tagline": "Docs and copy that sound human. Not AI.",
+    "jtbd": "When I write for users, I want clear copy in our voice, so it informs without sounding generated.",
+    "description": "Drafts the first pass, strips the AI tells while keeping your voice, and sets the tone for the audience. It edits for humans, not for word count.",
+    "outline": [
+      "draft-content or copywriting for the first pass",
+      "no-ai-slop to strip the AI tells",
+      "ux-copy and brand-voice for tone, seo if needed"
+    ],
+    "examples": [
+      "Write release notes for a new visualization type in plain language.",
+      "Rewrite an error message for a failed data-source connection so it actually helps.",
+      "Draft onboarding copy for the report builder.",
+      "Clean the AI slop out of a feature announcement.",
+      "Write tooltip and empty-state copy for the dashboard editor."
     ],
     "tips": [
       "Run no-ai-slop after drafting, not instead of it.",
-      "Match the brand voice — generic copy converts no one."
+      "Match the brand voice, generic copy converts no one."
     ]
   }
 }

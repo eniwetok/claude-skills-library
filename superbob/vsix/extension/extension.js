@@ -21,12 +21,12 @@ const BOB_RULES = path.join(HOME, '.bob', 'rules');   // Bob's global custom-rul
 // each conversation, so this removes the need to type /superbob to "run" SuperBob. It is
 // written whenever SuperBob is on and removed when it's switched off, so it tracks the toggle.
 const AUTO_RULE_FILE = () => path.join(BOB_RULES, 'superbob-auto.md');
-const AUTO_RULE_ALL = `# SuperBob — automatic skill routing (managed by the SuperBob extension; do not edit by hand)
+const AUTO_RULE_ALL = `# SuperBob, automatic skill routing (managed by the SuperBob extension; do not edit by hand)
 
-SuperBob is ON. Do this at the start of EVERY task, in every mode, automatically — without
+SuperBob is ON. Do this at the start of EVERY task, in every mode, automatically, without
 being asked and without needing the \`/superbob\` command.
 
-**First line of your reply, always** — show a short marker so it's visible SuperBob ran, and
+**First line of your reply, always**, show a short marker so it's visible SuperBob ran, and
 say where the skill comes from:
 - a skill from a SuperBob kit or the vault → \`▸ SuperBob → from kit: <skill-name>\`
 - one of the user's own already-installed skills → \`▸ SuperBob → your own skill: <skill-name>\`
@@ -36,7 +36,7 @@ Then:
 
 1. **Check for a skill (using-superpowers).** Look for a relevant skill in \`~/.bob/skills\`
    (already active, including the user's own) and in \`~/.bob/skills-vault\` (loaded on demand).
-   Read the matching \`SKILL.md\` and follow it. Use whichever fits best — but label its origin
+   Read the matching \`SKILL.md\` and follow it. Use whichever fits best, but label its origin
    in the marker above, and never imply SuperBob owns a skill the user installed themselves.
 2. **Route with mission-control.** When no active skill clearly fits, read
    \`~/.bob/skills/mission-control/SKILL.md\` and use it to pull the right skill from the vault.
@@ -44,17 +44,17 @@ Then:
 
 **Honor active add-ons.** If an optional add-on skill is active in \`~/.bob/skills\` (for example an output-style skill like \`i-have-adhd\`), follow it on every response for the whole session, regardless of its own invocation setting.
 
-Loading a specific kit with \`/superbob <kit>\` or the SuperBob sidebar is optional — the routing
+Loading a specific kit with \`/superbob <kit>\` or the SuperBob sidebar is optional, the routing
 above is automatic. If SuperBob is switched **off** in the sidebar, this file is removed and Bob
 behaves normally.
 `;
 // Scope variant: SuperBob routes ONLY its own vault/kit skills and leaves the user's own alone.
-const AUTO_RULE_SUPERBOB_ONLY = `# SuperBob — automatic skill routing (managed by the SuperBob extension; do not edit by hand)
+const AUTO_RULE_SUPERBOB_ONLY = `# SuperBob, automatic skill routing (managed by the SuperBob extension; do not edit by hand)
 
 SuperBob is ON, scoped to its OWN skills only. Do this at the start of EVERY task, in every
-mode, automatically — without being asked and without needing the \`/superbob\` command.
+mode, automatically, without being asked and without needing the \`/superbob\` command.
 
-**First line of your reply, always** — show a short marker so it's visible SuperBob ran:
+**First line of your reply, always**, show a short marker so it's visible SuperBob ran:
 - a skill from a SuperBob kit or the vault → \`▸ SuperBob → from kit: <skill-name>\`
 - nothing in SuperBob fits → \`▸ SuperBob → no matching skill (using Bob normally)\`
 
@@ -64,7 +64,7 @@ Then:
    active core skills. If one fits, read its \`SKILL.md\` and follow it.
 2. **Route with mission-control** when unsure which SuperBob skill applies.
 3. **Leave the user's own skills to Bob.** Do NOT reach for, apply, or manage skills the user
-   installed themselves — those are outside SuperBob's scope in this mode.
+   installed themselves, those are outside SuperBob's scope in this mode.
 4. **Don't over-claim.** Never say work is verified unless you actually ran the check.
 
 **Honor active add-ons.** If an optional add-on skill is active in \`~/.bob/skills\` (for example an output-style skill like \`i-have-adhd\`), follow it on every response for the whole session, regardless of its own invocation setting.
@@ -261,7 +261,7 @@ function saveCustomProfile(name, skills, desc) {
   return clean;
 }
 // Save a custom kit WITH its reference/augmentation info: the profile + meta (what Auto mode reads
-// to pick it) + an authored "How to use" guide (tagline/when/example/tips) — first-class, not an
+// to pick it) + an authored "How to use" guide (tagline/when/example/tips), first-class, not an
 // afterthought. The tagline and when-to-use are what let SuperBob route to this kit correctly.
 function saveCustomKit(name, skills, desc, when, example, tips) {
   const clean = saveCustomProfile(name, skills, desc);   // writes profile + meta[name]=desc
@@ -295,7 +295,7 @@ function deleteCustomProfile(name) {
 // skill (never written to the managed manifest), so kit switches never touch it.
 // No optional external tools. (OpenWiki was removed: on an IBM-gateway Bob the shell
 // carries no model credential, so a third-party CLI has nothing to authenticate with.
-// Use Bob's own model-backed wiki skills — codebase-onboarding / wiki — instead.)
+// Use Bob's own model-backed wiki skills, codebase-onboarding / wiki, instead.)
 const OPTIONAL_TOOLS = [];
 function toolByName(n) { return OPTIONAL_TOOLS.find(t => t.name === n); }
 // Run through a login shell so we pick up Bob's / the user's real PATH and env
@@ -447,7 +447,7 @@ async function handleMessage(m, context) {
     if (!isPoweredOff()) writeAutoRule();   // rewrite the live rule to match the new scope
     vscode.window.showInformationMessage(readScope() === 'superbob-only'
       ? 'SuperBob will route only its own skills and leave your own skills alone. Start a new conversation.'
-      : 'SuperBob will route all skills — yours and its own. Start a new conversation.');
+      : 'SuperBob will route all skills, yours and its own. Start a new conversation.');
     postState(); return;
   }
   if (m.type === 'openDocs') {
@@ -487,43 +487,52 @@ function guideFor(kit) {
   const meta = readMeta(), g = readGuides()[kit] || {}, prov = readProvenance();
   const skills = readList(path.join(BOB_PROFILES, kit + '.txt'))
     .map(s => ({ name: s, desc: frontmatterTokens(path.join(BOB_VAULT, s)).desc, origin: prov[s] || '' }));
+  const examples = g.examples || g.example || [];
   return {
     kit,
     tagline: g.tagline || meta[kit] || ('Skills for ' + kit.replace(/-/g, ' ') + '.'),
+    jtbd: g.jtbd || '',
+    description: g.description || '',
     when: g.when || '',
+    outline: g.outline || [],
     skills,
-    example: g.example || [],
+    examples,
     tips: g.tips || [],
-    authored: !!(g.example && g.example.length)
+    authored: !!examples.length
   };
 }
 function esc(s) { return String(s || '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
 function guideHtml(g) {
   const skillRows = g.skills.map(s => '<div class="s"><div class="sn">' + esc(s.name) + '</div>' + (s.desc ? '<div class="sd">' + esc(s.desc) + '</div>' : '') + (s.origin ? '<div class="sorc">from ' + esc(s.origin) + '</div>' : '') + '</div>').join('');
-  const steps = g.example.length ? '<h2>Try it — a worked example</h2><ol>' + g.example.map(e => '<li>' + esc(e) + '</li>').join('') + '</ol>' : '';
-  const tips = g.tips.length ? '<h2>Tips</h2><ul>' + g.tips.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
+  const jtbd = g.jtbd ? '<p class="jtbd"><b>The job:</b> ' + esc(g.jtbd) + '</p>' : '';
+  const desc = g.description ? '<p class="desc">' + esc(g.description) + '</p>' : '';
   const when = g.when ? '<p class="when"><b>When to reach for it:</b> ' + esc(g.when) + '</p>' : '';
-  const note = g.authored ? '' : '<p class="muted auto">This page was generated from the kit\'s skills. A hand-written walkthrough is coming.</p>';
+  const outline = g.outline.length ? '<h2>How it flows</h2><ol class="outline">' + g.outline.map(o => '<li>' + esc(o) + '</li>').join('') + '</ol>' : '';
+  const examples = g.examples.length ? '<h2>Ways to use it (' + g.examples.length + ')</h2><ol>' + g.examples.map(e => '<li>' + esc(e) + '</li>').join('') + '</ol>' : '';
+  const tips = g.tips.length ? '<h2>Tips</h2><ul>' + g.tips.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
+  const note = g.authored ? '' : '<p class="muted auto">Generated from the kit\'s skills. A fuller walkthrough is coming.</p>';
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>
     body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);max-width:720px;margin:0 auto;padding:28px 32px;line-height:1.6;font-size:14px}
-    h1{font-size:1.5rem;margin:0 0 4px} .tag{font-size:1.05rem;color:var(--vscode-descriptionForeground);margin:0 0 16px}
-    h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--vscode-descriptionForeground);margin:26px 0 10px;border-top:1px solid var(--vscode-widget-border,#333);padding-top:14px}
-    .when{background:var(--vscode-editorWidget-background);border-radius:8px;padding:10px 14px}
+    h1{font-size:1.5rem;margin:0 0 4px} .tag{font-size:1.05rem;color:var(--vscode-descriptionForeground);margin:0 0 14px}
+    h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--vscode-descriptionForeground);margin:24px 0 10px;border-top:1px solid var(--vscode-widget-border,#333);padding-top:14px}
+    .jtbd{background:var(--vscode-editorWidget-background);border-left:3px solid var(--vscode-charts-blue,#3794ff);border-radius:0 6px 6px 0;padding:9px 13px;margin:0 0 12px}
+    .desc{margin:0 0 12px} .when{color:var(--vscode-descriptionForeground);margin:0 0 4px}
     .s{padding:8px 0;border-top:1px solid var(--vscode-widget-border,#2a2a2a)} .s:first-child{border-top:0}
     .sn{font-weight:600} .sd{color:var(--vscode-descriptionForeground);font-size:13px;margin-top:2px}
     .sorc{color:var(--vscode-descriptionForeground);font-size:12px;opacity:.8;font-style:italic;margin-top:1px}
-    ol,ul{padding-left:22px;margin:0} li{margin:6px 0}
+    ol,ul{padding-left:22px;margin:0} li{margin:7px 0} .outline li{margin:4px 0}
     .muted{color:var(--vscode-descriptionForeground)} .auto{font-size:12px;font-style:italic;margin-top:6px}
     .foot{margin-top:26px;border-top:1px solid var(--vscode-widget-border,#333);padding-top:12px;color:var(--vscode-descriptionForeground);font-size:13px}
     code{background:var(--vscode-textCodeBlock-background,#222);padding:1px 5px;border-radius:4px}
   </style></head><body>
     <h1>${esc(g.kit)} kit</h1>
     <p class="tag">${esc(g.tagline)}</p>
-    ${when}${note}
+    ${jtbd}${desc}${when}${note}
+    ${outline}
     <h2>What's inside (${g.skills.length} skills)</h2>${skillRows}
-    ${steps}
+    ${examples}
     ${tips}
-    <div class="foot">Load this kit from the SuperBob panel, or type <code>/superbob ${esc(g.kit)}</code> in chat. Then start a new conversation so the skills come online. The two core skills (using-superpowers, mission-control) are always on.</div>
+    <div class="foot">Load this kit from the SuperBob panel, or type <code>/superbob ${esc(g.kit)}</code> in chat. Then start a new conversation so the skills come online. The two core skills (using-superpowers and mission-control) are always on.</div>
   </body></html>`;
 }
 let guidePanel;
@@ -565,12 +574,12 @@ function builderHtml(vault) {
   .hint{background:var(--vscode-editorWidget-background);border-radius:6px;padding:8px 11px;font-size:12px;margin-top:4px}
 </style></head><body>
   <h1>Create a SuperBob kit</h1>
-  <p class="sub muted">A kit is a set of skills you load together for one kind of work — plus the context that tells <b>you</b> and SuperBob's <b>Auto mode</b> when to reach for it. Fill the context in here; it powers routing and the "How to use" page.</p>
+  <p class="sub muted">A kit is a set of skills you load together for one kind of work, plus the context that tells <b>you</b> and SuperBob's <b>Auto mode</b> when to reach for it. Fill the context in here; it powers routing and the "How to use" page.</p>
 
   <label>Name <span class="muted">(lowercase, e.g. sql-evals)</span></label>
   <input id="name" placeholder="sql-evals"/>
 
-  <label>What it's for <span class="muted">— Auto mode reads this to pick the kit</span></label>
+  <label>What it's for <span class="muted">, Auto mode reads this to pick the kit</span></label>
   <input id="tagline" placeholder="Evaluating our SQL agent's answers"/>
   <div class="hint muted">Describe the <b>situation</b>, not the skills. This is the cue Auto mode matches a task against.</div>
 
@@ -581,11 +590,11 @@ function builderHtml(vault) {
   <input id="search" placeholder="Search skills…"/>
   <div class="list" id="list"></div>
 
-  <label>Worked example <span class="muted">(one step per line — optional; shows in "How to use")</span></label>
+  <label>Worked example <span class="muted">(one step per line, optional; shows in "How to use")</span></label>
   <textarea id="example" rows="4" placeholder="Load the kit and start a new chat.&#10;Paste the question and the agent's answer.&#10;Score retrieval and answer quality separately."></textarea>
 
-  <label>Tips <span class="muted">(one per line — optional)</span></label>
-  <textarea id="tips" rows="3" placeholder="Keep it lean — 8 sharp skills beat 30 vague ones.&#10;Start a new chat after loading so the skills come online."></textarea>
+  <label>Tips <span class="muted">(one per line, optional)</span></label>
+  <textarea id="tips" rows="3" placeholder="Keep it lean, 8 sharp skills beat 30 vague ones.&#10;Start a new chat after loading so the skills come online."></textarea>
 
   <div class="actions"><button id="save">Save kit</button><button class="sec" id="cancel">Cancel</button></div>
 
@@ -633,6 +642,7 @@ function getWebviewHtml() {
   .skrow:first-child{border-top:0}
   .skgroup{margin-top:8px}
   .skgroup-h{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--vscode-descriptionForeground);font-weight:600}
+  .dup{font-size:10px;color:var(--vscode-charts-blue,#3794ff);border:1px solid currentColor;border-radius:8px;padding:0 6px;margin-left:6px;white-space:nowrap}
   .skrow .sh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
   .skrow .sn{font-weight:600}
   .skrow .sn .ao{font-size:9px;color:var(--vscode-charts-blue,#4aa8d8);border:1px solid currentColor;border-radius:7px;padding:0 5px;margin-left:5px;text-transform:uppercase}
@@ -703,7 +713,7 @@ function getWebviewHtml() {
 </div>
 <div id="main" style="display:none">
   <h1>SuperBob</h1>
-  <div class="muted">Expert skill <b>kits</b> for Bob — the right skills load per task, automatically. Leave <b>Auto</b> on, or flip a kit's blue toggle. Each kit has a <b>Learn more</b> guide with a worked example.</div>
+  <div class="muted">Expert skill <b>kits</b> for Bob, the right skills load per task, automatically. Leave <b>Auto</b> on, or flip a kit's blue toggle. Each kit has a <b>Learn more</b> guide with a worked example.</div>
 
   <div class="powerbar">
     <label class="pswitch"><input type="checkbox" id="powerToggle" checked/><span class="track"></span><span class="knob"></span></label>
@@ -775,7 +785,7 @@ function getWebviewHtml() {
       <p>A <b>kit</b> is a set of expert skills for one kind of work. SuperBob loads only the current kit, so Bob stays fast and focused.</p>
       <ol>
         <li>Leave <b>Auto mode</b> on and SuperBob picks the skills for each task. For most work, that's the whole setup.</li>
-        <li>Or flip a kit's <b>blue toggle</b> on to load it — <b>stack several</b> and their skills combine. Click <b>Learn more</b> for its pitch and a worked example; <b>skills</b> shows what's inside and where each comes from.</li>
+        <li>Or flip a kit's <b>blue toggle</b> on to load it, <b>stack several</b> and their skills combine. Click <b>Learn more</b> for its pitch and a worked example; <b>skills</b> shows what's inside and where each comes from.</li>
         <li>Or, in the Bob chat, type <code>/superbob software-development</code> (or any kit). <code>/superbob</code> alone lists them.</li>
         <li>After switching, <b>start a new conversation</b> so the skills load.</li>
         <li>Use <b>+ Create your own kit</b> to build one, with its own guide.</li>
@@ -816,13 +826,15 @@ function getWebviewHtml() {
   // Short, hand-written labels for the two always-on skills, their own frontmatter
   // descriptions are long and wrap badly in a narrow panel.
   const SHORT={ 'using-superpowers':'Checks for a matching skill before acting.', 'mission-control':'Routes each task to the right skills.' };
-  function skillRows(names){
+  function skillRows(names, shared){
     const d=document.createElement('div'); d.className='sklist';
     names.forEach(n=>{ const s=skillInfo(n); const core=S.core.includes(n);
       const r=document.createElement('div'); r.className='skrow';
       const desc=SHORT[n]||s.desc;
       const origin=(S.provenance&&S.provenance[n])||'';
-      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">always on</span>':'')+'</span><span class="stk">'+fmtTok(s.tokens)+'</span></div>'+(desc?'<div class="sd">'+desc+'</div>':'')+(origin?'<div class="sorc">from '+origin+'</div>':'');
+      const dup = shared && shared[n] && shared[n].length>1;   // skill is in more than one active kit
+      const dupBadge = dup ? '<span class="dup" title="in: '+shared[n].join(', ')+', loaded once">shared · once</span>' : '';
+      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">always on</span>':'')+dupBadge+'</span><span class="stk">'+fmtTok(s.tokens)+'</span></div>'+(desc?'<div class="sd">'+desc+'</div>':'')+(origin?'<div class="sorc">from '+origin+'</div>':'');
       d.appendChild(r); });
     return d;
   }
@@ -844,7 +856,7 @@ function getWebviewHtml() {
     const sec=document.getElementById('toolsSection'); if(sec) sec.style.display=(S.tools&&S.tools.length)?'block':'none';
     const c=document.getElementById('tools'); if(!c) return; c.innerHTML='';
     (S.tools||[]).forEach(t=>{
-      const status = t.active ? (t.hasKey?'Enabled':'Enabled — add a model key to Bob’s env') : (t.installed?'Installed, off':'Not installed');
+      const status = t.active ? (t.hasKey?'Enabled':'Enabled, add a model key to Bob’s env') : (t.installed?'Installed, off':'Not installed');
       const row=document.createElement('div'); row.className='mode'+(t.active?' on':'');
       const top=document.createElement('div'); top.className='mode-top'; top.style.display='flex'; top.style.alignItems='center'; top.style.justifyContent='space-between';
       top.innerHTML='<span class="mode-name">'+t.title+'</span>'+
@@ -870,10 +882,10 @@ function getWebviewHtml() {
     const am=activeMode();
     const AK=activeKits();   // the set of active kits (0, 1, or many)
     // active card title: Auto / one or more kit names / custom
-    document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode' : AK.length ? AK.join(' + ') : (am==='__custom__'?'custom set':'—'));
+    document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode' : AK.length ? AK.join(' + ') : (am==='__custom__'?'custom set':','));
     document.getElementById('autoToggle').checked = (am==='__lean__');
     { const sc=(S.scope==='superbob-only')?'superbob-only':'all'; document.querySelectorAll('input[name=scope]').forEach(r=>{ r.checked=(r.value===sc); }); }
-    document.getElementById('activeDesc').textContent = AK.length===1 ? descFor(AK[0]) : AK.length>1 ? (AK.length+' kits stacked — their skills are combined.') : (am==='__custom__'?'A custom set of skills you picked.':'');
+    document.getElementById('activeDesc').textContent = AK.length===1 ? descFor(AK[0]) : AK.length>1 ? (AK.length+' kits stacked, their skills are combined.') : (am==='__custom__'?'A custom set of skills you picked.':'');
     // Show only what SuperBob loaded (core + the kits' skills). The user's own skills are kept untouched, not listed.
     const ext=new Set(S.external||[]);
     const addonNames=new Set((S.addons||[]).map(a=>a.name));
@@ -881,17 +893,20 @@ function getWebviewHtml() {
     const cont=document.getElementById('activeSkills'); cont.innerHTML='';
     // Group by what loaded each skill: core, then one group PER active kit (a skill in two kits
     // shows under each). That's the kit-level provenance; each row still shows its author origin.
+    // which active kits contain each loaded skill → a skill in >1 kit is "shared, loaded once"
+    const sharedMap={}; extras.forEach(n=>{ sharedMap[n]=AK.filter(k=>(S.profiles[k]||[]).includes(n)); });
+    const dupCount=Object.values(sharedMap).filter(ks=>ks.length>1).length;
     function group(title, names){ if(!names.length) return; const g=document.createElement('div'); g.className='skgroup';
-      const h=document.createElement('div'); h.className='skgroup-h'; h.textContent=title; g.appendChild(h); g.appendChild(skillRows(names)); cont.appendChild(g); }
+      const h=document.createElement('div'); h.className='skgroup-h'; h.textContent=title; g.appendChild(h); g.appendChild(skillRows(names, sharedMap)); cont.appendChild(g); }
     group('Always on · core', S.core);
     const grouped=new Set();
     AK.forEach(k=>{ const ks=(S.profiles[k]||[]).filter(n=>extras.includes(n)); ks.forEach(n=>grouped.add(n)); group('From kit · '+k, ks); });
     const ungrouped=extras.filter(n=>!grouped.has(n));   // custom / leftover skills not in any active kit
     group(AK.length?'Also loaded':'From your custom set', ungrouped);
-    // one-line summary; stable height
+    // one-line summary; stable height (no dashes)
     const total=S.core.length+extras.length;
     document.getElementById('activeSkillsSummary').textContent =
-      total + ' skills loaded — ' + S.core.length + ' core' + (extras.length? (' + ' + extras.length + ' from ' + (AK.length||1) + ' kit' + ((AK.length||1)>1?'s':'')) : '') + ' · view';
+      total + ' skills loaded: ' + S.core.length + ' core' + (extras.length? (' + ' + extras.length + ' from ' + (AK.length||1) + ' kit' + ((AK.length||1)>1?'s':'')) : '') + (dupCount? (', ' + dupCount + ' shared (loaded once)') : '') + ' · view';
     renderAddons();
 
     // your kits = the user's own (non-builtin) kits. Lean is the Auto/base state,
@@ -924,7 +939,7 @@ function getWebviewHtml() {
     top.appendChild(nm);
     d.appendChild(top);
     // Row 2: Learn more (the kit's pitch, worked example, AND its skill list) · delete.
-    // No separate "skills" link — Learn more already lists the skills, so it was redundant.
+    // No separate "skills" link, Learn more already lists the skills, so it was redundant.
     const sp=document.createElement('div'); sp.className='mode-actions';
     const how=document.createElement('button'); how.className='linkbtn'; how.textContent='Learn more';
     how.title='what this kit is for, a worked example, and the skills inside'; how.onclick=()=> vscode.postMessage({type:'openGuide',kit:id}); sp.appendChild(how);
