@@ -484,9 +484,9 @@ function openPanel(context) {
 // we auto-generate a usable page from its skills + their descriptions. Every kit has a page.
 function readGuides() { try { return JSON.parse(fs.readFileSync(path.join(BOB_PROFILES, '_guides.json'), 'utf8')); } catch (e) { return {}; } }
 function guideFor(kit) {
-  const meta = readMeta(), g = readGuides()[kit] || {};
+  const meta = readMeta(), g = readGuides()[kit] || {}, prov = readProvenance();
   const skills = readList(path.join(BOB_PROFILES, kit + '.txt'))
-    .map(s => ({ name: s, desc: frontmatterTokens(path.join(BOB_VAULT, s)).desc }));
+    .map(s => ({ name: s, desc: frontmatterTokens(path.join(BOB_VAULT, s)).desc, origin: prov[s] || '' }));
   return {
     kit,
     tagline: g.tagline || meta[kit] || ('Skills for ' + kit.replace(/-/g, ' ') + '.'),
@@ -499,7 +499,7 @@ function guideFor(kit) {
 }
 function esc(s) { return String(s || '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
 function guideHtml(g) {
-  const skillRows = g.skills.map(s => '<div class="s"><div class="sn">' + esc(s.name) + '</div>' + (s.desc ? '<div class="sd">' + esc(s.desc) + '</div>' : '') + '</div>').join('');
+  const skillRows = g.skills.map(s => '<div class="s"><div class="sn">' + esc(s.name) + '</div>' + (s.desc ? '<div class="sd">' + esc(s.desc) + '</div>' : '') + (s.origin ? '<div class="sorc">from ' + esc(s.origin) + '</div>' : '') + '</div>').join('');
   const steps = g.example.length ? '<h2>Try it — a worked example</h2><ol>' + g.example.map(e => '<li>' + esc(e) + '</li>').join('') + '</ol>' : '';
   const tips = g.tips.length ? '<h2>Tips</h2><ul>' + g.tips.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
   const when = g.when ? '<p class="when"><b>When to reach for it:</b> ' + esc(g.when) + '</p>' : '';
@@ -511,6 +511,7 @@ function guideHtml(g) {
     .when{background:var(--vscode-editorWidget-background);border-radius:8px;padding:10px 14px}
     .s{padding:8px 0;border-top:1px solid var(--vscode-widget-border,#2a2a2a)} .s:first-child{border-top:0}
     .sn{font-weight:600} .sd{color:var(--vscode-descriptionForeground);font-size:13px;margin-top:2px}
+    .sorc{color:var(--vscode-descriptionForeground);font-size:12px;opacity:.8;font-style:italic;margin-top:1px}
     ol,ul{padding-left:22px;margin:0} li{margin:6px 0}
     .muted{color:var(--vscode-descriptionForeground)} .auto{font-size:12px;font-style:italic;margin-top:6px}
     .foot{margin-top:26px;border-top:1px solid var(--vscode-widget-border,#333);padding-top:12px;color:var(--vscode-descriptionForeground);font-size:13px}
@@ -922,19 +923,15 @@ function getWebviewHtml() {
     const nm=document.createElement('span'); nm.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'')+(locked?' <span class="lockbadge">🔒 needs '+pre.label.replace(/^the /,'')+'</span>':'');
     top.appendChild(nm);
     d.appendChild(top);
-    // Row 2: Learn more (the kit guide) · skills (with provenance) · delete
+    // Row 2: Learn more (the kit's pitch, worked example, AND its skill list) · delete.
+    // No separate "skills" link — Learn more already lists the skills, so it was redundant.
     const sp=document.createElement('div'); sp.className='mode-actions';
     const how=document.createElement('button'); how.className='linkbtn'; how.textContent='Learn more';
-    how.title='how to use this kit'; how.onclick=()=> vscode.postMessage({type:'openGuide',kit:id}); sp.appendChild(how);
-    const sk=document.createElement('button'); sk.className='linkbtn'; sk.textContent='skills';
-    sk.title='the skills in this kit and where each comes from';
-    sk.onclick=()=>{ const el=d.querySelector('.mode-skills'); el.style.display = el.style.display==='none'?'block':'none'; }; sp.appendChild(sk);
+    how.title='what this kit is for, a worked example, and the skills inside'; how.onclick=()=> vscode.postMessage({type:'openGuide',kit:id}); sp.appendChild(how);
     if(deletable){ const del=document.createElement('button'); del.className='del'; del.textContent='🗑'; del.title='delete this kit';
       del.onclick=()=> vscode.postMessage({type:'deleteMode',name:id}); sp.appendChild(del); }
     d.appendChild(sp);
     const md=document.createElement('div'); md.className='mode-desc'; md.textContent=descFor(id); d.appendChild(md);
-    const s=document.createElement('div'); s.className='mode-skills'; s.style.display='none';
-    s.appendChild(skillRows(skills)); d.appendChild(s);
     return d;
   }
 

@@ -54,121 +54,120 @@
     ]
   },
   "software-development": {
-    "tagline": "Write and change code the way a senior engineer would — test-first, patterned, and hard to regret.",
-    "when": "You're building or refactoring a feature and want it done right, not just working.",
+    "tagline": "Ship code a senior would approve — test-first, your stack's patterns, nothing over-built.",
+    "when": "Building or refactoring a feature you'll have to maintain.",
     "example": [
-      "Describe the feature; it starts test-first (tdd-workflow) — the failing test before the code.",
-      "It applies your stack's patterns (python / react / go / fastapi / django…) and api-design + system-design for the shape.",
-      "ponytail and karpathy-guidelines keep it minimal and free of the common LLM mistakes.",
-      "verification-before-completion runs the checks before it ever says 'done'."
+      "Say what you're building. It writes the failing test first, then the code (tdd-workflow).",
+      "It applies your stack's patterns (python / react / go / fastapi / django) and shapes the API and system design.",
+      "ponytail and karpathy-guidelines cut over-engineering and the usual LLM slips.",
+      "It runs the checks before it calls anything done."
     ],
     "tips": [
-      "Name your stack so it pulls the right patterns.",
-      "Keep changes small — it won't claim verified without running the check."
+      "Name your stack.",
+      "It won't claim 'verified' without running the check."
     ]
   },
   "data-analysis": {
-    "tagline": "Work with data and judge AI output without fooling yourself.",
-    "when": "You're doing analytics, or measuring how good an AI/LLM pipeline actually is.",
+    "tagline": "Analyze data and grade AI output without fooling yourself.",
+    "when": "Doing analytics, or measuring how good an AI pipeline actually is.",
     "example": [
-      "Start with error-analysis on real traces — categorize the failures before counting anything.",
-      "write-judge-prompt to build a binary Pass/Fail evaluator for the subjective calls.",
-      "validate-evaluator to calibrate that judge against human labels — never trust an uncalibrated one.",
-      "SQL + statistics for the actual numbers."
+      "error-analysis reads real traces and names the failure modes before you count anything.",
+      "write-judge-prompt builds a Pass/Fail evaluator for the subjective calls.",
+      "validate-evaluator calibrates that judge against human labels.",
+      "SQL and statistics do the numbers."
     ],
     "tips": [
-      "Calibrate the judge before you believe its score.",
-      "Separate retrieval quality from answer quality."
+      "An uncalibrated judge is a random number.",
+      "Score retrieval and answer separately."
     ]
   },
   "product-management": {
-    "tagline": "The full PM toolkit — from a fuzzy idea to a shipped, measured feature.",
-    "when": "You're planning and strategizing, not coding: PRDs, roadmaps, prioritization, go-to-market.",
+    "tagline": "From fuzzy idea to shipped, measured feature — the whole PM toolkit.",
+    "when": "Planning and strategy, not code: PRDs, roadmaps, prioritization, go-to-market.",
     "example": [
-      "jobs-to-be-done to find the real need behind the request.",
-      "create-prd + user-stories to spec it.",
-      "prioritization-frameworks (RICE) to rank what to build.",
-      "north-star-metric + gtm-strategy to ship and measure it."
+      "jobs-to-be-done finds the real need behind the ask.",
+      "create-prd and user-stories spec it.",
+      "prioritization-frameworks (RICE) ranks what's worth building.",
+      "north-star-metric and gtm-strategy ship and measure it."
     ],
     "tips": [
       "Describe the situation, not the skills.",
-      "Pair with pm-methodology (the process) and product-frameworks (the thinking)."
+      "Pair with pm-methodology (process) and product-frameworks (thinking)."
     ]
   },
   "production-engineering": {
-    "tagline": "Design, ship, and operate production-grade systems — not just make it run on your laptop.",
-    "when": "You're deploying, operating, or hardening real infrastructure.",
+    "tagline": "Design, ship, and run production systems — past 'works on my laptop'.",
+    "when": "Deploying, operating, or hardening real infrastructure.",
     "example": [
-      "system-design + deployment-patterns to shape it for production.",
-      "docker / kubernetes / terraform to actually ship it.",
-      "runbook + incident-response for when it breaks at 3am."
+      "system-design and deployment-patterns shape it for production.",
+      "docker / kubernetes / terraform ship it.",
+      "runbook and incident-response for when it breaks at 3am."
     ],
     "tips": [
-      "For a specific prod bug, pair with the bug-fixing kit.",
-      "Write the runbook before you need it."
+      "Write the runbook before you need it.",
+      "For a specific prod bug, add the bug-fixing kit."
     ]
   },
   "test-engineering": {
-    "tagline": "Make the tests actually catch things — unit, end-to-end, and regression.",
-    "when": "You're writing or hardening a test suite you'll trust.",
+    "tagline": "Tests that actually catch regressions — unit, end-to-end, and back.",
+    "when": "Writing or hardening a suite you'll trust to gate a release.",
     "example": [
-      "testing-strategy decides what to test at each level (and what not to).",
-      "Write the unit, end-to-end, and regression tests.",
-      "verification-before-completion so green means green."
+      "testing-strategy decides what to test at each level, and what to skip.",
+      "It writes the unit, end-to-end, and regression tests.",
+      "verification-before-completion, so green means green."
     ],
     "tips": [
-      "Test behavior, not implementation details.",
-      "A test that never fails is testing nothing."
+      "Test behavior, not implementation.",
+      "A test that can't fail tests nothing."
     ]
   },
   "application-security": {
-    "tagline": "Find and fix vulnerabilities the way an attacker would — then write code that resists them.",
-    "when": "You're running an audit or pen-test, or hardening a feature before it ships.",
+    "tagline": "Break it like an attacker, then write code that resists — audit to fix.",
+    "when": "Running an audit or pen-test, or hardening a feature before ship.",
     "example": [
-      "bb-methodology to plan the hunt and scope it.",
-      "The hunt-* skills work each vulnerability class (xss, sqli, ssrf, idor, auth-bypass…).",
-      "vibesec to prevent them at write-time, not just find them.",
-      "A clean, reproducible report at the end."
+      "bb-methodology scopes and plans the hunt.",
+      "The hunt-* skills work each class: xss, sqli, ssrf, idor, auth-bypass.",
+      "vibesec prevents them at write-time, not just finds them.",
+      "You get a clean, reproducible report."
     ],
     "tips": [
-      "hunt-* finds them; vibesec prevents them.",
-      "Reproduce every finding before you report it."
+      "hunt-* finds; vibesec prevents.",
+      "Reproduce every finding before reporting it."
     ]
   },
   "frontend-design": {
-    "tagline": "Build interfaces people actually enjoy — polished, accessible, and alive.",
-    "when": "You're working on anything users see on screen.",
+    "tagline": "Interfaces people enjoy — polished, accessible, and alive.",
+    "when": "Anything users see on screen.",
     "example": [
-      "frontend-design for the structure and layout.",
-      "design-system + frontend patterns for consistency.",
-      "motion for how it feels.",
-      "fixing-accessibility so everyone can use it."
+      "frontend-design lays out the structure.",
+      "design-system and frontend patterns keep it consistent.",
+      "motion gives it feel; fixing-accessibility makes it usable by everyone."
     ],
     "tips": [
-      "Accessibility isn't optional — bake it in.",
-      "Motion with restraint; it should guide, not distract."
+      "Accessibility isn't a phase — bake it in.",
+      "Motion should guide, not perform."
     ]
   },
   "web-research": {
-    "tagline": "Dig into a topic and come back with a synthesized answer — not 40 open tabs.",
+    "tagline": "A synthesized answer with sources — not 40 open tabs.",
     "when": "You need to understand something you don't yet know.",
     "example": [
-      "deep-research plans the search — what to look for and why.",
-      "exa-search / x-research gather the raw material.",
-      "research-synthesis turns it into a clear answer with sources."
+      "deep-research plans what to look for and why.",
+      "exa-search and x-research gather the material.",
+      "research-synthesis turns it into an answer you can cite."
     ],
     "tips": [
       "Ask for sources so you can check the claims.",
-      "search-first before guessing from memory."
+      "search-first before answering from memory."
     ]
   },
   "release-review": {
-    "tagline": "The gate before you ship — catch what a tired reviewer would miss.",
-    "when": "You're right before a merge or a release.",
+    "tagline": "The last gate before ship — catch what a tired reviewer misses.",
+    "when": "Right before a merge or release.",
     "example": [
-      "code-review across dimensions (correctness, security, simplicity, tests).",
-      "security-audit + a check that tests actually cover the change.",
-      "verification-before-completion, and karpathy-guidelines for the common LLM slip-ups."
+      "code-review across correctness, security, simplicity, and tests.",
+      "security-audit, plus a check that tests cover the change.",
+      "verification-before-completion and karpathy-guidelines for the common slips."
     ],
     "tips": [
       "Run it before you merge, not after.",
@@ -176,12 +175,12 @@
     ]
   },
   "bug-fixing": {
-    "tagline": "Find the root cause fast — not the symptom.",
-    "when": "Something's broken and you need it fixed now.",
+    "tagline": "Root cause, not symptom — fixed fast.",
+    "when": "Something's broken and you need it working now.",
     "example": [
-      "systematic-debugging to isolate the actual cause (reproduce first).",
-      "caveman-debug (print statements) when the trail goes cold.",
-      "error-handling to fix it properly, not just silence it."
+      "Reproduce, then systematic-debugging isolates the real cause.",
+      "Stuck? caveman-debug drops in prints to see what's actually happening.",
+      "error-handling fixes it properly — no silent catch."
     ],
     "tips": [
       "Reproduce before you fix.",
@@ -189,12 +188,12 @@
     ]
   },
   "code-simplification": {
-    "tagline": "Cut the over-engineering — the best code is the code you didn't write.",
-    "when": "A diff or a repo feels bloated and you want it lean.",
+    "tagline": "Delete the over-engineering — the best code is the code you didn't write.",
+    "when": "A diff or repo feels bloated and you want it lean.",
     "example": [
-      "ponytail-review on the diff — a ranked list of what to delete.",
-      "ponytail-audit for whole-repo bloat.",
-      "Keep the laziest working solution: stdlib before custom, one line before fifty."
+      "ponytail-review reads the diff and ranks what to cut.",
+      "ponytail-audit finds bloat across the whole repo.",
+      "It keeps the laziest working solution: stdlib before custom, one line before fifty."
     ],
     "tips": [
       "Eight sharp lines beat fifty clever ones.",
@@ -202,25 +201,25 @@
     ]
   },
   "rag-evaluation": {
-    "tagline": "Prove your RAG or search system actually works — retrieval and answer, scored separately.",
-    "when": "You're measuring or improving a retrieval/RAG agent.",
+    "tagline": "Prove your RAG works — retrieval and answer, scored apart.",
+    "when": "Measuring or improving a retrieval / RAG agent.",
     "example": [
-      "evaluate-rag scores retrieval quality and answer quality as separate concerns.",
-      "error-analysis on the failures to find the pattern.",
-      "write-judge-prompt + validate-evaluator for a judge you've actually calibrated."
+      "evaluate-rag scores retrieval quality and answer quality separately.",
+      "error-analysis finds the pattern in the failures.",
+      "write-judge-prompt and validate-evaluator give you a judge you've calibrated."
     ],
     "tips": [
-      "Never trust a judge you haven't calibrated against humans.",
-      "Bad retrieval and bad generation are different bugs — don't blend them."
+      "Never trust an uncalibrated judge.",
+      "Bad retrieval and bad generation are different bugs."
     ]
   },
   "content-writing": {
-    "tagline": "Write and edit docs and copy that sound human — not AI.",
-    "when": "You're writing docs or marketing copy, or cleaning up a draft.",
+    "tagline": "Docs and copy that sound human — not AI.",
+    "when": "Writing docs or copy, or cleaning up a draft.",
     "example": [
-      "draft-content / copywriting for the first pass.",
-      "no-ai-slop to strip the 20+ AI tells while keeping your voice.",
-      "ux-copy / brand-voice for tone; seo if it's for search."
+      "draft-content or copywriting for the first pass.",
+      "no-ai-slop strips the AI tells while keeping your voice.",
+      "ux-copy and brand-voice set the tone; seo if it's for search."
     ],
     "tips": [
       "Run no-ai-slop after drafting, not instead of it.",
