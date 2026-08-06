@@ -665,7 +665,12 @@ function getWebviewHtml() {
   .offbanner{padding:9px 11px;margin:0 0 12px;border-radius:8px;font-size:12.5px;line-height:1.5;background:var(--vscode-inputValidation-warningBackground,#3b2e1e);border:1px solid var(--vscode-inputValidation-warningBorder,#6b5424)}
   .mode{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:8px;padding:10px 12px;margin-bottom:7px}
   .mode.on{border-color:var(--vscode-focusBorder,#0e639c)}
-  .mode-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .mode-top{display:flex;align-items:center;gap:8px}
+  .mode-namewrap{flex:1;min-width:0}
+  .mode-icons{margin-left:auto;display:flex;gap:1px;flex-shrink:0}
+  .iconbtn{background:none;border:0;cursor:pointer;color:var(--vscode-textLink-foreground,#4aa8d8);font-size:14px;line-height:1;padding:3px 6px;border-radius:5px}
+  .iconbtn:hover{background:var(--vscode-toolbar-hoverBackground,#2a2a2a)}
+  .iconbtn.del{color:var(--vscode-descriptionForeground);font-size:13px}
   .mode-name{font-weight:600}
   .mode-top .cnt{color:var(--vscode-descriptionForeground);font-size:12px}
   .mode-top .badge{font-size:10px;color:var(--vscode-charts-green,#3fb950);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap}
@@ -936,17 +941,17 @@ function getWebviewHtml() {
     const tog=document.createElement('label'); tog.className='pswitch blue'; tog.title=locked?('needs '+pre.label):(isActive?'unload this kit (back to Auto)':'load this kit');
     tog.innerHTML='<input type="checkbox" class="kitsw" data-kit="'+id+'" '+(isActive?'checked':'')+(locked?' disabled':'')+'/><span class="track"></span><span class="knob"></span>';
     top.appendChild(tog);
-    const nm=document.createElement('span'); nm.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'')+(locked?' <span class="lockbadge">🔒 needs '+pre.label.replace(/^the /,'')+'</span>':'');
+    const nm=document.createElement('span'); nm.className='mode-namewrap';
+    nm.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'')+(locked?' <span class="lockbadge">🔒 needs '+pre.label.replace(/^the /,'')+'</span>':'');
     top.appendChild(nm);
+    // Top-right icons: Learn more (ⓘ, opens the guide with pitch + example + skills) and delete.
+    const acts=document.createElement('span'); acts.className='mode-icons';
+    const how=document.createElement('button'); how.className='iconbtn'; how.textContent='ⓘ';
+    how.title='Learn more: the pitch, a worked example, and the skills inside'; how.onclick=()=> vscode.postMessage({type:'openGuide',kit:id}); acts.appendChild(how);
+    if(deletable){ const del=document.createElement('button'); del.className='iconbtn del'; del.textContent='🗑'; del.title='delete this kit';
+      del.onclick=()=> vscode.postMessage({type:'deleteMode',name:id}); acts.appendChild(del); }
+    top.appendChild(acts);
     d.appendChild(top);
-    // Row 2: Learn more (the kit's pitch, worked example, AND its skill list) · delete.
-    // No separate "skills" link, Learn more already lists the skills, so it was redundant.
-    const sp=document.createElement('div'); sp.className='mode-actions';
-    const how=document.createElement('button'); how.className='linkbtn'; how.textContent='Learn more';
-    how.title='what this kit is for, a worked example, and the skills inside'; how.onclick=()=> vscode.postMessage({type:'openGuide',kit:id}); sp.appendChild(how);
-    if(deletable){ const del=document.createElement('button'); del.className='del'; del.textContent='🗑'; del.title='delete this kit';
-      del.onclick=()=> vscode.postMessage({type:'deleteMode',name:id}); sp.appendChild(del); }
-    d.appendChild(sp);
     const md=document.createElement('div'); md.className='mode-desc'; md.textContent=descFor(id); d.appendChild(md);
     return d;
   }
