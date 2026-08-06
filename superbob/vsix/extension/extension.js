@@ -136,18 +136,34 @@ function frontmatterTokens(skillDir) {
     return { desc: desc.replace(/^[>|]\s*/, '').replace(/^["']|["']$/g, '').replace(/\s+/g, ' ').trim().slice(0, 160), tokens: Math.ceil(fm.length / 4) };
   } catch (e) { return { desc: '', tokens: 60 }; }
 }
+// The vault holds ~1500+ skills. Reading every SKILL.md on each state refresh blocks the
+// extension host long enough that Bob can flag it unresponsive and restart it, and that teardown
+// trips a SQLite-on-cleanup crash in Bob itself. So cache the per-skill frontmatter (the only
+// part that touches disk) and only rebuild it when the vault actually changes (on install).
+let _skillMetaCache = null;
+function invalidateVaultCache() { _skillMetaCache = null; }
+function skillMetaMap() {
+  if (_skillMetaCache) return _skillMetaCache;
+  const m = {};
+  if (fs.existsSync(BOB_VAULT)) {
+    for (const name of fs.readdirSync(BOB_VAULT)) {
+      if (name.startsWith('.')) continue;
+      const dir = path.join(BOB_VAULT, name);
+      if (!fs.existsSync(path.join(dir, 'SKILL.md'))) continue;
+      m[name] = frontmatterTokens(dir);   // the only disk read, now done once and cached
+    }
+  }
+  _skillMetaCache = m;
+  return m;
+}
 function listVaultSkills() {
-  if (!fs.existsSync(BOB_VAULT)) return [];
+  const meta = skillMetaMap();   // cached
   const profs = {};
-  for (const p of profileNames()) profs[p] = new Set(readList(path.join(BOB_PROFILES, p + '.txt')));
-  return fs.readdirSync(BOB_VAULT)
-    .filter(n => !n.startsWith('.') && fs.existsSync(path.join(BOB_VAULT, n, 'SKILL.md')))
-    .sort()
-    .map(name => {
-      const info = frontmatterTokens(path.join(BOB_VAULT, name));
-      const inProfiles = Object.keys(profs).filter(p => profs[p].has(name));
-      return { name, desc: info.desc, tokens: info.tokens, inProfiles, core: CORE.includes(name) };
-    });
+  for (const p of profileNames()) profs[p] = new Set(readList(path.join(BOB_PROFILES, p + '.txt')));   // cheap: a few small .txt files
+  return Object.keys(meta).sort().map(name => ({
+    name, desc: meta[name].desc, tokens: meta[name].tokens,
+    inProfiles: Object.keys(profs).filter(p => profs[p].has(name)), core: CORE.includes(name)
+  }));
 }
 function activeSkillSet() {
   if (!fs.existsSync(BOB_ACTIVE)) return [];
@@ -1029,6 +1045,7 @@ async function doInstall(context) {
       } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
     }
   );
+  invalidateVaultCache();   // the vault just changed; drop the cached skill metadata
   updateStatus();
   vscode.window.showInformationMessage('SuperBob installed (' + target + '). Restart Bob / start a new VS Code session so skills load.');
 }
@@ -1064,6 +1081,9 @@ function activate(context) {
     vscode.window.showInformationMessage('SuperBob is ready to install into Bob / VS Code.', 'Install now')
       .then(choice => { if (choice === 'Install now') doInstall(context); });
   }
+  // Warm the skill-metadata cache in the background so the first drawer open never blocks on a
+  // full vault scan (which could make Bob restart the extension host and hit its SQLite crash).
+  setTimeout(() => { try { skillMetaMap(); } catch (e) {} }, 1500);
 }
 function deactivate() {}
 module.exports = { activate, deactivate };
