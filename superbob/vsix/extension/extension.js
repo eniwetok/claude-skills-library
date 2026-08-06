@@ -650,6 +650,7 @@ function getWebviewHtml() {
   h2{font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;color:var(--vscode-descriptionForeground);margin:22px 0 8px;font-weight:600}
   .muted{color:var(--vscode-descriptionForeground)}
   .active-card{border:1px solid var(--vscode-focusBorder,#0e639c);background:var(--vscode-editorWidget-background);border-radius:8px;padding:12px 14px;margin:12px 0 4px}
+  #activeKits{margin-top:8px} #activeKits .mode{background:var(--vscode-editor-background,rgba(0,0,0,.15))}
   .active-card .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--vscode-charts-green,#3fb950);margin-right:7px}
   .active-card .now{font-weight:600;font-size:1rem}
   .active-card .skills{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
@@ -757,6 +758,7 @@ function getWebviewHtml() {
   <div class="active-card">
     <div><span class="dot"></span><span class="now" id="activeNow"></span></div>
     <div id="activeDesc"></div>
+    <div id="activeKits"></div>
     <details class="active-skills">
       <summary id="activeSkillsSummary">Loaded skills</summary>
       <div class="skills" id="activeSkills"></div>
@@ -904,10 +906,14 @@ function getWebviewHtml() {
     const am=activeMode();
     const AK=activeKits();   // the set of active kits (0, 1, or many)
     // active card title: Auto / one or more kit names / custom
-    document.getElementById('activeNow').textContent = 'Active: ' + (am==='__lean__'?'Auto mode' : AK.length ? AK.join(' + ') : (am==='__custom__'?'custom set':','));
+    document.getElementById('activeNow').textContent = am==='__lean__'?'Auto mode' : AK.length ? ('Active kits ('+AK.length+')') : (am==='__custom__'?'Custom set':'Active');
     document.getElementById('autoToggle').checked = (am==='__lean__');
     { const sc=(S.scope==='superbob-only')?'superbob-only':'all'; document.querySelectorAll('input[name=scope]').forEach(r=>{ r.checked=(r.value===sc); }); }
-    document.getElementById('activeDesc').textContent = AK.length===1 ? descFor(AK[0]) : AK.length>1 ? (AK.length+' kits stacked, their skills are combined.') : (am==='__custom__'?'A custom set of skills you picked.':'');
+    // Description only for Auto/custom; when kits are on we render their cards below instead.
+    document.getElementById('activeDesc').textContent = am==='__lean__' ? descFor('__lean__') : (AK.length ? '' : (am==='__custom__'?'A custom set of skills you picked.':''));
+    // The enabled kits, as the same cards used below, so you can see and toggle them off here.
+    const akEl=document.getElementById('activeKits'); akEl.innerHTML='';
+    AK.forEach(k=>{ if(S.profiles[k]) akEl.appendChild(modeCard(k, k, S.profiles[k], true, !S.builtin.includes(k))); });
     // Show only what SuperBob loaded (core + the kits' skills). The user's own skills are kept untouched, not listed.
     const ext=new Set(S.external||[]);
     const addonNames=new Set((S.addons||[]).map(a=>a.name));
@@ -933,14 +939,17 @@ function getWebviewHtml() {
 
     // your kits = the user's own (non-builtin) kits. Lean is the Auto/base state,
     // controlled by the Auto toggle and shown in the active card, so it is not a card here.
+    // The lists below show only kits that are NOT active (active ones live in the active card).
     const your=document.getElementById('yourModes'); your.innerHTML='';
-    const mine=Object.keys(S.profiles).filter(p=>!S.builtin.includes(p));
-    if(!mine.length){ your.innerHTML='<div class="muted" style="font-size:12px;padding:6px 0">No kits yet.</div>'; }
-    mine.forEach(p=>{ your.appendChild(modeCard(p, p, S.profiles[p], AK.includes(p), true)); });
-    // built-in modes
+    const mine=Object.keys(S.profiles).filter(p=>!S.builtin.includes(p) && !AK.includes(p));
+    if(!Object.keys(S.profiles).filter(p=>!S.builtin.includes(p)).length){ your.innerHTML='<div class="muted" style="font-size:12px;padding:6px 0">No kits yet.</div>'; }
+    else if(!mine.length){ your.innerHTML='<div class="muted" style="font-size:12px;padding:6px 0">All your kits are active.</div>'; }
+    mine.forEach(p=>{ your.appendChild(modeCard(p, p, S.profiles[p], false, true)); });
+    // built-in modes (excluding active ones, which show in the active card)
     const bi=document.getElementById('builtinModes'); bi.innerHTML='';
-    S.builtin.forEach(p=>{ if(S.profiles[p]) bi.appendChild(modeCard(p, p, S.profiles[p], AK.includes(p), false)); });
-    document.getElementById('builtinSummary').textContent='Starter kits (built-in · '+S.builtin.filter(p=>S.profiles[p]).length+')';
+    const biList=S.builtin.filter(p=>S.profiles[p] && !AK.includes(p));
+    biList.forEach(p=>{ bi.appendChild(modeCard(p, p, S.profiles[p], false, false)); });
+    document.getElementById('builtinSummary').textContent='Starter kits (built-in · '+biList.length+' available)';
     // builder start-from options
     const bs=document.getElementById('bstart'); if(bs && bs.options.length===0){
       bs.innerHTML='<option value="">(blank, pick your own)</option>'+Object.keys(S.profiles).map(p=>'<option value="'+p+'">'+p+'</option>').join('');
