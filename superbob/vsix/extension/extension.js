@@ -76,7 +76,26 @@ is switched **off**, this file is removed and Bob behaves normally.
 const SCOPE_FILE = () => path.join(HOME, '.bob', '.superbob-scope');
 function readScope() { try { return fs.readFileSync(SCOPE_FILE(), 'utf8').trim() === 'superbob-only' ? 'superbob-only' : 'all'; } catch (e) { return 'all'; } }
 function writeScope(s) { try { fs.writeFileSync(SCOPE_FILE(), (s === 'superbob-only' ? 'superbob-only' : 'all') + '\n'); } catch (e) {} }
-function writeAutoRule() { try { fs.mkdirSync(BOB_RULES, { recursive: true }); fs.writeFileSync(AUTO_RULE_FILE(), readScope() === 'superbob-only' ? AUTO_RULE_SUPERBOB_ONLY : AUTO_RULE_ALL); } catch (e) {} }
+// Auto-routing on/off (independent of kits). ON = mission-control auto-picks per task, scoped to
+// the loaded kits (or the whole vault when no kit is loaded). OFF = no auto-routing (manual).
+const AUTO_FILE = () => path.join(HOME, '.bob', '.superbob-auto');
+function readAuto() { try { return fs.readFileSync(AUTO_FILE(), 'utf8').trim() !== 'off'; } catch (e) { return true; } }
+function writeAuto(on) { try { fs.writeFileSync(AUTO_FILE(), (on ? 'on' : 'off') + '\n'); } catch (e) {} }
+// The kits currently loaded, parsed from the '.profile' label ('core + kitA kitB').
+function activeKitNames() { const p = activeProfile(); if (!p || p.indexOf('core + ') !== 0) return []; return p.slice(7).split(' ').filter(k => k && fs.existsSync(path.join(BOB_PROFILES, k + '.txt'))); }
+function writeAutoRule() {
+  try {
+    if (!readAuto()) { removeAutoRule(); return; }   // auto off: no auto-routing rule
+    fs.mkdirSync(BOB_RULES, { recursive: true });
+    let text = readScope() === 'superbob-only' ? AUTO_RULE_SUPERBOB_ONLY : AUTO_RULE_ALL;
+    const kits = activeKitNames();
+    if (kits.length) {   // scope auto-routing to the loaded kits
+      text += '\n## Scope: stay within the loaded kit' + (kits.length > 1 ? 's' : '') + '\n\n' +
+        kits.length + ' kit' + (kits.length > 1 ? 's are' : ' is') + ' loaded (' + kits.join(', ') + '). Their skills are in `~/.bob/skills`. For each task, prefer a skill from these loaded kits. Only reach into the wider `~/.bob/skills-vault` if none of the loaded skills fits, and say so when you do.\n';
+    }
+    fs.writeFileSync(AUTO_RULE_FILE(), text);
+  } catch (e) {}
+}
 function removeAutoRule() { try { fs.rmSync(AUTO_RULE_FILE(), { force: true }); } catch (e) {} }
 
 // Lean mode: only these two skills stay loaded; mission-control routes to the rest
@@ -373,7 +392,8 @@ function stateMessage() {
     scope: readScope(),
     addons: addonStates(),
     provenance: readProvenance(),
-    prereqs: kitPrereqStates()
+    prereqs: kitPrereqStates(),
+    auto: readAuto()
   };
 }
 function postState() { const msg = stateMessage(); webviews.forEach(w => { try { w.postMessage(msg); } catch (e) {} }); }
@@ -391,7 +411,16 @@ async function handleMessage(m, context) {
     if (applyProfile(names)) vscode.window.showInformationMessage(names.length > 1 ? ('Loaded ' + names.length + ' kits (' + names.join(' + ') + '). Start a new conversation.') : ('Loaded "' + names[0] + '" kit. Start a new conversation to apply.'));
     postState(); return;
   }
-  if (m.type === 'applyLean') { applyProfile([]); vscode.window.showInformationMessage('Auto mode on. SuperBob picks skills per task. Start a new conversation.'); postState(); return; }
+  if (m.type === 'applyLean') { applyProfile([]); vscode.window.showInformationMessage('Cleared kits. SuperBob picks from all skills. Start a new conversation.'); postState(); return; }
+  if (m.type === 'setAuto') {
+    writeAuto(m.on);
+    if (!isPoweredOff()) writeAutoRule();   // rewrite/remove the routing rule to match
+    const kits = activeKitNames();
+    vscode.window.showInformationMessage(m.on
+      ? ('Auto mode on. SuperBob picks skills per task' + (kits.length ? ', scoped to your ' + kits.length + ' loaded kit' + (kits.length > 1 ? 's' : '') : ' from all skills') + '. Start a new conversation.')
+      : 'Auto mode off. SuperBob will not auto-pick; invoke skills yourself. Start a new conversation.');
+    postState(); return;
+  }
   if (m.type === 'setPower') {
     if (m.on) { applyProfile([]); vscode.window.showInformationMessage('SuperBob on. Auto mode. Start a new conversation.'); }
     else { superbobOff(); vscode.window.showInformationMessage('SuperBob off. Bob runs normally, your own skills kept. Start a new conversation.'); }
@@ -747,7 +776,7 @@ function getWebviewHtml() {
   </div>
 
   <div class="hideWhenOff">
-  <label class="autobar"><input type="checkbox" id="autoToggle"/><span><span class="t">Auto mode</span> <span class="muted">(recommended). SuperBob picks the right skills for each task.</span></span></label>
+  <label class="autobar"><input type="checkbox" id="autoToggle"/><span><span class="t">Auto mode</span> <span class="muted">(recommended). SuperBob picks skills per task. It stays within the kits you select below, or uses all skills when none are selected.</span></span></label>
 
   <div class="scopebar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 8px;font-size:12px">
     <span class="muted">SuperBob handles:</span>
@@ -906,11 +935,12 @@ function getWebviewHtml() {
     const am=activeMode();
     const AK=activeKits();   // the set of active kits (0, 1, or many)
     // active card title: Auto / one or more kit names / custom
-    document.getElementById('activeNow').textContent = am==='__lean__'?'Auto mode' : AK.length ? ('Active kits ('+AK.length+')') : (am==='__custom__'?'Custom set':'Active');
-    document.getElementById('autoToggle').checked = (am==='__lean__');
+    const autoOn=!!S.auto;
+    document.getElementById('activeNow').textContent = AK.length ? ('Active kits ('+AK.length+')') : (am==='__custom__'?'Custom set' : (autoOn?'Auto mode: all skills':'Manual mode'));
+    document.getElementById('autoToggle').checked = !!S.auto;
     { const sc=(S.scope==='superbob-only')?'superbob-only':'all'; document.querySelectorAll('input[name=scope]').forEach(r=>{ r.checked=(r.value===sc); }); }
     // Description only for Auto/custom; when kits are on we render their cards below instead.
-    document.getElementById('activeDesc').textContent = am==='__lean__' ? descFor('__lean__') : (AK.length ? '' : (am==='__custom__'?'A custom set of skills you picked.':''));
+    document.getElementById('activeDesc').textContent = AK.length ? (autoOn?'Auto picks within these kits per task.':'Manual: these kits are loaded; invoke skills yourself.') : (am==='__custom__'?'A custom set of skills you picked.' : (autoOn?descFor('__lean__'):'Auto is off. SuperBob will not auto-pick; invoke skills yourself.'));
     // The enabled kits, as the same cards used below, so you can see and toggle them off here.
     const akEl=document.getElementById('activeKits'); akEl.innerHTML='';
     AK.forEach(k=>{ if(S.profiles[k]) akEl.appendChild(modeCard(k, k, S.profiles[k], true, !S.builtin.includes(k))); });
@@ -1005,7 +1035,7 @@ function getWebviewHtml() {
     if(e.target.id==='bsave'){ const name=document.getElementById('bname').value; vscode.postMessage({type:'saveMode',name:name,desc:document.getElementById('bdesc').value,skills:[...sel]}); closeBuilder(); }
   });
   document.addEventListener('input',e=>{ if(e.target.id==='bsearch') renderBuilder(); });
-  document.addEventListener('change',e=>{ if(e.target.id==='autoToggle'){ if(e.target.checked) vscode.postMessage({type:'applyLean'}); }
+  document.addEventListener('change',e=>{ if(e.target.id==='autoToggle'){ vscode.postMessage({type:'setAuto', on:e.target.checked}); }
     if(e.target.id==='powerToggle'){ vscode.postMessage({type:'setPower', on:e.target.checked}); }
     if(e.target.name==='scope' && e.target.checked){ vscode.postMessage({type:'setScope', scope:e.target.value}); }
     if(e.target.classList && e.target.classList.contains('toolsw')){ vscode.postMessage({type:'toolToggle', tool:e.target.dataset.tool, on:e.target.checked}); }
