@@ -98,6 +98,54 @@ function writeAutoRule() {
 }
 function removeAutoRule() { try { fs.rmSync(AUTO_RULE_FILE(), { force: true }); } catch (e) {} }
 
+// ---- per-kit settings: rulesync generation targets (agentic-authoring) -----
+// A kit can expose settings its skills read at run time. The first instance:
+// which tools the agentic-authoring kit generates for. Stored per kit in
+// ~/.bob/.superbob-kit-settings.json = { "<kit>": { targets: [<id>...] } }.
+const KIT_SETTINGS_FILE = () => path.join(HOME, '.bob', '.superbob-kit-settings.json');
+function readKitSettings() { try { return JSON.parse(fs.readFileSync(KIT_SETTINGS_FILE(), 'utf8')); } catch (e) { return {}; } }
+function writeKitSettings(o) { try { fs.writeFileSync(KIT_SETTINGS_FILE(), JSON.stringify(o, null, 2) + '\n'); } catch (e) {} }
+// rulesync target ids, labelled for the UI. Default (nothing saved) = all on.
+const RULESYNC_TARGETS = [
+  { id: 'agentsmd', label: 'AGENTS.md (portable standard)' },
+  { id: 'claudecode', label: 'Claude Code' },
+  { id: 'roo', label: 'Bob / Roo' },
+  { id: 'codexcli', label: 'Codex' },
+  { id: 'cursor', label: 'Cursor' }
+];
+function kitTargets(kit) {
+  const s = readKitSettings()[kit];
+  if (s && Array.isArray(s.targets) && s.targets.length) return s.targets;
+  return RULESYNC_TARGETS.map(t => t.id);   // default: every target
+}
+function setKitTarget(kit, target, on) {
+  const all = readKitSettings();
+  const cur = new Set(kitTargets(kit));
+  if (on) cur.add(target); else cur.delete(target);
+  let arr = RULESYNC_TARGETS.map(t => t.id).filter(id => cur.has(id));
+  if (!arr.length) arr = ['agentsmd'];   // never empty: keep the portable standard
+  all[kit] = { targets: arr };
+  writeKitSettings(all);
+  return arr;
+}
+// A rule Bob reads globally so it honours the chosen targets when it runs rulesync.
+// Present only while the agentic-authoring kit is loaded; self-removes otherwise.
+const TARGETS_RULE_FILE = () => path.join(BOB_RULES, 'superbob-rulesync-targets.md');
+function writeTargetsRule() {
+  try {
+    if (!activeKitNames().includes('agentic-authoring')) { removeTargetsRule(); return; }
+    const ids = kitTargets('agentic-authoring');
+    const labels = ids.map(id => (RULESYNC_TARGETS.find(t => t.id === id) || {}).label || id).join(', ');
+    fs.mkdirSync(BOB_RULES, { recursive: true });
+    fs.writeFileSync(TARGETS_RULE_FILE(),
+      '# SuperBob, agent-generation targets (managed by the SuperBob extension; do not edit by hand)\n\n' +
+      'When you generate agent artifacts with rulesync in this workspace, generate for these targets only: ' + labels + '.\n' +
+      'Run: `npx rulesync generate --targets "' + ids.join(',') + '" --features "*"`\n' +
+      'Do not add other targets unless the user asks.\n');
+  } catch (e) {}
+}
+function removeTargetsRule() { try { fs.rmSync(TARGETS_RULE_FILE(), { force: true }); } catch (e) {} }
+
 // Lean mode: only these two skills stay loaded; mission-control routes to the rest
 // from the vault on demand. Keeps starting context tiny (~200 tokens vs ~67,000).
 const CORE = ['using-superpowers', 'mission-control']; // superpowers first, always check for a skill before acting
@@ -221,6 +269,7 @@ function superbobOff() {
   } else { fs.mkdirSync(BOB_ACTIVE, { recursive: true }); }
   writeManaged([]);   // SuperBob manages nothing while off
   removeAutoRule();   // stop auto-routing: Bob behaves normally when off
+  removeTargetsRule();   // and stop steering rulesync targets
   fs.writeFileSync(path.join(BOB_ACTIVE, '.profile'), 'off');
   updateStatus();
   return true;
@@ -250,6 +299,7 @@ function applySkillSet(skillNames, label) {
   fs.writeFileSync(path.join(BOB_ACTIVE, '.profile'), label);
   writeManaged(staged);   // the manifest is exactly what SuperBob just placed
   writeAutoRule();        // SuperBob is on → make routing automatic (no /superbob needed)
+  writeTargetsRule();     // refresh the agent-generation targets rule for the loaded kits
   const kept = externalActiveSkills().length;
   if (kept) vscode.window.setStatusBarMessage('SuperBob kept ' + kept + ' of your own skill(s) untouched', 4000);
   updateStatus();
@@ -440,6 +490,14 @@ async function handleMessage(m, context) {
   if (m.type === 'closeBuilder') { if (builderPanel) builderPanel.dispose(); return; }
   if (m.type === 'deleteMode') { deleteCustomProfile(m.name); postState(); return; }
   if (m.type === 'openGuide') { openGuidePanel(m.kit, context); return; }
+  if (m.type === 'setKitTarget') {
+    const arr = setKitTarget(m.kit, m.target, m.on);
+    if (!isPoweredOff()) writeTargetsRule();   // refresh the live rule if the kit is loaded
+    if (guidePanel) guidePanel.webview.html = guideHtml(guideFor(m.kit));   // reflect the new state
+    const active = activeKitNames().includes(m.kit);
+    vscode.window.showInformationMessage('Agent generation set to: ' + arr.join(', ') + (active ? '. Applies now.' : '. Load the ' + m.kit + ' kit to apply.'));
+    postState(); return;
+  }
   if (m.type === 'setAddon') {
     const a = ADDONS.find(x => x.name === m.name); if (!a) { postState(); return; }
     const en = readAddons(); if (m.on) en.add(a.name); else en.delete(a.name); writeAddons(en);
@@ -533,7 +591,7 @@ function guideFor(kit) {
   const skills = readList(path.join(BOB_PROFILES, kit + '.txt'))
     .map(s => ({ name: s, desc: frontmatterTokens(path.join(BOB_VAULT, s)).desc, origin: prov[s] || '' }));
   const examples = g.examples || g.example || [];
-  return {
+  const out = {
     kit,
     tagline: g.tagline || meta[kit] || ('Skills for ' + kit.replace(/-/g, ' ') + '.'),
     jtbd: g.jtbd || '',
@@ -545,6 +603,12 @@ function guideFor(kit) {
     tips: g.tips || [],
     authored: !!examples.length
   };
+  // agentic-authoring exposes a per-kit setting: which tools rulesync generates for.
+  if (kit === 'agentic-authoring') {
+    const on = new Set(kitTargets(kit));
+    out.targets = RULESYNC_TARGETS.map(t => ({ id: t.id, label: t.label, on: on.has(t.id) }));
+  }
+  return out;
 }
 function esc(s) { return String(s || '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
 function guideHtml(g) {
@@ -555,6 +619,16 @@ function guideHtml(g) {
   const outline = g.outline.length ? '<h2>How it flows</h2><ol class="outline">' + g.outline.map(o => '<li>' + esc(o) + '</li>').join('') + '</ol>' : '';
   const examples = g.examples.length ? '<h2>How to use it</h2><p class="usehint">Load the kit, start a new chat, then say what you need in plain language. It picks the right skills. For example:</p><ol class="uses">' + g.examples.map(e => '<li>' + esc(e) + '</li>').join('') + '</ol>' : '';
   const tips = g.tips.length ? '<h2>Tips</h2><ul>' + g.tips.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
+  const targets = (g.targets && g.targets.length) ? (
+    '<h2>Generate for</h2>' +
+    '<p class="usehint">Pick which tools rulesync generates when you author an agent in this kit. Applies while the kit is loaded; the portable AGENTS.md always stays available.</p>' +
+    '<div class="targets">' + g.targets.map(t =>
+      '<label class="tgt"><input type="checkbox" data-id="' + esc(t.id) + '"' + (t.on ? ' checked' : '') + '/> ' + esc(t.label) + '</label>'
+    ).join('') + '</div>'
+  ) : '';
+  const targetsScript = (g.targets && g.targets.length) ? (
+    '<script>(function(){var v=acquireVsCodeApi();document.querySelectorAll(".tgt input").forEach(function(cb){cb.addEventListener("change",function(){v.postMessage({type:"setKitTarget",kit:' + JSON.stringify(g.kit) + ',target:cb.dataset.id,on:cb.checked});});});})();</script>'
+  ) : '';
   const note = g.authored ? '' : '<p class="muted auto">Generated from the kit\'s skills. A fuller walkthrough is coming.</p>';
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>
     body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);max-width:720px;margin:0 auto;padding:28px 32px;line-height:1.6;font-size:14px}
@@ -570,6 +644,7 @@ function guideHtml(g) {
     .muted{color:var(--vscode-descriptionForeground)} .auto{font-size:12px;font-style:italic;margin-top:6px}
     .foot{margin-top:26px;border-top:1px solid var(--vscode-widget-border,#333);padding-top:12px;color:var(--vscode-descriptionForeground);font-size:13px}
     code{background:var(--vscode-textCodeBlock-background,#222);padding:1px 5px;border-radius:4px}
+    .targets{display:flex;flex-direction:column;gap:8px;margin:2px 0} .tgt{display:flex;align-items:center;gap:9px;cursor:pointer} .tgt input{margin:0;cursor:pointer}
   </style></head><body>
     <h1>${esc(g.kit)} kit</h1>
     <p class="tag">${esc(g.tagline)}</p>
@@ -577,16 +652,19 @@ function guideHtml(g) {
     ${outline}
     <h2>What's inside (${g.skills.length} skills)</h2>${skillRows}
     ${examples}
+    ${targets}
     ${tips}
     <div class="foot">Load this kit from the SuperBob panel, or type <code>/superbob ${esc(g.kit)}</code> in chat. Then start a new conversation so the skills come online. The two core skills (using-superpowers and mission-control) are always on.</div>
+    ${targetsScript}
   </body></html>`;
 }
 let guidePanel;
 function openGuidePanel(kit, context) {
   const g = guideFor(kit);
   if (guidePanel) { guidePanel.title = 'How to use: ' + kit; guidePanel.webview.html = guideHtml(g); guidePanel.reveal(vscode.ViewColumn.Active); return; }
-  guidePanel = vscode.window.createWebviewPanel('superbobGuide', 'How to use: ' + kit, vscode.ViewColumn.Active, { enableScripts: false });
+  guidePanel = vscode.window.createWebviewPanel('superbobGuide', 'How to use: ' + kit, vscode.ViewColumn.Active, { enableScripts: true });
   guidePanel.webview.html = guideHtml(g);
+  guidePanel.webview.onDidReceiveMessage(m => handleMessage(m, context));
   guidePanel.onDidDispose(() => { guidePanel = null; }, null, context.subscriptions);
 }
 
