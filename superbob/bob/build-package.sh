@@ -37,7 +37,7 @@ EXCLUDE=(mission-control \
   email-drafter explainer-graphic invoice-generator learning-path-generator morning-briefing \
   quick-research receipt-scanner slide-deck-builder visual-page-builder workflow-visualizer)
 
-mkdir -p "$STAGE/skills" "$STAGE/profiles" "$STAGE/meta" "$STAGE/commands" "$OUT"
+mkdir -p "$STAGE/skills" "$STAGE/profiles" "$STAGE/meta" "$STAGE/commands" "$STAGE/agents" "$OUT"
 
 while IFS= read -r f; do
   d="$(dirname "$f")"; name="$(basename "$d")"
@@ -52,6 +52,8 @@ cp "$REPO"/bob/profiles/_meta.json "$STAGE/profiles/" 2>/dev/null || true
 cp "$REPO"/bob/profiles/_guides.json "$STAGE/profiles/" 2>/dev/null || true
 cp "$REPO"/bob/profiles/_prereqs.json "$STAGE/profiles/" 2>/dev/null || true
 cp "$REPO"/bob/profiles/_resources.json "$STAGE/profiles/" 2>/dev/null || true
+cp "$REPO"/bob/profiles/_agents.json "$STAGE/profiles/" 2>/dev/null || true
+cp "$REPO"/bob/agents/*.md "$STAGE/agents/" 2>/dev/null || true
 node "$REPO/bob/gen-provenance.js" "$LIB" "$STAGE/profiles/_provenance.json" 2>/dev/null || true
 cp "$REPO"/bob/commands/*.md "$STAGE/commands/" 2>/dev/null || true
 cp "$REPO/bob/bob-profile"          "$STAGE/bob-profile"

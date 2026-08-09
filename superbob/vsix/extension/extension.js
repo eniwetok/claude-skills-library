@@ -146,6 +146,97 @@ function writeTargetsRule() {
 }
 function removeTargetsRule() { try { fs.rmSync(TARGETS_RULE_FILE(), { force: true }); } catch (e) {} }
 
+// ---- agents: a kit can install subagents Bob can delegate subtasks to --------
+// Definitions ship at ~/.bob/agents/<name>.md (rulesync subagent frontmatter). On
+// kit load we transform each into a Bob custom mode + a Claude Code subagent. The
+// Bob modes go into the SHARED ~/.bob/settings/custom_modes.yaml as a marker-
+// delimited managed block (append + strip is byte-reversible, proven in the spike),
+// so the user's own modes and Propel's `winning-products` are never touched. A tiny
+// in-extension transformer keeps kit-load offline and instant; rulesync stays the
+// authoring engine for users.
+const BOB_AGENTS = path.join(HOME, '.bob', 'agents');                          // bundled agent defs (installed)
+const BOB_MODES = path.join(HOME, '.bob', 'settings', 'custom_modes.yaml');    // Bob's shared modes file
+const CLAUDE_AGENTS = path.join(HOME, '.claude', 'agents');                    // Claude Code subagents (user-level)
+const AGENTS_FILE = () => path.join(BOB_PROFILES, '_agents.json');
+const AGENTS_MANIFEST = () => path.join(HOME, '.bob', '.superbob-agents.json');
+const AGENT_BEGIN = '# >>> superbob-managed agents (do not edit by hand)';
+const AGENT_END = '# <<< superbob-managed agents';
+function escRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function yamlScalar(s) { return JSON.stringify(String(s || '').replace(/\s+/g, ' ').trim()); }   // safe double-quoted YAML scalar
+function readAgentsMap() { try { return JSON.parse(fs.readFileSync(AGENTS_FILE(), 'utf8')); } catch (e) { return {}; } }
+function readAgentDef(name) {
+  try {
+    const raw = fs.readFileSync(path.join(BOB_AGENTS, name + '.md'), 'utf8');
+    const m = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+    const fm = m ? m[1] : ''; const body = (m ? m[2] : raw).trim();
+    const get = k => { const r = fm.match(new RegExp('^' + k + ':\\s*(.*)$', 'm')); return r ? r[1].trim() : ''; };
+    let groups = get('groups');
+    groups = groups ? groups.replace(/^\[|\]$/g, '').split(',').map(s => s.trim()).filter(Boolean) : ['read', 'edit', 'command', 'mcp'];
+    return { name: get('name') || name, description: get('description'), groups, body };
+  } catch (e) { return null; }
+}
+function kitAgents(kit) { return (readAgentsMap()[kit] || []).map(readAgentDef).filter(Boolean); }
+function kitAgentsMap() { const all = readAgentsMap(); const out = {}; for (const k of Object.keys(all)) out[k] = kitAgents(k).map(a => ({ name: a.name, description: a.description })); return out; }
+function activeAgents() {
+  const seen = new Set(); const out = [];
+  for (const k of activeKitNames()) for (const a of kitAgents(k)) if (!seen.has(a.name)) { seen.add(a.name); out.push(a); }
+  return out;
+}
+function toRooMode(a, indent) {
+  const groups = a.groups.map(g => indent + '      - ' + g).join('\n');
+  return indent + '  - slug: ' + a.name + '\n' +
+    indent + '    name: ' + a.name + '\n' +
+    indent + '    roleDefinition: ' + yamlScalar(a.body) + '\n' +
+    indent + '    groups:\n' + groups + '\n' +
+    indent + '    description: ' + yamlScalar(a.description);
+}
+function toClaudeAgent(a) {
+  return '---\nname: ' + a.name + '\ndescription: ' + yamlScalar(a.description) + '\nmodel: inherit\n---\n' + a.body + '\n';
+}
+function stripManagedBlock(text) {
+  const re = new RegExp('\\n?[ \\t]*' + escRe(AGENT_BEGIN) + '[\\s\\S]*?' + escRe(AGENT_END) + '\\n?', 'g');
+  return text.replace(re, '\n');
+}
+function removeClaudeAgents() {
+  try { const m = JSON.parse(fs.readFileSync(AGENTS_MANIFEST(), 'utf8')); for (const f of (m.claude || [])) fs.rmSync(path.join(CLAUDE_AGENTS, f), { force: true }); } catch (e) {}
+}
+// Refresh the managed agent set to match the loaded kits (idempotent). Strips our
+// old block first, then appends the current one. Skips the YAML splice safely if
+// the file has more than one top-level key (we only ever append list items).
+function writeAgents() {
+  try {
+    const agents = activeAgents();
+    const existed = fs.existsSync(BOB_MODES);
+    let text = existed ? fs.readFileSync(BOB_MODES, 'utf8') : 'customModes:\n';
+    const topKeys = text.split('\n').filter(l => /^[A-Za-z].*:/.test(l));
+    if (topKeys.length > 1) { removeAgents(); return; }   // not safe to append; bail cleanly
+    removeClaudeAgents();   // drop previously-placed Claude files before re-placing
+    let base = stripManagedBlock(text).replace(/\n*$/, '\n');
+    if (!/^customModes:/m.test(base)) base = 'customModes:\n';
+    const manifest = { slugs: [], claude: [] };
+    if (agents.length) {
+      if (existed && !fs.existsSync(BOB_MODES + '.superbob.bak')) fs.copyFileSync(BOB_MODES, BOB_MODES + '.superbob.bak');
+      const items = agents.map(a => toRooMode(a, '')).join('\n');
+      const block = AGENT_BEGIN + '\n' + items + '\n' + AGENT_END + '\n';
+      fs.mkdirSync(path.dirname(BOB_MODES), { recursive: true });
+      fs.writeFileSync(BOB_MODES, base.replace(/\n*$/, '\n') + block);
+      fs.mkdirSync(CLAUDE_AGENTS, { recursive: true });
+      for (const a of agents) { fs.writeFileSync(path.join(CLAUDE_AGENTS, a.name + '.md'), toClaudeAgent(a)); manifest.claude.push(a.name + '.md'); }
+      manifest.slugs = agents.map(a => a.name);
+    } else if (existed) {
+      fs.writeFileSync(BOB_MODES, base);   // no agents: leave the file without our block
+    }
+    fs.writeFileSync(AGENTS_MANIFEST(), JSON.stringify(manifest, null, 2) + '\n');
+  } catch (e) {}
+}
+function removeAgents() {
+  try {
+    if (fs.existsSync(BOB_MODES)) fs.writeFileSync(BOB_MODES, stripManagedBlock(fs.readFileSync(BOB_MODES, 'utf8')).replace(/\n*$/, '\n'));
+    removeClaudeAgents();
+    fs.rmSync(AGENTS_MANIFEST(), { force: true });
+  } catch (e) {}
+}
+
 // Lean mode: only these two skills stay loaded; mission-control routes to the rest
 // from the vault on demand. Keeps starting context tiny (~200 tokens vs ~67,000).
 const CORE = ['using-superpowers', 'mission-control']; // superpowers first, always check for a skill before acting
@@ -270,6 +361,7 @@ function superbobOff() {
   writeManaged([]);   // SuperBob manages nothing while off
   removeAutoRule();   // stop auto-routing: Bob behaves normally when off
   removeTargetsRule();   // and stop steering rulesync targets
+  removeAgents();   // and remove any installed agents (managed block + Claude files)
   fs.writeFileSync(path.join(BOB_ACTIVE, '.profile'), 'off');
   updateStatus();
   return true;
@@ -300,6 +392,7 @@ function applySkillSet(skillNames, label) {
   writeManaged(staged);   // the manifest is exactly what SuperBob just placed
   writeAutoRule();        // SuperBob is on → make routing automatic (no /superbob needed)
   writeTargetsRule();     // refresh the agent-generation targets rule for the loaded kits
+  writeAgents();          // install/refresh the loaded kits' agents as Bob modes + Claude subagents
   const kept = externalActiveSkills().length;
   if (kept) vscode.window.setStatusBarMessage('SuperBob kept ' + kept + ' of your own skill(s) untouched', 4000);
   updateStatus();
@@ -353,6 +446,11 @@ const RESOURCE_DETECTORS = {
   propel: PREREQ_DETECTORS.propel
 };
 function resourceMet(check) {
+  if (!check) return true;
+  if (check.indexOf('conn:') === 0) {   // a saved connection (never cached: changes on save)
+    const c = readConnections()[check.slice(5)];
+    return !!(c && Object.keys(c).some(k => k !== 'savedAt' && c[k]));
+  }
   if (check in _resDetectorCache) return _resDetectorCache[check];
   const det = RESOURCE_DETECTORS[check];
   const met = det ? !!det() : true;   // unknown detector → assume met (don't nag)
@@ -363,7 +461,7 @@ function kitResources(kit) {
   for (const skill of readList(path.join(BOB_PROFILES, kit + '.txt'))) {
     for (const r of (res[skill] || [])) {
       if (seen.has(r.id)) continue; seen.add(r.id);
-      items.push({ id: r.id, type: r.type || 'tool', label: r.label || r.id, setup: r.setup || '', met: resourceMet(r.check), skill });
+      items.push({ id: r.id, type: r.type || 'tool', label: r.label || r.id, setup: r.setup || '', met: resourceMet(r.check), skill, extId: r.extId || '', open: r.open || '', tool: r.tool || '', config: r.config || null });
     }
   }
   return items;
@@ -371,6 +469,38 @@ function kitResources(kit) {
 function kitResourceStates() {
   const out = {};
   for (const kit of profileNames()) { const items = kitResources(kit); if (items.length) out[kit] = { items, needsSetup: items.some(i => !i.met) }; }
+  return out;
+}
+
+// ---- actionable setup (Propel-style: act in place, inside Bob) --------------
+// Unifies prereqs (kit-level, hard gate) + resources (skill-level, soft) into one
+// list of setup items, each with an action the user can run from the guide:
+//   install-extension | open (deep-link) | install-tool | save-connection | recheck
+// Everything happens inside Bob; credentials are only ever typed by the user.
+const CONNECTIONS_FILE = () => path.join(HOME, '.bob', '.superbob-connections.json');
+function readConnections() { try { return JSON.parse(fs.readFileSync(CONNECTIONS_FILE(), 'utf8')); } catch (e) { return {}; } }
+function saveConnection(id, values) {
+  const all = readConnections();
+  all[id] = Object.assign({}, all[id], values, { savedAt: true });
+  try { fs.mkdirSync(path.dirname(CONNECTIONS_FILE()), { recursive: true }); fs.writeFileSync(CONNECTIONS_FILE(), JSON.stringify(all, null, 2) + '\n'); } catch (e) {}
+}
+// Derive the actionable control from a declaration (prereq or resource).
+function actionFor(spec) {
+  if (spec.extId) return { verb: 'install-extension', extId: spec.extId, open: spec.open || '' };
+  if (spec.open) return { verb: 'open', command: spec.open };
+  if (spec.tool) return { verb: 'install-tool', tool: spec.tool };
+  if (spec.config) return { verb: 'save-connection', fields: spec.config };
+  return { verb: 'recheck' };
+}
+function kitSetupStates() {
+  const out = {}; const prereqs = readPrereqs();
+  for (const kit of profileNames()) {
+    const items = [];
+    const p = prereqs[kit];
+    if (p) items.push({ id: 'prereq:' + (p.check || kit), kind: p.kind || 'plugin', label: p.label || 'a required plugin', setup: p.setup || '', met: prereqMet(kit), action: actionFor(p), hard: true });
+    for (const r of kitResources(kit)) items.push({ id: 'res:' + r.id, kind: r.type === 'connection' ? 'connection' : 'tool', label: r.label + (r.skill ? ' (for ' + r.skill + ')' : ''), setup: r.setup || '', met: r.met, action: actionFor(r), hard: false });
+    if (items.length) out[kit] = { items, needsSetup: items.some(i => !i.met) };
+  }
   return out;
 }
 function writeMeta(m) { try { fs.writeFileSync(META(), JSON.stringify(m, null, 2)); } catch (e) {} }
@@ -450,6 +580,32 @@ async function installTool(t) {
   );
 }
 
+// Run one actionable setup step, all inside Bob. Each is user-initiated (a click).
+async function runSetupAction(m) {
+  try {
+    if (m.verb === 'install-extension' && m.extId) {
+      try {
+        await vscode.commands.executeCommand('workbench.extensions.installExtension', m.extId);
+        vscode.window.showInformationMessage('Installing ' + m.extId + ' in Bob. When it finishes, click Recheck.');
+      } catch (e) {
+        try { await vscode.commands.executeCommand('workbench.extensions.search', m.extId); } catch (_) {}
+        vscode.window.showWarningMessage('Opened the Extensions view for ' + m.extId + '. Install it there, then click Recheck.');
+      }
+    } else if (m.verb === 'open' && m.command) {
+      try { await vscode.commands.executeCommand(m.command); }
+      catch (e) { vscode.window.showWarningMessage('Could not open "' + m.command + '". Make sure the plugin is installed, then retry.'); }
+    } else if (m.verb === 'install-tool' && m.tool) {
+      const t = toolByName(m.tool);
+      if (t && !cliInstalled(t.bin)) {
+        const r = await installTool(t);
+        if (!r.ok) vscode.window.showErrorMessage(t.title + ": couldn't install " + t.pkg + (r.err ? ('  ·  ' + r.err) : ''));
+        else vscode.window.showInformationMessage(t.title + ' installed.');
+      } else if (t) { vscode.window.showInformationMessage(t.title + ' is already installed.'); }
+    }
+    // 'recheck' and every other verb fall through to the cache-invalidate the caller does.
+  } catch (e) {}
+}
+
 function updateStatus() {
   if (!statusItem) return;
   const p = activeProfile();
@@ -483,6 +639,8 @@ function stateMessage() {
     provenance: readProvenance(),
     prereqs: kitPrereqStates(),
     resources: kitResourceStates(),
+    setup: kitSetupStates(),
+    agentsByKit: kitAgentsMap(),
     auto: readAuto()
   };
 }
@@ -530,6 +688,18 @@ async function handleMessage(m, context) {
   if (m.type === 'closeBuilder') { if (builderPanel) builderPanel.dispose(); return; }
   if (m.type === 'deleteMode') { deleteCustomProfile(m.name); postState(); return; }
   if (m.type === 'openGuide') { openGuidePanel(m.kit, context); return; }
+  if (m.type === 'setupAction') {
+    await runSetupAction(m);
+    invalidateResourceCache();
+    if (guidePanel && m.kit) guidePanel.webview.html = guideHtml(guideFor(m.kit));   // reflect new setup state
+    postState(); return;
+  }
+  if (m.type === 'saveConnection') {
+    saveConnection(m.id, m.values || {});
+    vscode.window.showInformationMessage('Saved. Rechecking…');
+    if (guidePanel && m.kit) guidePanel.webview.html = guideHtml(guideFor(m.kit));
+    postState(); return;
+  }
   if (m.type === 'setKitTarget') {
     const arr = setKitTarget(m.kit, m.target, m.on);
     if (!isPoweredOff()) writeTargetsRule();   // refresh the live rule if the kit is loaded
@@ -648,9 +818,11 @@ function guideFor(kit) {
     const on = new Set(kitTargets(kit));
     out.targets = RULESYNC_TARGETS.map(t => ({ id: t.id, label: t.label, on: on.has(t.id) }));
   }
-  // resources this kit's skills declare (Propel-style: informational, not a hard gate)
-  const reqs = kitResources(kit);
-  if (reqs.length) out.requirements = reqs;
+  // actionable setup items (prereqs + resources) — resolved in place, inside Bob
+  const su = kitSetupStates()[kit];
+  if (su) out.setup = su.items;
+  // agents this kit installs as Bob modes + Claude subagents
+  out.agents = kitAgents(kit).map(a => ({ name: a.name, description: a.description }));
   return out;
 }
 function esc(s) { return String(s || '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
@@ -669,18 +841,41 @@ function guideHtml(g) {
       '<label class="tgt"><input type="checkbox" data-id="' + esc(t.id) + '"' + (t.on ? ' checked' : '') + '/> ' + esc(t.label) + '</label>'
     ).join('') + '</div>'
   ) : '';
-  const targetsScript = (g.targets && g.targets.length) ? (
-    '<script>(function(){var v=acquireVsCodeApi();document.querySelectorAll(".tgt input").forEach(function(cb){cb.addEventListener("change",function(){v.postMessage({type:"setKitTarget",kit:' + JSON.stringify(g.kit) + ',target:cb.dataset.id,on:cb.checked});});});})();</script>'
+  // Actionable setup: prereqs + resources, each resolvable in place (inside Bob).
+  const setup = (g.setup && g.setup.length) ? (
+    '<h2>Requirements &amp; setup</h2>' +
+    '<p class="usehint">Set these up here, inside Bob. Nothing installs or runs until you click.</p>' +
+    '<div class="setuplist">' + g.setup.map(it => {
+      const a = it.action || { verb: 'recheck' }; const K = esc(g.kit), ID = esc(it.id);
+      let ctrl = '';
+      if (!it.met) {
+        if (a.verb === 'install-extension') ctrl += '<button class="setupbtn" data-verb="install-extension" data-ext="' + esc(a.extId) + '" data-kit="' + K + '" data-id="' + ID + '">Install</button>';
+        if (a.open || a.verb === 'open') ctrl += '<button class="setupbtn" data-verb="open" data-cmd="' + esc(a.command || a.open) + '" data-kit="' + K + '" data-id="' + ID + '">Open setup</button>';
+        if (a.verb === 'install-tool') ctrl += '<button class="setupbtn" data-verb="install-tool" data-tool="' + esc(a.tool) + '" data-kit="' + K + '" data-id="' + ID + '">Install</button>';
+        if (a.verb === 'save-connection') {
+          const fields = (a.fields || []).map(f => '<label class="cfield"><span>' + esc(f.label || f.key) + '</span><input data-key="' + esc(f.key) + '" type="' + (f.secret ? 'password' : 'text') + '" placeholder="' + esc(f.placeholder || '') + '"/></label>').join('');
+          ctrl += '<div class="cform">' + fields + '<button class="setupbtn" data-verb="save-connection" data-kit="' + K + '" data-id="' + ID + '">Save and connect</button></div>';
+        }
+        ctrl += '<button class="setupbtn ghost" data-verb="recheck" data-kit="' + K + '" data-id="' + ID + '">Recheck</button>';
+      }
+      return '<div class="setupitem ' + (it.met ? 'ok' : 'need') + '"><div class="simark">' + (it.met ? '&#10003;' : '!') + '</div>' +
+        '<div class="sibody"><div class="silabel">' + esc(it.label) + (it.met ? ' <span class="siok">ready</span>' : ' <span class="sineed">needs setup</span>') + '</div>' +
+        (it.setup ? '<div class="sisetup">' + esc(it.setup) + '</div>' : '') + (ctrl ? '<div class="siactions">' + ctrl + '</div>' : '') + '</div></div>';
+    }).join('') + '</div>'
   ) : '';
-  const requirements = (g.requirements && g.requirements.length) ? (
-    '<h2>Requirements</h2>' +
-    '<p class="usehint">What a few of these skills need before they can run. The kit still loads either way; set these up when you use the skill.</p>' +
-    '<div class="reqs">' + g.requirements.map(r =>
-      '<div class="req ' + (r.met ? 'ok' : 'need') + '"><span class="rmark">' + (r.met ? '&#10003;' : '!') + '</span>' +
-      '<div class="rbody"><div class="rlabel">' + esc(r.label) + ' <span class="rfor">for ' + esc(r.skill) + '</span>' + (r.met ? '' : ' <span class="rneed">requires setup</span>') + '</div>' +
-      (r.setup ? '<div class="rsetup">' + esc(r.setup) + '</div>' : '') + '</div></div>'
-    ).join('') + '</div>'
+  const agents = (g.agents && g.agents.length) ? (
+    '<h2>Agents this kit installs</h2>' +
+    '<p class="usehint">Loading the kit adds these as Bob modes and Claude Code subagents, so Bob can hand a subtask to a specialist. Unload the kit to remove them.</p>' +
+    g.agents.map(a => '<div class="s"><div class="sn">' + esc(a.name) + '</div>' + (a.description ? '<div class="sd">' + esc(a.description) + '</div>' : '') + '</div>').join('')
   ) : '';
+  const uiScript = '<script>(function(){var v=acquireVsCodeApi();' +
+    'document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".setupbtn");if(!b)return;' +
+    'var verb=b.dataset.verb;var msg={type:(verb==="save-connection"?"saveConnection":"setupAction"),kit:b.dataset.kit,id:b.dataset.id,verb:verb};' +
+    'if(b.dataset.ext)msg.extId=b.dataset.ext;if(b.dataset.cmd)msg.command=b.dataset.cmd;if(b.dataset.tool)msg.tool=b.dataset.tool;' +
+    'if(verb==="save-connection"){var box=b.closest(".setupitem");var vals={};box.querySelectorAll("input[data-key]").forEach(function(i){vals[i.dataset.key]=i.value;});msg.values=vals;}' +
+    'v.postMessage(msg);});' +
+    'document.querySelectorAll(".tgt input").forEach(function(cb){cb.addEventListener("change",function(){v.postMessage({type:"setKitTarget",kit:' + JSON.stringify(g.kit) + ',target:cb.dataset.id,on:cb.checked});});});' +
+    '})();</script>';
   const note = g.authored ? '' : '<p class="muted auto">Generated from the kit\'s skills. A fuller walkthrough is coming.</p>';
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>
     body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);max-width:720px;margin:0 auto;padding:28px 32px;line-height:1.6;font-size:14px}
@@ -702,18 +897,28 @@ function guideHtml(g) {
     .req.ok .rmark{background:var(--vscode-charts-green,#3fb950);color:#04260f} .req.need .rmark{background:var(--vscode-charts-yellow,#d29922);color:#3a2c00}
     .rlabel{font-weight:600} .rfor{font-weight:400;color:var(--vscode-descriptionForeground);font-size:12px}
     .rneed{color:var(--vscode-charts-yellow,#d29922);font-weight:600;font-size:12px} .rsetup{color:var(--vscode-descriptionForeground);font-size:13px;margin-top:2px}
+    .setuplist{display:flex;flex-direction:column;gap:14px} .setupitem{display:flex;gap:10px;align-items:flex-start}
+    .simark{flex:none;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:2px}
+    .setupitem.ok .simark{background:var(--vscode-charts-green,#3fb950);color:#04260f} .setupitem.need .simark{background:var(--vscode-charts-yellow,#d29922);color:#3a2c00}
+    .sibody{flex:1} .silabel{font-weight:600} .siok{color:var(--vscode-charts-green,#3fb950);font-weight:600;font-size:12px} .sineed{color:var(--vscode-charts-yellow,#d29922);font-weight:600;font-size:12px}
+    .sisetup{color:var(--vscode-descriptionForeground);font-size:13px;margin:2px 0 6px} .siactions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:4px}
+    .setupbtn{font:inherit;font-size:13px;padding:4px 12px;border-radius:5px;border:0;cursor:pointer;background:var(--vscode-button-background);color:var(--vscode-button-foreground)}
+    .setupbtn.ghost{background:transparent;color:var(--vscode-foreground);border:1px solid var(--vscode-widget-border,#444)}
+    .cform{display:flex;flex-direction:column;gap:6px;width:100%;margin:2px 0} .cfield{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--vscode-descriptionForeground)}
+    .cfield input{font:inherit;padding:5px 8px;border-radius:5px;border:1px solid var(--vscode-widget-border,#444);background:var(--vscode-input-background);color:var(--vscode-input-foreground)}
   </style></head><body>
     <h1>${esc(g.kit)} kit</h1>
     <p class="tag">${esc(g.tagline)}</p>
     ${jtbd}${desc}${when}${note}
     ${outline}
-    <h2>What's inside (${g.skills.length} skills)</h2>${skillRows}
-    ${requirements}
-    ${examples}
+    ${setup}
     ${targets}
+    ${examples}
     ${tips}
+    ${agents}
+    <h2>What's inside (${g.skills.length} skills)</h2>${skillRows}
     <div class="foot">Load this kit from the SuperBob panel, or type <code>/superbob ${esc(g.kit)}</code> in chat. Then start a new conversation so the skills come online. The two core skills (using-superpowers and mission-control) are always on.</div>
-    ${targetsScript}
+    ${uiScript}
   </body></html>`;
 }
 let guidePanel;
@@ -858,6 +1063,7 @@ function getWebviewHtml() {
   .mode-top .badge{font-size:10px;color:var(--vscode-charts-green,#3fb950);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap}
   .lockbadge{font-size:10px;color:var(--vscode-descriptionForeground);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap}
   .setupbadge{font-size:10px;color:var(--vscode-charts-yellow,#d29922);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap;cursor:help}
+  .agentbadge{font-size:10px;color:var(--vscode-charts-purple,#b180d7);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap}
   .pswitch input:disabled ~ .track{opacity:.4} .pswitch input:disabled ~ .knob{opacity:.4}
   .mode-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
   button{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border:0;border-radius:5px;padding:5px 13px;cursor:pointer;font-size:12px}
@@ -1129,13 +1335,14 @@ function getWebviewHtml() {
     // Row 1: a BLUE load/unload toggle on the left (kits differ from the green power/add-on
     // toggles), then the name + count + active badge. Stable regardless of state.
     const pre=(S.prereqs||{})[id]; const locked=pre && !pre.met;   // kit needs a plugin that isn't installed
-    const rs=(S.resources||{})[id]; const needSetup=rs && rs.needsSetup;   // a skill needs a resource (soft, not a lock)
+    const rs=(S.setup||{})[id]; const needSetup=rs && rs.needsSetup;   // a kit item needs setup (soft, not a lock)
+    const nAgents=((S.agentsByKit||{})[id]||[]).length;   // agents this kit installs
     const top=document.createElement('div'); top.className='mode-top';
     const tog=document.createElement('label'); tog.className='pswitch blue'; tog.title=locked?('needs '+pre.label):(isActive?'unload this kit (back to Auto)':'load this kit');
     tog.innerHTML='<input type="checkbox" class="kitsw" data-kit="'+id+'" '+(isActive?'checked':'')+(locked?' disabled':'')+'/><span class="track"></span><span class="knob"></span>';
     top.appendChild(tog);
     const nm=document.createElement('span'); nm.className='mode-namewrap';
-    nm.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'')+(locked?' <span class="lockbadge">🔒 needs '+pre.label.replace(/^the /,'')+'</span>':'')+((needSetup&&!locked)?' <span class="setupbadge" title="'+(rs.items.filter(i=>!i.met).map(i=>i.label).join(', '))+' — see Learn more">requires setup</span>':'');
+    nm.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(nAgents?' <span class="agentbadge">+'+nAgents+' agent'+(nAgents>1?'s':'')+'</span>':'')+(isActive?' <span class="badge">active</span>':'')+(locked?' <span class="lockbadge">🔒 needs '+pre.label.replace(/^the /,'')+'</span>':'')+((needSetup&&!locked)?' <span class="setupbadge" title="'+(rs.items.filter(i=>!i.met).map(i=>i.label).join(', '))+' — see Learn more">requires setup</span>':'');
     top.appendChild(nm);
     // Top-right icons: Learn more (ⓘ, opens the guide with pitch + example + skills) and delete.
     const acts=document.createElement('span'); acts.className='mode-icons';
@@ -1215,6 +1422,12 @@ async function doInstall(context) {
             const cmdDest = path.join(HOME, '.bob', 'commands');
             fs.mkdirSync(cmdDest, { recursive: true });
             for (const f of fs.readdirSync(cmdSrc)) fs.copyFileSync(path.join(cmdSrc, f), path.join(cmdDest, f));
+          }
+          // Bundled agent definitions (kits materialize these into Bob modes + Claude subagents)
+          const agentsSrc = path.join(pkg, 'agents');
+          if (fs.existsSync(agentsSrc)) {
+            fs.mkdirSync(BOB_AGENTS, { recursive: true });
+            for (const f of fs.readdirSync(agentsSrc)) fs.copyFileSync(path.join(agentsSrc, f), path.join(BOB_AGENTS, f));
           }
           applyProfile([]);
           if (bk) log('Bob skills backed up to ' + bk);

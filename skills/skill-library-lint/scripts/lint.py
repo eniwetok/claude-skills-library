@@ -299,9 +299,42 @@ def main():
     else:
         print("    SKIP  no _resources.json")
 
+    # --- CHECK H (HARD): agent declarations resolve ---
+    # _agents.json maps each kit to the agents it installs; each must have a bundled
+    # definition (../agents/<name>.md) with name/description frontmatter, or the kit
+    # would try to install an agent that does not exist.
+    print("\n[H] Agent declarations — every agent has a bundled definition")
+    agents_path = os.path.join(profiles, "_agents.json")
+    agents_dir = os.path.join(os.path.dirname(profiles), "agents")
+    h_broken = []
+    if os.path.isfile(agents_path):
+        try:
+            amap = json.load(open(agents_path, "r", errors="ignore"))
+        except Exception as e:
+            amap = None
+            h_broken.append(("_agents.json", "invalid JSON: %s" % e))
+        if isinstance(amap, dict):
+            for kit, names in amap.items():
+                for name in (names or []):
+                    md = os.path.join(agents_dir, name + ".md")
+                    if not os.path.isfile(md):
+                        h_broken.append((kit, "agent '%s' has no bundled definition" % name))
+                    else:
+                        body = open(md, "r", errors="ignore").read()
+                        if "name:" not in body or "description:" not in body:
+                            h_broken.append((kit, "agent '%s' missing name/description frontmatter" % name))
+        if h_broken:
+            hard_fail = True
+            for who, why in h_broken:
+                print(f"    FAIL  {who}  ({why})")
+        else:
+            print("    PASS  all agent declarations resolve")
+    else:
+        print("    SKIP  no _agents.json")
+
     print("\n" + "=" * 64)
     if hard_fail:
-        print("  RESULT: FAIL — hard checks [A/B/C/G] found problems above.")
+        print("  RESULT: FAIL — hard checks [A/B/C/G/H] found problems above.")
         print("=" * 64)
         return 1
     print("  RESULT: PASS — library integrity is sound.")
