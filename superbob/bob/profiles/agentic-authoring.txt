@@ -1,0 +1,16 @@
+skill-creator
+skill-comply
+writing-skills
+skill-scout
+agent-designer
+rulesync
+agent-architecture
+subagent-driven-development
+dispatching-parallel-agents
+team-agent-orchestration
+mcp-builder
+mcp-server-patterns
+autonomous-agent-harness
+agent-eval
+codebase-onboarding
+no-ai-slop

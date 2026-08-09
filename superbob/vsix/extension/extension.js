@@ -103,7 +103,7 @@ function removeAutoRule() { try { fs.rmSync(AUTO_RULE_FILE(), { force: true }); 
 const CORE = ['using-superpowers', 'mission-control']; // superpowers first, always check for a skill before acting
 // Every shipped kit is a built-in "starter kit" (not deletable). "Your kits" is left for
 // the user's own creations, seeded with a couple of clearly-labelled sample kits.
-const BUILTIN = ['software-development', 'data-analysis', 'product-management', 'production-engineering', 'test-engineering', 'application-security', 'frontend-design', 'web-research', 'release-review', 'bug-fixing', 'code-simplification', 'rag-evaluation', 'content-writing', 'wiki', 'product-frameworks', 'pm-methodology', 'agent-authoring'];
+const BUILTIN = ['software-development', 'data-analysis', 'product-management', 'production-engineering', 'test-engineering', 'application-security', 'frontend-design', 'web-research', 'release-review', 'bug-fixing', 'code-simplification', 'rag-evaluation', 'content-writing', 'wiki', 'product-frameworks', 'pm-methodology', 'agentic-authoring'];
 
 // Optional always-on add-ons: skills that layer on EVERY kit (like CORE) but can be toggled.
 // Unlike CORE (mandatory), these are preferences the user turns on/off. They persist across

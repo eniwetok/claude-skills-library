@@ -331,27 +331,33 @@
       "Match the brand voice, generic copy converts no one."
     ]
   },
-  "agent-authoring": {
-    "tagline": "Design a custom agent once, then generate it as AGENTS.md plus subagents for Claude, Bob, and 30+ tools.",
-    "jtbd": "When I need a reusable custom agent, I want to define it once and have it work across my tools, so I do not hand-maintain a separate file per tool.",
-    "description": "Design the agent role, then generate the portable AGENTS.md standard and native subagent definitions for Claude Code, Bob/Roo, Codex, and Cursor from one source. rulesync keeps every tool in sync from a single .rulesync/ folder; no API key, no model calls.",
+  "agentic-authoring": {
+    "tagline": "Build the agentic artifacts you ship: author skills, design agents to the AGENTS.md standard, compose subagents, and wire the MCP tools they call.",
+    "jtbd": "When I am building agents and skills for software, I want one kit that covers the whole lifecycle from definition to a working multi-agent stack, so I follow the current standards instead of hand-rolling each piece.",
+    "description": "A single workbench for making agentic artifacts. Author and validate skills in the SKILL.md format, design agent roles and generate them to the portable AGENTS.md standard plus native subagents for Claude and Bob, compose multi-agent teams, and build the MCP tools they call. rulesync keeps every target in sync from one source with no API key. no-ai-slop keeps the output tight.",
     "outline": [
-      "agent-designer: define the role (identity, responsibilities, boundaries)",
-      "rulesync: write .rulesync/subagents/<name>.md, then generate",
-      "one source becomes AGENTS.md + .claude/agents + Bob/Roo + Codex + Cursor",
-      "no-ai-slop: tighten the instructions"
+      "Create skills: skill-creator scaffolds to the SKILL.md format, skill-comply validates, writing-skills sharpens, skill-scout finds gaps",
+      "Design agents: agent-designer sets the role and boundaries, agent-architecture plans the system",
+      "Generate to standard: rulesync emits AGENTS.md plus Claude and Bob subagents from one source",
+      "Compose subagents: subagent-driven-development and dispatching-parallel-agents fan work across a team, team-agent-orchestration coordinates them",
+      "Build the tools: mcp-builder and mcp-server-patterns create the MCP servers agents call; autonomous-agent-harness runs long tasks",
+      "Prove it: agent-eval scores the agent before you ship, no-ai-slop tightens the prose"
     ],
     "examples": [
-      "Say \"design a data-source-review agent\". agent-designer sets its role and boundaries; rulesync generates it as an AGENTS.md entry plus a Claude subagent and a Bob config.",
-      "Say \"turn our code-review checklist into a reusable agent\". It writes .rulesync/subagents/code-reviewer.md and syncs it to every tool at once.",
-      "Say \"make a release-notes agent that works in Claude and Bob\". One source, both tools, plus a portable AGENTS.md.",
-      "Say \"import our existing CLAUDE.md into the shared format\". rulesync import pulls it into .rulesync/ so you can regenerate everywhere.",
-      "Say \"scaffold a fresh AGENTS.md for this repo\". codebase-onboarding maps it first, then rulesync writes the root plus scoped subsystem files."
+      "Say \"create a skill that grades a metric definition for clarity\". skill-creator scaffolds it, skill-comply checks the format, no-ai-slop tightens the wording.",
+      "Say \"design a data-source-review agent and generate it for Claude and Bob\". agent-designer sets its boundaries, rulesync emits AGENTS.md plus both subagents from one source.",
+      "Say \"turn our dashboard-QA checklist into a reusable subagent\". It writes the subagent once and syncs it to every tool.",
+      "Say \"stand up a team of subagents to audit a reporting pipeline in parallel\". subagent-driven-development and dispatching-parallel-agents fan the work out, team-agent-orchestration coordinates the results.",
+      "Say \"build an MCP server that exposes our query catalog to agents\". mcp-builder scaffolds it and mcp-server-patterns keeps it to the spec.",
+      "Say \"score this agent against cases before I ship it\". agent-eval runs it and reports where it fails.",
+      "Say \"import our existing CLAUDE.md into the shared format\". rulesync pulls it into .rulesync/ so you can regenerate everywhere."
     ],
     "tips": [
-      "Design the role with agent-designer before generating, so the agent has clear boundaries.",
-      "Run `npx rulesync generate --targets \"*\" --features \"*\"` to emit every tool at once.",
-      "rulesync is a pure file transformer: no API key, no model calls."
+      "Follow the standards on purpose: SKILL.md for skills, AGENTS.md for agents, the MCP spec for tools. This kit is organized around them.",
+      "Design the role with agent-designer before you generate, so the agent has clear boundaries.",
+      "Run `npx rulesync generate --targets \"*\" --features \"*\"` to emit every tool, including subagents, at once.",
+      "Validate before you ship: skill-comply for skills, agent-eval for agents.",
+      "rulesync is a pure file transformer: no API key, no model calls, so it works inside Bob out of the box."
     ]
   }
 }
