@@ -330,5 +330,28 @@
       "Run no-ai-slop after drafting, not instead of it.",
       "Match the brand voice, generic copy converts no one."
     ]
+  },
+  "agent-authoring": {
+    "tagline": "Design a custom agent once, then generate it as AGENTS.md plus subagents for Claude, Bob, and 30+ tools.",
+    "jtbd": "When I need a reusable custom agent, I want to define it once and have it work across my tools, so I do not hand-maintain a separate file per tool.",
+    "description": "Design the agent role, then generate the portable AGENTS.md standard and native subagent definitions for Claude Code, Bob/Roo, Codex, and Cursor from one source. rulesync keeps every tool in sync from a single .rulesync/ folder; no API key, no model calls.",
+    "outline": [
+      "agent-designer: define the role (identity, responsibilities, boundaries)",
+      "rulesync: write .rulesync/subagents/<name>.md, then generate",
+      "one source becomes AGENTS.md + .claude/agents + Bob/Roo + Codex + Cursor",
+      "no-ai-slop: tighten the instructions"
+    ],
+    "examples": [
+      "Say \"design a data-source-review agent\". agent-designer sets its role and boundaries; rulesync generates it as an AGENTS.md entry plus a Claude subagent and a Bob config.",
+      "Say \"turn our code-review checklist into a reusable agent\". It writes .rulesync/subagents/code-reviewer.md and syncs it to every tool at once.",
+      "Say \"make a release-notes agent that works in Claude and Bob\". One source, both tools, plus a portable AGENTS.md.",
+      "Say \"import our existing CLAUDE.md into the shared format\". rulesync import pulls it into .rulesync/ so you can regenerate everywhere.",
+      "Say \"scaffold a fresh AGENTS.md for this repo\". codebase-onboarding maps it first, then rulesync writes the root plus scoped subsystem files."
+    ],
+    "tips": [
+      "Design the role with agent-designer before generating, so the agent has clear boundaries.",
+      "Run `npx rulesync generate --targets \"*\" --features \"*\"` to emit every tool at once.",
+      "rulesync is a pure file transformer: no API key, no model calls."
+    ]
   }
 }

@@ -1,0 +1,4 @@
+agent-designer
+rulesync
+codebase-onboarding
+no-ai-slop

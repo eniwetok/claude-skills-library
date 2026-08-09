@@ -432,8 +432,9 @@ All 14 skills ✅ installed in `~/.claude/skills/`
 | **skill-library-lint** | Integrity gate for the mode library — checks every mode profile + the mission-control router point at real vault skills, flags vendor/crypto dependencies and data-egress risks, reports per-mode token cost. Exit 1 on any broken reference; wired into `build-package.sh` as a pre-build gate. | `lint the skill library`, `did I break a mode`, `check the modes`, `audit the skills` | ✅ installed |
 | **pptx-from-template** | Brand-faithful PowerPoint builder — unpack template → clone layouts → inject content → repack. Never regenerates from scratch. | `from my template`, `match our deck`, `use this pptx as template` | ✅ local only |
 | **update-skills-library** | Sync this repo from all upstream sources — clone, diff, copy changes, rebuild zips, update README/CATALOG, push | `update skills library`, `sync skills from upstream` | ✅ local only |
+| **granola-archive** | Bulk-export Granola meetings to a local per-conversation corpus (summary + verbatim transcript + meta.json), resumable across sessions. Encodes the connector's silent 500-result cap, its shared hourly rate limit, and how to move transcripts without a model ever retyping them. | `export all granola meetings`, `build meeting archive`, `pull granola transcripts`, `re-sync granola` | ✅ local only |
 
-*`pptx-from-template` and `update-skills-library` are in `~/.claude/skills/` locally but not tracked in this repo's `skills/` folder.*
+*`pptx-from-template`, `update-skills-library` and `granola-archive` are in `~/.claude/skills/` locally but not tracked in this repo's `skills/` folder.*
 
 ---
 
@@ -667,3 +668,11 @@ A repeatable product lifecycle as skills: **Foundation → Discover → Define �
 | Iterate | iterate-retrospective |
 
 Full 68 skills ship to the vault; the `pm-methodology` kit surfaces the 7-phase spine (~961 tokens). Pairs with the `product-frameworks` kit (JTBD / Hook Model / CRO thinking).
+
+
+## Group 25 — dyoshikawa/rulesync (1 skill · AGENTS.md + subagent authoring)
+
+**Source:** [github.com/dyoshikawa/rulesync](https://github.com/dyoshikawa/rulesync) - MIT
+**Package:** packages/rulesync/ · scanned clean (0 injection findings) · **Run:** `npx rulesync generate --targets "*"`
+
+The AGENTS.md authoring engine the library lacked. One `.rulesync/` source generates the portable **AGENTS.md** standard, **subagents** (multi-agent), and native rule/config files for **Claude Code, Roo Code (Bob), Codex, Cursor** and 30+ tools; imports existing CLAUDE.md / cursor rules too. Pure file transformer (no API key, no model calls). Powers the SuperBob **`agent-authoring`** kit (agent-designer → rulesync → codebase-onboarding → no-ai-slop). Anchored on the official [agents.md](https://github.com/agentsmd/agents.md) spec.

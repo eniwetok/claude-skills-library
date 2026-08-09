@@ -33,6 +33,7 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 22 | **petergyang/no-ai-slop** (sharper, more human writing) | Peter Yang | [github.com/petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) |
 | 23 | **ayghri/i-have-adhd** (concise, action-first output style) | ayghri | [github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) |
 | 24 | **product-on-purpose/pm-skills** (methodology-driven PM lifecycle · 68 skills) | Product on Purpose | [github.com/product-on-purpose/pm-skills](https://github.com/product-on-purpose/pm-skills) |
+| 25 | **dyoshikawa/rulesync** (author agents once, sync AGENTS.md + subagents across 30+ tools) | dyoshikawa | [github.com/dyoshikawa/rulesync](https://github.com/dyoshikawa/rulesync) |
 
 ---
 
@@ -556,3 +557,19 @@ claude-skills-library/
 In SuperBob this is the **`pm-methodology`** kit — one anchor skill per phase (foundation-lean-canvas,
 discover-interview-synthesis, define-jtbd-canvas, develop-solution-brief, deliver-prd,
 measure-experiment-design, iterate-retrospective); the full 68-skill set is in the vault for depth.
+
+---
+
+## Group 25 — dyoshikawa/rulesync (1 skill · author agents in the AGENTS.md standard)
+
+> The AGENTS.md authoring engine the library was missing. From a single `.rulesync/` source it
+> generates the portable **AGENTS.md** standard plus **subagents** and native rule/config files for
+> **Claude Code, Roo Code (Bob's family), Codex, Cursor** and 30+ tools; also imports existing
+> CLAUDE.md / cursor rules. A pure file transformer: no API key, no model calls. Anchored on the
+> official spec [agentsmd/agents.md](https://github.com/agentsmd/agents.md). Injection-scanned clean.
+> **Upstream:** [github.com/dyoshikawa/rulesync](https://github.com/dyoshikawa/rulesync) — MIT
+> **Install (skill):** `cp -r packages/rulesync/skills/* ~/.claude/skills/` · **Run:** `npx rulesync generate --targets "*"`
+
+In SuperBob this powers the **`agent-authoring`** kit: `agent-designer` (design the role) →
+`rulesync` (generate AGENTS.md + subagents for Claude and Bob) → `codebase-onboarding` (map the repo)
+→ `no-ai-slop` (tighten).

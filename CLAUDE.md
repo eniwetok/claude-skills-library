@@ -87,6 +87,7 @@ Upstreams to check:
 - `https://github.com/affaan-m/ECC`
 - `https://github.com/zhangzhang-111-i/claude-skills`
 - `https://github.com/n8n-io/skills`
+- `https://github.com/dyoshikawa/rulesync`
 - `https://github.com/team-attention/agent-council`
 - `https://github.com/pablo-mano/Obsidian-CLI-skill`
 - `https://github.com/multica-ai/andrej-karpathy-skills`
