@@ -1,0 +1,20 @@
+{
+  "rulesync": [
+    {
+      "id": "node",
+      "type": "tool",
+      "label": "Node.js",
+      "check": "node",
+      "setup": "rulesync runs via `npx rulesync`, which needs Node.js. Bob normally ships it; if it is missing, install Node from nodejs.org."
+    }
+  ],
+  "mcp-builder": [
+    {
+      "id": "node",
+      "type": "tool",
+      "label": "Node.js",
+      "check": "node",
+      "setup": "Scaffolding an MCP server needs Node.js and npm. Bob normally ships it; if it is missing, install Node from nodejs.org."
+    }
+  ]
+}

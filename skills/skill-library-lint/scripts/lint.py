@@ -11,6 +11,7 @@ happens — and flags vendor lock-in / phone-home risks while it's in there.
 Exit code is 0 only if every HARD check passes. Warnings never fail the build.
 """
 import argparse
+import json
 import os
 import re
 import sys
@@ -267,9 +268,40 @@ def main():
     print(f"\n[F] Coverage — {len(covered)} skills in a mode, {len(orphans)} orphaned (info only)")
     print("    Orphans stay reachable via the router's vault-scan fallback; not an error.")
 
+    # --- CHECK G (HARD): resource declarations resolve ---
+    # _resources.json declares, per skill, the tools/MCP/scripts it needs so the UI
+    # can show "requires setup". A typo (missing skill, unknown detector) would
+    # silently break that gate, so validate it here.
+    print("\n[G] Resource declarations — skills + detectors resolve")
+    KNOWN_DETECTORS = {"node", "npx", "propel"}
+    res_path = os.path.join(profiles, "_resources.json")
+    g_broken = []
+    if os.path.isfile(res_path):
+        try:
+            res = json.load(open(res_path, "r", errors="ignore"))
+        except Exception as e:
+            res = None
+            g_broken.append(("_resources.json", "invalid JSON: %s" % e))
+        if isinstance(res, dict):
+            for skill, items in res.items():
+                if skill not in vault_skills:
+                    g_broken.append((skill, "declaring skill not in vault"))
+                for it in (items or []):
+                    chk = (it or {}).get("check")
+                    if chk and chk not in KNOWN_DETECTORS:
+                        g_broken.append((skill, "unknown detector '%s'" % chk))
+        if g_broken:
+            hard_fail = True
+            for who, why in g_broken:
+                print(f"    FAIL  {who}  ({why})")
+        else:
+            print("    PASS  all resource declarations resolve")
+    else:
+        print("    SKIP  no _resources.json")
+
     print("\n" + "=" * 64)
     if hard_fail:
-        print("  RESULT: FAIL — hard checks [A/B/C] found problems above.")
+        print("  RESULT: FAIL — hard checks [A/B/C/G] found problems above.")
         print("=" * 64)
         return 1
     print("  RESULT: PASS — library integrity is sound.")

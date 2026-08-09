@@ -334,6 +334,45 @@ function kitPrereqStates() {
   for (const k of Object.keys(all)) out[k] = { label: all[k].label || 'a required plugin', met: prereqMet(k) };
   return out;
 }
+
+// ---- per-skill resources (data-driven, Propel-style) ----------------------
+// A skill can declare resources it needs: a tool/CLI, an MCP connection, or a
+// script. Config lives in ~/.bob/profiles/_resources.json:
+//   { "<skill>": [ { id, type, label, check, setup } ] }
+// Unlike prereqs (which hard-block a kit), resources are informational: the kit
+// still loads, but the card and guide show "requires setup" until satisfied.
+// This mirrors Propel's convention (a skill declares what it needs; the user
+// sets it up; nothing runs on its own).
+const RESOURCE_FILE = () => path.join(BOB_PROFILES, '_resources.json');
+function readResources() { try { return JSON.parse(fs.readFileSync(RESOURCE_FILE(), 'utf8')); } catch (e) { return {}; } }
+let _resDetectorCache = {};
+function invalidateResourceCache() { _resDetectorCache = {}; }
+const RESOURCE_DETECTORS = {
+  node: () => cliInstalled('node'),
+  npx: () => cliInstalled('npx'),
+  propel: PREREQ_DETECTORS.propel
+};
+function resourceMet(check) {
+  if (check in _resDetectorCache) return _resDetectorCache[check];
+  const det = RESOURCE_DETECTORS[check];
+  const met = det ? !!det() : true;   // unknown detector → assume met (don't nag)
+  _resDetectorCache[check] = met; return met;
+}
+function kitResources(kit) {
+  const res = readResources(); const items = []; const seen = new Set();
+  for (const skill of readList(path.join(BOB_PROFILES, kit + '.txt'))) {
+    for (const r of (res[skill] || [])) {
+      if (seen.has(r.id)) continue; seen.add(r.id);
+      items.push({ id: r.id, type: r.type || 'tool', label: r.label || r.id, setup: r.setup || '', met: resourceMet(r.check), skill });
+    }
+  }
+  return items;
+}
+function kitResourceStates() {
+  const out = {};
+  for (const kit of profileNames()) { const items = kitResources(kit); if (items.length) out[kit] = { items, needsSetup: items.some(i => !i.met) }; }
+  return out;
+}
 function writeMeta(m) { try { fs.writeFileSync(META(), JSON.stringify(m, null, 2)); } catch (e) {} }
 
 function saveCustomProfile(name, skills, desc) {
@@ -443,6 +482,7 @@ function stateMessage() {
     addons: addonStates(),
     provenance: readProvenance(),
     prereqs: kitPrereqStates(),
+    resources: kitResourceStates(),
     auto: readAuto()
   };
 }
@@ -608,6 +648,9 @@ function guideFor(kit) {
     const on = new Set(kitTargets(kit));
     out.targets = RULESYNC_TARGETS.map(t => ({ id: t.id, label: t.label, on: on.has(t.id) }));
   }
+  // resources this kit's skills declare (Propel-style: informational, not a hard gate)
+  const reqs = kitResources(kit);
+  if (reqs.length) out.requirements = reqs;
   return out;
 }
 function esc(s) { return String(s || '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
@@ -629,6 +672,15 @@ function guideHtml(g) {
   const targetsScript = (g.targets && g.targets.length) ? (
     '<script>(function(){var v=acquireVsCodeApi();document.querySelectorAll(".tgt input").forEach(function(cb){cb.addEventListener("change",function(){v.postMessage({type:"setKitTarget",kit:' + JSON.stringify(g.kit) + ',target:cb.dataset.id,on:cb.checked});});});})();</script>'
   ) : '';
+  const requirements = (g.requirements && g.requirements.length) ? (
+    '<h2>Requirements</h2>' +
+    '<p class="usehint">What a few of these skills need before they can run. The kit still loads either way; set these up when you use the skill.</p>' +
+    '<div class="reqs">' + g.requirements.map(r =>
+      '<div class="req ' + (r.met ? 'ok' : 'need') + '"><span class="rmark">' + (r.met ? '&#10003;' : '!') + '</span>' +
+      '<div class="rbody"><div class="rlabel">' + esc(r.label) + ' <span class="rfor">for ' + esc(r.skill) + '</span>' + (r.met ? '' : ' <span class="rneed">requires setup</span>') + '</div>' +
+      (r.setup ? '<div class="rsetup">' + esc(r.setup) + '</div>' : '') + '</div></div>'
+    ).join('') + '</div>'
+  ) : '';
   const note = g.authored ? '' : '<p class="muted auto">Generated from the kit\'s skills. A fuller walkthrough is coming.</p>';
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>
     body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);max-width:720px;margin:0 auto;padding:28px 32px;line-height:1.6;font-size:14px}
@@ -645,12 +697,18 @@ function guideHtml(g) {
     .foot{margin-top:26px;border-top:1px solid var(--vscode-widget-border,#333);padding-top:12px;color:var(--vscode-descriptionForeground);font-size:13px}
     code{background:var(--vscode-textCodeBlock-background,#222);padding:1px 5px;border-radius:4px}
     .targets{display:flex;flex-direction:column;gap:8px;margin:2px 0} .tgt{display:flex;align-items:center;gap:9px;cursor:pointer} .tgt input{margin:0;cursor:pointer}
+    .reqs{display:flex;flex-direction:column;gap:10px} .req{display:flex;gap:10px;align-items:flex-start}
+    .rmark{flex:none;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:2px}
+    .req.ok .rmark{background:var(--vscode-charts-green,#3fb950);color:#04260f} .req.need .rmark{background:var(--vscode-charts-yellow,#d29922);color:#3a2c00}
+    .rlabel{font-weight:600} .rfor{font-weight:400;color:var(--vscode-descriptionForeground);font-size:12px}
+    .rneed{color:var(--vscode-charts-yellow,#d29922);font-weight:600;font-size:12px} .rsetup{color:var(--vscode-descriptionForeground);font-size:13px;margin-top:2px}
   </style></head><body>
     <h1>${esc(g.kit)} kit</h1>
     <p class="tag">${esc(g.tagline)}</p>
     ${jtbd}${desc}${when}${note}
     ${outline}
     <h2>What's inside (${g.skills.length} skills)</h2>${skillRows}
+    ${requirements}
     ${examples}
     ${targets}
     ${tips}
@@ -799,6 +857,7 @@ function getWebviewHtml() {
   .mode-top .cnt{color:var(--vscode-descriptionForeground);font-size:12px}
   .mode-top .badge{font-size:10px;color:var(--vscode-charts-green,#3fb950);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap}
   .lockbadge{font-size:10px;color:var(--vscode-descriptionForeground);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap}
+  .setupbadge{font-size:10px;color:var(--vscode-charts-yellow,#d29922);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap;cursor:help}
   .pswitch input:disabled ~ .track{opacity:.4} .pswitch input:disabled ~ .knob{opacity:.4}
   .mode-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
   button{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border:0;border-radius:5px;padding:5px 13px;cursor:pointer;font-size:12px}
@@ -1070,12 +1129,13 @@ function getWebviewHtml() {
     // Row 1: a BLUE load/unload toggle on the left (kits differ from the green power/add-on
     // toggles), then the name + count + active badge. Stable regardless of state.
     const pre=(S.prereqs||{})[id]; const locked=pre && !pre.met;   // kit needs a plugin that isn't installed
+    const rs=(S.resources||{})[id]; const needSetup=rs && rs.needsSetup;   // a skill needs a resource (soft, not a lock)
     const top=document.createElement('div'); top.className='mode-top';
     const tog=document.createElement('label'); tog.className='pswitch blue'; tog.title=locked?('needs '+pre.label):(isActive?'unload this kit (back to Auto)':'load this kit');
     tog.innerHTML='<input type="checkbox" class="kitsw" data-kit="'+id+'" '+(isActive?'checked':'')+(locked?' disabled':'')+'/><span class="track"></span><span class="knob"></span>';
     top.appendChild(tog);
     const nm=document.createElement('span'); nm.className='mode-namewrap';
-    nm.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'')+(locked?' <span class="lockbadge">🔒 needs '+pre.label.replace(/^the /,'')+'</span>':'');
+    nm.innerHTML='<span class="mode-name">'+label+'</span> <span class="cnt">'+count+'</span>'+(isActive?' <span class="badge">active</span>':'')+(locked?' <span class="lockbadge">🔒 needs '+pre.label.replace(/^the /,'')+'</span>':'')+((needSetup&&!locked)?' <span class="setupbadge" title="'+(rs.items.filter(i=>!i.met).map(i=>i.label).join(', '))+' — see Learn more">requires setup</span>':'');
     top.appendChild(nm);
     // Top-right icons: Learn more (ⓘ, opens the guide with pitch + example + skills) and delete.
     const acts=document.createElement('span'); acts.className='mode-icons';
@@ -1163,6 +1223,7 @@ async function doInstall(context) {
     }
   );
   invalidateVaultCache();   // the vault just changed; drop the cached skill metadata
+  invalidateResourceCache();   // re-detect resource availability after an install
   updateStatus();
   vscode.window.showInformationMessage('SuperBob installed (' + target + '). Restart Bob / start a new VS Code session so skills load.');
 }

@@ -50,6 +50,8 @@ cp "$REPO/bob/meta/mission-control.bob.md" "$STAGE/meta/"
 cp "$REPO"/bob/profiles/*.txt "$STAGE/profiles/"
 cp "$REPO"/bob/profiles/_meta.json "$STAGE/profiles/" 2>/dev/null || true
 cp "$REPO"/bob/profiles/_guides.json "$STAGE/profiles/" 2>/dev/null || true
+cp "$REPO"/bob/profiles/_prereqs.json "$STAGE/profiles/" 2>/dev/null || true
+cp "$REPO"/bob/profiles/_resources.json "$STAGE/profiles/" 2>/dev/null || true
 node "$REPO/bob/gen-provenance.js" "$LIB" "$STAGE/profiles/_provenance.json" 2>/dev/null || true
 cp "$REPO"/bob/commands/*.md "$STAGE/commands/" 2>/dev/null || true
 cp "$REPO/bob/bob-profile"          "$STAGE/bob-profile"
