@@ -16,3 +16,8 @@ superbob/dist/*.zip
 superbob/vsix/extension/skills.zip
 
 superbob/dist/*.vsix
+
+# Local build copies of the library inside the extension (never commit; superbob reads the top-level library via config.sh)
+superbob/packages/
+superbob/skills/
+superbob/zips/
