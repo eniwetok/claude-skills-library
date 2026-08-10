@@ -146,23 +146,23 @@ function writeTargetsRule() {
 }
 function removeTargetsRule() { try { fs.rmSync(TARGETS_RULE_FILE(), { force: true }); } catch (e) {} }
 
-// ---- agents: a kit can install subagents Bob can delegate subtasks to --------
-// Definitions ship at ~/.bob/agents/<name>.md (rulesync subagent frontmatter). On
-// kit load we transform each into a Bob custom mode + a Claude Code subagent. The
-// Bob modes go into the SHARED ~/.bob/settings/custom_modes.yaml as a marker-
-// delimited managed block (append + strip is byte-reversible, proven in the spike),
-// so the user's own modes and Propel's `winning-products` are never touched. A tiny
-// in-extension transformer keeps kit-load offline and instant; rulesync stays the
-// authoring engine for users.
+// ---- agents: a kit installs SUBAGENTS the SuperBob mode can delegate to ------
+// Definitions ship at ~/.bob/agents/<name>.md. On kit load we write each active
+// agent as a SUBAGENT file (name/description/model + role) into ~/.claude/agents/,
+// which Bob reads as a delegatable subagent (confirmed: Bob's subagent config
+// locations include .claude/agents) and Claude Code reads too. Agents are NOT
+// custom modes: they never appear in Bob's mode selector; the one SuperBob mode
+// orchestrates them. Load a kit -> its subagents appear; unload -> they vanish.
 const BOB_AGENTS = path.join(HOME, '.bob', 'agents');                          // bundled agent defs (installed)
-const BOB_MODES = path.join(HOME, '.bob', 'settings', 'custom_modes.yaml');    // Bob's shared modes file
-const CLAUDE_AGENTS = path.join(HOME, '.claude', 'agents');                    // Claude Code subagents (user-level)
+const BOB_MODES = path.join(HOME, '.bob', 'settings', 'custom_modes.yaml');    // Bob's shared modes file (only ever CLEANED, never written to)
+const CLAUDE_AGENTS = path.join(HOME, '.claude', 'agents');                    // subagent dir Bob + Claude both read
 const AGENTS_FILE = () => path.join(BOB_PROFILES, '_agents.json');
 const AGENTS_MANIFEST = () => path.join(HOME, '.bob', '.superbob-agents.json');
-const AGENT_BEGIN = '# >>> superbob-managed agents (do not edit by hand)';
-const AGENT_END = '# <<< superbob-managed agents';
+// Legacy markers: earlier builds wrongly spliced agents into custom_modes.yaml as
+// modes. We keep the markers only to STRIP that pollution from existing installs.
+const LEGACY_AGENT_BEGIN = '# >>> superbob-managed agents (do not edit by hand)';
+const LEGACY_AGENT_END = '# <<< superbob-managed agents';
 function escRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-function yamlScalar(s) { return JSON.stringify(String(s || '').replace(/\s+/g, ' ').trim()); }   // safe double-quoted YAML scalar
 function readAgentsMap() { try { return JSON.parse(fs.readFileSync(AGENTS_FILE(), 'utf8')); } catch (e) { return {}; } }
 function readAgentDef(name) {
   try {
@@ -170,9 +170,7 @@ function readAgentDef(name) {
     const m = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
     const fm = m ? m[1] : ''; const body = (m ? m[2] : raw).trim();
     const get = k => { const r = fm.match(new RegExp('^' + k + ':\\s*(.*)$', 'm')); return r ? r[1].trim() : ''; };
-    let groups = get('groups');
-    groups = groups ? groups.replace(/^\[|\]$/g, '').split(',').map(s => s.trim()).filter(Boolean) : ['read', 'edit', 'command', 'mcp'];
-    return { name: get('name') || name, description: get('description'), groups, body };
+    return { name: get('name') || name, description: get('description'), whenToUse: get('whenToUse'), body };
   } catch (e) { return null; }
 }
 function kitAgents(kit) { return (readAgentsMap()[kit] || []).map(readAgentDef).filter(Boolean); }
@@ -182,57 +180,45 @@ function activeAgents() {
   for (const k of activeKitNames()) for (const a of kitAgents(k)) if (!seen.has(a.name)) { seen.add(a.name); out.push(a); }
   return out;
 }
-function toRooMode(a, indent) {
-  const groups = a.groups.map(g => indent + '      - ' + g).join('\n');
-  return indent + '  - slug: ' + a.name + '\n' +
-    indent + '    name: ' + a.name + '\n' +
-    indent + '    roleDefinition: ' + yamlScalar(a.body) + '\n' +
-    indent + '    groups:\n' + groups + '\n' +
-    indent + '    description: ' + yamlScalar(a.description);
+function toSubagent(a) {
+  // A subagent file: description drives when the orchestrator delegates to it.
+  const desc = (a.description || '') + (a.whenToUse ? ' ' + a.whenToUse : '');
+  return '---\nname: ' + a.name + '\ndescription: ' + JSON.stringify(desc.replace(/\s+/g, ' ').trim()) + '\nmodel: inherit\n---\n' + a.body + '\n';
 }
-function toClaudeAgent(a) {
-  return '---\nname: ' + a.name + '\ndescription: ' + yamlScalar(a.description) + '\nmodel: inherit\n---\n' + a.body + '\n';
+function readAgentsManifest() { try { return JSON.parse(fs.readFileSync(AGENTS_MANIFEST(), 'utf8')); } catch (e) { return { subagents: [] }; } }
+function removeSubagentFiles() {
+  try { const m = readAgentsManifest(); for (const f of [].concat(m.subagents || [], m.claude || [])) fs.rmSync(path.join(CLAUDE_AGENTS, f), { force: true }); } catch (e) {}
 }
-function stripManagedBlock(text) {
-  const re = new RegExp('\\n?[ \\t]*' + escRe(AGENT_BEGIN) + '[\\s\\S]*?' + escRe(AGENT_END) + '\\n?', 'g');
-  return text.replace(re, '\n');
+// One-time healing: strip any agent block(s) an earlier build wrote into the shared
+// custom_modes.yaml, so agents stop showing up as modes. Leaves every real mode
+// (superbob, winning-products, the user's own) exactly as it was.
+function cleanupLegacyAgentModes() {
+  try {
+    if (!fs.existsSync(BOB_MODES)) return;
+    const text = fs.readFileSync(BOB_MODES, 'utf8');
+    if (text.indexOf(LEGACY_AGENT_BEGIN) < 0) return;
+    const re = new RegExp('\\n?[ \\t]*' + escRe(LEGACY_AGENT_BEGIN) + '[\\s\\S]*?' + escRe(LEGACY_AGENT_END) + '\\n?', 'g');
+    fs.writeFileSync(BOB_MODES, text.replace(re, '\n').replace(/\n{3,}/g, '\n\n').replace(/\n*$/, '\n'));
+  } catch (e) {}
 }
-function removeClaudeAgents() {
-  try { const m = JSON.parse(fs.readFileSync(AGENTS_MANIFEST(), 'utf8')); for (const f of (m.claude || [])) fs.rmSync(path.join(CLAUDE_AGENTS, f), { force: true }); } catch (e) {}
-}
-// Refresh the managed agent set to match the loaded kits (idempotent). Strips our
-// old block first, then appends the current one. Skips the YAML splice safely if
-// the file has more than one top-level key (we only ever append list items).
+// Refresh the managed subagents to match the loaded kits (idempotent).
 function writeAgents() {
   try {
+    cleanupLegacyAgentModes();      // heal any old mode pollution first
+    removeSubagentFiles();          // drop previously-placed subagents
     const agents = activeAgents();
-    const existed = fs.existsSync(BOB_MODES);
-    let text = existed ? fs.readFileSync(BOB_MODES, 'utf8') : 'customModes:\n';
-    const topKeys = text.split('\n').filter(l => /^[A-Za-z].*:/.test(l));
-    if (topKeys.length > 1) { removeAgents(); return; }   // not safe to append; bail cleanly
-    removeClaudeAgents();   // drop previously-placed Claude files before re-placing
-    let base = stripManagedBlock(text).replace(/\n*$/, '\n');
-    if (!/^customModes:/m.test(base)) base = 'customModes:\n';
-    const manifest = { slugs: [], claude: [] };
+    const manifest = { subagents: [] };
     if (agents.length) {
-      if (existed && !fs.existsSync(BOB_MODES + '.superbob.bak')) fs.copyFileSync(BOB_MODES, BOB_MODES + '.superbob.bak');
-      const items = agents.map(a => toRooMode(a, '')).join('\n');
-      const block = AGENT_BEGIN + '\n' + items + '\n' + AGENT_END + '\n';
-      fs.mkdirSync(path.dirname(BOB_MODES), { recursive: true });
-      fs.writeFileSync(BOB_MODES, base.replace(/\n*$/, '\n') + block);
       fs.mkdirSync(CLAUDE_AGENTS, { recursive: true });
-      for (const a of agents) { fs.writeFileSync(path.join(CLAUDE_AGENTS, a.name + '.md'), toClaudeAgent(a)); manifest.claude.push(a.name + '.md'); }
-      manifest.slugs = agents.map(a => a.name);
-    } else if (existed) {
-      fs.writeFileSync(BOB_MODES, base);   // no agents: leave the file without our block
+      for (const a of agents) { fs.writeFileSync(path.join(CLAUDE_AGENTS, a.name + '.md'), toSubagent(a)); manifest.subagents.push(a.name + '.md'); }
     }
     fs.writeFileSync(AGENTS_MANIFEST(), JSON.stringify(manifest, null, 2) + '\n');
   } catch (e) {}
 }
 function removeAgents() {
   try {
-    if (fs.existsSync(BOB_MODES)) fs.writeFileSync(BOB_MODES, stripManagedBlock(fs.readFileSync(BOB_MODES, 'utf8')).replace(/\n*$/, '\n'));
-    removeClaudeAgents();
+    cleanupLegacyAgentModes();
+    removeSubagentFiles();
     fs.rmSync(AGENTS_MANIFEST(), { force: true });
   } catch (e) {}
 }
@@ -865,7 +851,7 @@ function guideHtml(g) {
   ) : '';
   const agents = (g.agents && g.agents.length) ? (
     '<h2>Agents this kit installs</h2>' +
-    '<p class="usehint">Loading the kit adds these as Bob modes and Claude Code subagents, so Bob can hand a subtask to a specialist. Unload the kit to remove them.</p>' +
+    '<p class="usehint">Loading the kit adds these as subagents (not modes, so your mode picker stays clean). The SuperBob mode can hand a specific subtask to one. Unload the kit to remove them.</p>' +
     g.agents.map(a => '<div class="s"><div class="sn">' + esc(a.name) + '</div>' + (a.description ? '<div class="sd">' + esc(a.description) + '</div>' : '') + '</div>').join('')
   ) : '';
   const uiScript = '<script>(function(){var v=acquireVsCodeApi();' +
@@ -1451,6 +1437,8 @@ async function doLoadProfile() {
 }
 
 function activate(context) {
+  cleanupLegacyAgentModes();   // heal any custom_modes.yaml pollution from an earlier build
+  if (!isPoweredOff()) writeAgents();   // reconcile subagents to the currently loaded kits
   statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   statusItem.command = 'superBobSkills.openPanel';
   statusItem.tooltip = 'SuperBob, open the skills control panel';
