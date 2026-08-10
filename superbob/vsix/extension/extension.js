@@ -147,19 +147,24 @@ function writeTargetsRule() {
 function removeTargetsRule() { try { fs.rmSync(TARGETS_RULE_FILE(), { force: true }); } catch (e) {} }
 
 // ---- agents: a kit installs SUBAGENTS the SuperBob mode can delegate to ------
-// Definitions ship at ~/.bob/agents/<name>.md. On kit load we write each active
-// agent as a SUBAGENT file (name/description/model + role) into ~/.claude/agents/,
-// which Bob reads as a delegatable subagent (confirmed: Bob's subagent config
-// locations include .claude/agents) and Claude Code reads too. Agents are NOT
-// custom modes: they never appear in Bob's mode selector; the one SuperBob mode
-// orchestrates them. Load a kit -> its subagents appear; unload -> they vanish.
+// Bob-native mechanism only (no Claude route): definitions ship at
+// ~/.bob/agents/<name>.md; on kit load we write each active agent as a SUBAGENT
+// file into a SuperBob-owned folder ~/.bob/subagents/, and register that folder in
+// Bob's OWN `chat.agents.config.locations` setting so Bob scans it globally. Agents
+// are NOT custom modes (never in the mode picker); the one SuperBob mode delegates
+// to them. Load a kit -> its subagents appear; unload -> they + our setting entry go.
 const BOB_AGENTS = path.join(HOME, '.bob', 'agents');                          // bundled agent defs (installed)
 const BOB_MODES = path.join(HOME, '.bob', 'settings', 'custom_modes.yaml');    // Bob's shared modes file (only ever CLEANED, never written to)
-const CLAUDE_AGENTS = path.join(HOME, '.claude', 'agents');                    // subagent dir Bob + Claude both read
+const BOB_SUBAGENTS = path.join(HOME, '.bob', 'subagents');                    // SuperBob-owned subagent folder Bob scans
+const BOB_SETTINGS = path.join(HOME, '.bob', 'settings', 'settings.json');     // Bob's user settings
+const AGENT_LOC_KEY = 'chat.agents.config.locations';                          // Bob's native agent-locations setting
+const DEFAULT_AGENT_LOCS = ['**/.github/agents/*.md', '**/.claude/agents/*.md'];  // Bob's built-in defaults (preserve them)
+const OUR_AGENT_LOC = path.join(BOB_SUBAGENTS, '*.md');                        // absolute glob for our folder
+const LEGACY_CLAUDE_AGENTS = path.join(HOME, '.claude', 'agents');            // earlier (Claude-route) build wrote here; clean up
 const AGENTS_FILE = () => path.join(BOB_PROFILES, '_agents.json');
 const AGENTS_MANIFEST = () => path.join(HOME, '.bob', '.superbob-agents.json');
-// Legacy markers: earlier builds wrongly spliced agents into custom_modes.yaml as
-// modes. We keep the markers only to STRIP that pollution from existing installs.
+// Legacy markers: an even earlier build wrongly spliced agents into custom_modes.yaml
+// as modes. We keep the markers only to STRIP that pollution from existing installs.
 const LEGACY_AGENT_BEGIN = '# >>> superbob-managed agents (do not edit by hand)';
 const LEGACY_AGENT_END = '# <<< superbob-managed agents';
 function escRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
@@ -187,7 +192,35 @@ function toSubagent(a) {
 }
 function readAgentsManifest() { try { return JSON.parse(fs.readFileSync(AGENTS_MANIFEST(), 'utf8')); } catch (e) { return { subagents: [] }; } }
 function removeSubagentFiles() {
-  try { const m = readAgentsManifest(); for (const f of [].concat(m.subagents || [], m.claude || [])) fs.rmSync(path.join(CLAUDE_AGENTS, f), { force: true }); } catch (e) {}
+  // remove tracked files from our folder AND the legacy Claude folder an old build used
+  try { const m = readAgentsManifest(); for (const f of [].concat(m.subagents || [], m.claude || [])) { fs.rmSync(path.join(BOB_SUBAGENTS, f), { force: true }); fs.rmSync(path.join(LEGACY_CLAUDE_AGENTS, f), { force: true }); } } catch (e) {}
+}
+// Register our folder in Bob's own agent-locations setting, preserving Bob's defaults
+// and the user's own entries. settings.json is parsed as JSON; on any parse issue we
+// skip (never corrupt the file).
+function registerAgentLocation() {
+  try {
+    let s = {}; if (fs.existsSync(BOB_SETTINGS)) s = JSON.parse(fs.readFileSync(BOB_SETTINGS, 'utf8'));
+    const had = Object.prototype.hasOwnProperty.call(s, AGENT_LOC_KEY);
+    const cur = Array.isArray(s[AGENT_LOC_KEY]) ? s[AGENT_LOC_KEY].slice() : DEFAULT_AGENT_LOCS.slice();
+    if (!cur.includes(OUR_AGENT_LOC)) cur.push(OUR_AGENT_LOC);
+    s[AGENT_LOC_KEY] = cur;
+    fs.mkdirSync(path.dirname(BOB_SETTINGS), { recursive: true });
+    fs.writeFileSync(BOB_SETTINGS, JSON.stringify(s, null, 2) + '\n');
+    const m = readAgentsManifest(); m.createdLocKey = !had; fs.writeFileSync(AGENTS_MANIFEST(), JSON.stringify(m, null, 2) + '\n');
+  } catch (e) {}
+}
+function deregisterAgentLocation() {
+  try {
+    if (!fs.existsSync(BOB_SETTINGS)) return;
+    const s = JSON.parse(fs.readFileSync(BOB_SETTINGS, 'utf8'));
+    if (!Array.isArray(s[AGENT_LOC_KEY])) return;
+    const left = s[AGENT_LOC_KEY].filter(x => x !== OUR_AGENT_LOC);
+    const createdKey = (readAgentsManifest().createdLocKey === true);
+    if (createdKey && JSON.stringify(left) === JSON.stringify(DEFAULT_AGENT_LOCS)) delete s[AGENT_LOC_KEY];  // we created it; restore to Bob's implicit default
+    else s[AGENT_LOC_KEY] = left;
+    fs.writeFileSync(BOB_SETTINGS, JSON.stringify(s, null, 2) + '\n');
+  } catch (e) {}
 }
 // One-time healing: strip any agent block(s) an earlier build wrote into the shared
 // custom_modes.yaml, so agents stop showing up as modes. Leaves every real mode
@@ -205,20 +238,25 @@ function cleanupLegacyAgentModes() {
 function writeAgents() {
   try {
     cleanupLegacyAgentModes();      // heal any old mode pollution first
-    removeSubagentFiles();          // drop previously-placed subagents
+    removeSubagentFiles();          // drop previously-placed subagents (ours + legacy Claude route)
     const agents = activeAgents();
-    const manifest = { subagents: [] };
+    const manifest = { subagents: [], createdLocKey: readAgentsManifest().createdLocKey };
     if (agents.length) {
-      fs.mkdirSync(CLAUDE_AGENTS, { recursive: true });
-      for (const a of agents) { fs.writeFileSync(path.join(CLAUDE_AGENTS, a.name + '.md'), toSubagent(a)); manifest.subagents.push(a.name + '.md'); }
+      fs.mkdirSync(BOB_SUBAGENTS, { recursive: true });
+      for (const a of agents) { fs.writeFileSync(path.join(BOB_SUBAGENTS, a.name + '.md'), toSubagent(a)); manifest.subagents.push(a.name + '.md'); }
+      fs.writeFileSync(AGENTS_MANIFEST(), JSON.stringify(manifest, null, 2) + '\n');
+      registerAgentLocation();      // make Bob scan our folder
+    } else {
+      deregisterAgentLocation();    // no agents: stop Bob scanning our folder
+      fs.writeFileSync(AGENTS_MANIFEST(), JSON.stringify(manifest, null, 2) + '\n');
     }
-    fs.writeFileSync(AGENTS_MANIFEST(), JSON.stringify(manifest, null, 2) + '\n');
   } catch (e) {}
 }
 function removeAgents() {
   try {
     cleanupLegacyAgentModes();
     removeSubagentFiles();
+    deregisterAgentLocation();
     fs.rmSync(AGENTS_MANIFEST(), { force: true });
   } catch (e) {}
 }
