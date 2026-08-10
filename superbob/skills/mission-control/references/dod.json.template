@@ -1,0 +1,24 @@
+{
+  "_comment": "Copy to <repo>/.claude/dod.json to make this repo mission-critical. Presence of this file activates ALL mission-critical hooks: design-gate (PreToolUse), format-on-save (PostToolUse), and dod-gate (Stop). branch-guard is global and always on.",
+
+  "verify": "echo 'set me: e.g. npm run lint && npm run typecheck && npm test' && false",
+  "_verify_help": "dod-gate runs this on session end when there are uncommitted non-doc changes; a non-zero exit BLOCKS completion.",
+  "verify_examples": {
+    "node": "npm run lint && npm run typecheck && npm test",
+    "python": "ruff check . && mypy . && pytest -q",
+    "go": "go vet ./... && golangci-lint run && go test ./...",
+    "rust": "cargo clippy -- -D warnings && cargo test",
+    "django": "ruff check . && python manage.py test"
+  },
+
+  "design_gate": true,
+  "_design_gate_help": "When true (default), the FIRST code edit is blocked until a plan exists (PLAN.md / DESIGN.md / docs/adr/*.md). Set false to disable design-before-code enforcement.",
+
+  "format": "",
+  "_format_help": "Optional. Per-file format command; {file} is replaced with the edited path, e.g. 'prettier --write {file}'. Leave empty to auto-detect (prettier/ruff/black/gofmt/rustfmt/shfmt).",
+  "format_examples": {
+    "node": "prettier --write {file}",
+    "python": "ruff format {file}",
+    "go": "gofmt -w {file}"
+  }
+}

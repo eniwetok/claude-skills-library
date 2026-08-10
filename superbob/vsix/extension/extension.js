@@ -709,6 +709,7 @@ async function handleMessage(m, context) {
     postState(); return;
   }
   if (m.type === 'openBuilder') { openBuilderPanel(context); return; }
+  if (m.type === 'openHowTo') { openHowToPanel(context); return; }
   if (m.type === 'closeBuilder') { if (builderPanel) builderPanel.dispose(); return; }
   if (m.type === 'deleteMode') { deleteCustomProfile(m.name); postState(); return; }
   if (m.type === 'openGuide') { openGuidePanel(m.kit, context); return; }
@@ -955,6 +956,133 @@ function openGuidePanel(kit, context) {
   guidePanel.onDidDispose(() => { guidePanel = null; }, null, context.subscriptions);
 }
 
+// ---- "How to create & import" instructions page ---------------------------
+let howToPanel;
+function openHowToPanel(context) {
+  if (howToPanel) { howToPanel.reveal(vscode.ViewColumn.Active); return; }
+  howToPanel = vscode.window.createWebviewPanel('superbobHowTo', 'SuperBob: create & import', vscode.ViewColumn.Active, { enableScripts: false });
+  howToPanel.webview.html = howToHtml();
+  howToPanel.onDidDispose(() => { howToPanel = null; }, null, context.subscriptions);
+}
+function howToHtml() {
+  const H = os.homedir();
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>
+    body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);max-width:760px;margin:0 auto;padding:28px 32px;line-height:1.6;font-size:14px}
+    h1{font-size:1.5rem;margin:0 0 4px} .tag{font-size:1.05rem;color:var(--vscode-descriptionForeground);margin:0 0 18px}
+    h2{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--vscode-descriptionForeground);margin:26px 0 10px;border-top:1px solid var(--vscode-widget-border,#333);padding-top:14px}
+    h3{font-size:1rem;margin:16px 0 6px}
+    ol,ul{padding-left:22px;margin:6px 0} li{margin:6px 0}
+    code{background:var(--vscode-textCodeBlock-background,#222);padding:1px 5px;border-radius:4px;font-size:12.5px}
+    pre{background:var(--vscode-textCodeBlock-background,#1e1e1e);border:1px solid var(--vscode-widget-border,#333);border-radius:6px;padding:11px 13px;overflow-x:auto;font-size:12.5px;white-space:pre}
+    .note{background:var(--vscode-editorWidget-background);border-left:3px solid var(--vscode-charts-blue,#3794ff);border-radius:0 6px 6px 0;padding:9px 13px;margin:10px 0}
+    .muted{color:var(--vscode-descriptionForeground)} b{font-weight:600}
+    table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12.5px} td,th{border:1px solid var(--vscode-widget-border,#333);padding:6px 9px;text-align:left;vertical-align:top}
+  </style></head><body>
+    <h1>Create &amp; import in SuperBob</h1>
+    <p class="tag">Bring your own skills, agents, and connectors into Bob, then assemble them into a kit. Everything below happens in plain files SuperBob reads. No coding required beyond editing text.</p>
+
+    <div class="note">A <b>kit</b> is a named bundle you load together. It can hold three kinds of things: <b>skills</b> (know-how loaded into context), <b>agents</b> (subagents Bob delegates subtasks to), and <b>connectors</b> (MCP tools the skills or agents call). You mix and match them per task.</div>
+
+    <h2>Where things live</h2>
+    <table>
+      <tr><th>Thing</th><th>Folder or file</th></tr>
+      <tr><td>Skills (the library)</td><td><code>~/.bob/skills-vault/&lt;name&gt;/SKILL.md</code></td></tr>
+      <tr><td>Kits (which skills load together)</td><td><code>~/.bob/profiles/&lt;kit&gt;.txt</code> (one skill name per line)</td></tr>
+      <tr><td>Agent definitions (source)</td><td><code>~/.bob/agents/&lt;name&gt;.md</code></td></tr>
+      <tr><td>Which agents a kit installs</td><td><code>~/.bob/profiles/_agents.json</code></td></tr>
+      <tr><td>Active subagents (Bob reads these)</td><td><code>~/.bob/subagents/</code> (managed for you)</td></tr>
+      <tr><td>What a skill needs (resources)</td><td><code>~/.bob/profiles/_resources.json</code></td></tr>
+      <tr><td>MCP connectors</td><td><code>~/.bob/settings/mcp.json</code></td></tr>
+    </table>
+
+    <h2>Create your own skill</h2>
+    <ol>
+      <li>Make a folder <code>~/.bob/skills-vault/my-skill/</code> and put a <code>SKILL.md</code> in it.</li>
+      <li>Start it with frontmatter, then the instructions:
+<pre>---
+name: my-skill
+description: One line on what it does and when to use it.
+---
+
+# My skill
+Step-by-step instructions Bob should follow for this kind of task.</pre></li>
+      <li>Add the skill to a kit: open <code>~/.bob/profiles/&lt;kit&gt;.txt</code> and add a line with <code>my-skill</code>. Or use <b>+ Create your own kit</b> in the SuperBob panel and tick it.</li>
+      <li>Load the kit and start a new conversation. Done.</li>
+    </ol>
+    <p class="muted">Prefer help writing it? Load the <b>agentic-authoring</b> kit and say "create a skill that ...". The <code>skill-creator</code> skill scaffolds and validates it for you.</p>
+
+    <h2>Import an existing skill</h2>
+    <ol>
+      <li>Copy the whole skill folder (the one containing its <code>SKILL.md</code>) into <code>~/.bob/skills-vault/</code>.</li>
+      <li>Add its name to a kit's <code>.txt</code> profile (or tick it in the kit builder).</li>
+      <li>Load the kit. That is all a skill is: a folder in the vault plus a line in a kit.</li>
+    </ol>
+
+    <h2>Create your own agent (subagent)</h2>
+    <p class="muted">An agent is a specialist Bob can hand a subtask to. It is a subagent, not a mode, so it never clutters your mode picker.</p>
+    <ol>
+      <li>Create <code>~/.bob/agents/my-agent.md</code>:
+<pre>---
+name: my-agent
+description: What this agent is good at.
+whenToUse: Delegate when the task is to &lt;the specific job&gt;.
+groups: [read, edit, command]
+---
+You are a focused specialist. Do exactly this job and return the result.</pre>
+      <span class="muted">The <b>description</b> and <b>whenToUse</b> are how Bob decides to delegate to it. Keep the agent narrow and single-purpose.</span></li>
+      <li>Tell a kit to install it: open <code>~/.bob/profiles/_agents.json</code> and add the name under the kit:
+<pre>{
+  "my-kit": ["my-agent"]
+}</pre></li>
+      <li>Load that kit. SuperBob writes the subagent into <code>~/.bob/subagents/</code> and registers that folder in Bob's own <code>chat.agents.config.locations</code> setting. Unload the kit and it is removed.</li>
+    </ol>
+    <p class="muted">Prefer help? Load <b>agentic-authoring</b> and say "design an agent that ...". <code>agent-designer</code> shapes the role and <code>rulesync</code> generates the file.</p>
+
+    <h2>Import an existing agent (AGENTS.md standard)</h2>
+    <ol>
+      <li>If you already have a subagent file (from <code>.claude/agents</code>, <code>.github/agents</code>, or an <code>AGENTS.md</code>), drop it into <code>~/.bob/agents/</code> and list it in <code>_agents.json</code> as above.</li>
+      <li>To pull in a whole existing setup, run rulesync in that repo and it converts the config into editable agent files:
+<pre>npx rulesync import --targets claudecode --features subagents
+npx rulesync generate --targets "*" --features "*"</pre></li>
+    </ol>
+
+    <h2>Connect skills or agents to resources (tools / MCP)</h2>
+    <p class="muted">If a skill or agent needs a tool or an MCP connection, declare it once. SuperBob then shows a <b>Requirements &amp; setup</b> section on the kit's Learn-more page where you install or connect it, inside Bob.</p>
+    <ol>
+      <li>Declare the need in <code>~/.bob/profiles/_resources.json</code>, keyed by the skill name:
+<pre>{
+  "my-skill": [
+    { "id": "acme", "type": "connection", "label": "Acme API",
+      "check": "conn:acme",
+      "config": [ { "key": "token", "label": "Acme API token", "secret": true } ] }
+  ]
+}</pre></li>
+      <li>Open the kit's <b>ⓘ Learn more</b> page. Under <b>Requirements &amp; setup</b>, fill the token and click <b>Save and connect</b>, or <b>Install</b> for a plugin, or <b>Open setup</b> to deep-link into Bob's own connections. Then <b>Recheck</b>.</li>
+    </ol>
+    <div class="note">You type any secret yourself, inside Bob. SuperBob never sees it, and for connections a plugin already manages (like Propel), it deep-links you there instead of asking again.</div>
+
+    <h2>Add an MCP connector</h2>
+    <p class="muted">To register a tool server, add an entry to <code>~/.bob/settings/mcp.json</code> under <code>mcpServers</code> (SuperBob leaves your existing servers untouched):</p>
+<pre>"my-tool": { "command": "npx", "args": ["-y", "my-mcp"], "env": { "MY_KEY": "" } }
+// or a remote server:
+"my-remote": { "type": "streamable-http", "url": "https://...", "headers": { } }</pre>
+
+    <h2>Trigger a subagent</h2>
+    <h3>Manually</h3>
+    <p>In Bob's chat, type <code>@</code> and pick the agent, then give it the task, for example <code>@my-agent do X</code>. It runs on its own and hands the result back.</p>
+    <h3>Automatically</h3>
+    <p>While the <b>SuperBob</b> mode is working a task, it delegates a matching subtask to the right subagent based on its <b>description</b> and <b>whenToUse</b>. Keep those clear and specific and delegation just works.</p>
+
+    <h2>Put it together as a kit</h2>
+    <ol>
+      <li>Pick or create the skills (vault + kit <code>.txt</code>), the agents (<code>_agents.json</code>), and any connectors (<code>mcp.json</code>).</li>
+      <li>Declare anything that needs setup in <code>_resources.json</code>.</li>
+      <li>Load the kit from the SuperBob panel and start a new conversation.</li>
+    </ol>
+    <div class="note">After editing any of these files, load or reload the kit and start a new conversation so Bob picks up the change.</div>
+  </body></html>`;
+}
+
 // ---- kit builder (its own page) -------------------------------------------
 let builderPanel;
 function openBuilderPanel(context) {
@@ -1175,6 +1303,7 @@ function getWebviewHtml() {
   </details>
 
   <button id="createBtn">+ Create your own kit</button>
+  <button class="sec" id="howToBtn" style="margin-left:6px">How to create &amp; import ↗</button>
 
   <div id="builder" style="display:none">
     <div style="font-weight:600;margin-bottom:4px">Create your own kit</div>
@@ -1398,6 +1527,7 @@ function getWebviewHtml() {
   }
   document.addEventListener('click',e=>{
     if(e.target.id==='createBtn') vscode.postMessage({type:'openBuilder'});
+    if(e.target.id==='howToBtn') vscode.postMessage({type:'openHowTo'});
     if(e.target.id==='bcancel') closeBuilder();
     if(e.target.id==='installBtn') vscode.postMessage({type:'install'});
     if(e.target.id==='docsBtn') vscode.postMessage({type:'openDocs'});
