@@ -359,5 +359,29 @@
       "Validate before you ship: skill-comply for skills, agent-eval for agents.",
       "rulesync is a pure file transformer: no API key, no model calls, so it works inside Bob out of the box."
     ]
+  },
+  "diagramming": {
+    "tagline": "Turn ideas, specs, and code into clean, editable diagrams: draw.io, mermaid, sketches, and UI wireframes.",
+    "jtbd": "When I need a diagram for a spec or a system, I want to describe it in words and get an editable draw.io file plus exports, so I stop hand-drawing boxes.",
+    "description": "Describe a flow, architecture, ERD, or process and get an editable .drawio diagram with PNG/SVG/PDF export, a mermaid diagram from text, a rough hand-drawn sketch, or a UI wireframe. drawio-skill can also turn existing code, SQL schemas, or infrastructure configs into auto-laid-out diagrams, and it self-checks its own layout. Everything runs locally with no API keys.",
+    "outline": [
+      "drawio-skill: describe it and get an editable .drawio plus exports, or turn code, SQL, and infra into a diagram",
+      "utility-mermaid-diagrams: quick flowcharts and sequence diagrams from plain text",
+      "hand-drawn-diagrams: loose, sketchy diagrams for early thinking",
+      "wireframe-sketch: low-fidelity UI wireframes"
+    ],
+    "examples": [
+      "Say \"diagram the data flow from source to dashboard\". drawio-skill lays it out as an editable .drawio and exports a PNG.",
+      "Say \"turn this SQL schema into an ERD\". It parses the tables and draws the entity relationships.",
+      "Say \"draw a C4 container diagram for our reporting service\". It generates the boxes and connections, then checks the layout for overlaps.",
+      "Say \"flowchart this onboarding process\" and get a mermaid flowchart you can drop straight into a doc.",
+      "Say \"sketch a wireframe for the metrics page\". wireframe-sketch blocks out the layout before any design work.",
+      "Say \"diagram this repo's module dependencies\". drawio-skill extracts the imports and auto-lays them out."
+    ],
+    "tips": [
+      "drawio-skill renders and exports with the draw.io desktop app's command line. The kit's Requirements section checks for it and links the download if it is missing.",
+      "Graphviz is optional but improves auto-layout for large diagrams.",
+      "You get an editable .drawio file, not a flat image, so you can keep refining it by hand."
+    ]
   }
 }

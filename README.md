@@ -573,3 +573,17 @@ measure-experiment-design, iterate-retrospective); the full 68-skill set is in t
 In SuperBob this powers the **`agent-authoring`** kit: `agent-designer` (design the role) →
 `rulesync` (generate AGENTS.md + subagents for Claude and Bob) → `codebase-onboarding` (map the repo)
 → `no-ai-slop` (tighten).
+
+## Group 26 — Agents365-ai/drawio-skill (1 skill · natural language to editable diagrams)
+
+> Describe a flow, architecture, ERD, or process and get an **editable `.drawio`** diagram with
+> PNG/SVG/PDF export; also turns code, SQL schemas, and infra configs into auto-laid-out diagrams,
+> and self-checks its own layout via the rendered image. A pure prompt/transformer: no API keys.
+> Needs the **draw.io desktop CLI** to render/export (Graphviz optional for large-graph layout).
+> Injection-scanned clean (38 bundled Python extractors, all local).
+> **Upstream:** [github.com/Agents365-ai/drawio-skill](https://github.com/Agents365-ai/drawio-skill) — MIT
+> **Install (skill):** `cp -r skills/drawio-skill ~/.claude/skills/`
+
+In SuperBob this anchors the **`diagramming`** kit (`drawio-skill` + `utility-mermaid-diagrams` +
+`hand-drawn-diagrams` + `wireframe-sketch`), with the draw.io CLI declared as an actionable resource
+(the kit's Requirements section detects it and links the download).

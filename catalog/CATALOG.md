@@ -676,3 +676,11 @@ Full 68 skills ship to the vault; the `pm-methodology` kit surfaces the 7-phase 
 **Package:** packages/rulesync/ · scanned clean (0 injection findings) · **Run:** `npx rulesync generate --targets "*"`
 
 The AGENTS.md authoring engine the library lacked. One `.rulesync/` source generates the portable **AGENTS.md** standard, **subagents** (multi-agent), and native rule/config files for **Claude Code, Roo Code (Bob), Codex, Cursor** and 30+ tools; imports existing CLAUDE.md / cursor rules too. Pure file transformer (no API key, no model calls). Powers the SuperBob **`agent-authoring`** kit (agent-designer → rulesync → codebase-onboarding → no-ai-slop). Anchored on the official [agents.md](https://github.com/agentsmd/agents.md) spec.
+
+
+## Group 26 — Agents365-ai/drawio-skill (1 skill · natural language to editable diagrams)
+
+**Source:** [github.com/Agents365-ai/drawio-skill](https://github.com/Agents365-ai/drawio-skill) - MIT
+**Skill:** skills/drawio-skill/ · scanned clean (0 injection findings) · zip: zips/drawio-skill.zip
+
+Natural-language to **editable `.drawio`** diagrams with PNG/SVG/PDF export; also converts code, SQL schemas, and infra (Terraform/K8s) into auto-laid-out diagrams and self-checks its own layout from the rendered image. Pure prompt/transformer (no API keys); needs the **draw.io desktop CLI** to render/export, Graphviz optional. Anchors the SuperBob **`diagramming`** kit (drawio-skill + utility-mermaid-diagrams + hand-drawn-diagrams + wireframe-sketch), with the draw.io CLI declared as an actionable resource.

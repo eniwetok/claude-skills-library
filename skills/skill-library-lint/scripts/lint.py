@@ -273,7 +273,7 @@ def main():
     # can show "requires setup". A typo (missing skill, unknown detector) would
     # silently break that gate, so validate it here.
     print("\n[G] Resource declarations — skills + detectors resolve")
-    KNOWN_DETECTORS = {"node", "npx", "propel"}
+    KNOWN_DETECTORS = {"node", "npx", "propel", "drawio", "graphviz"}
     res_path = os.path.join(profiles, "_resources.json")
     g_broken = []
     if os.path.isfile(res_path):

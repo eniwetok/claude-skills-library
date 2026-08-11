@@ -267,7 +267,7 @@ function removeAgents() {
 const CORE = ['using-superpowers', 'mission-control']; // superpowers first, always check for a skill before acting
 // Every shipped kit is a built-in "starter kit" (not deletable). "Your kits" is left for
 // the user's own creations, seeded with a couple of clearly-labelled sample kits.
-const BUILTIN = ['software-development', 'data-analysis', 'product-management', 'production-engineering', 'test-engineering', 'application-security', 'frontend-design', 'web-research', 'release-review', 'bug-fixing', 'code-simplification', 'rag-evaluation', 'content-writing', 'wiki', 'product-frameworks', 'pm-methodology', 'agentic-authoring'];
+const BUILTIN = ['software-development', 'data-analysis', 'product-management', 'production-engineering', 'test-engineering', 'application-security', 'frontend-design', 'web-research', 'release-review', 'bug-fixing', 'code-simplification', 'rag-evaluation', 'content-writing', 'wiki', 'product-frameworks', 'pm-methodology', 'agentic-authoring', 'diagramming'];
 
 // Optional always-on add-ons: skills that layer on EVERY kit (like CORE) but can be toggled.
 // Unlike CORE (mandatory), these are preferences the user turns on/off. They persist across
@@ -468,7 +468,9 @@ function invalidateResourceCache() { _resDetectorCache = {}; }
 const RESOURCE_DETECTORS = {
   node: () => cliInstalled('node'),
   npx: () => cliInstalled('npx'),
-  propel: PREREQ_DETECTORS.propel
+  propel: PREREQ_DETECTORS.propel,
+  drawio: () => cliInstalled('drawio') || cliInstalled('draw.io') || fs.existsSync('/Applications/draw.io.app'),
+  graphviz: () => cliInstalled('dot')
 };
 function resourceMet(check) {
   if (!check) return true;
@@ -515,6 +517,7 @@ function actionFor(spec) {
   if (spec.open) return { verb: 'open', command: spec.open };
   if (spec.tool) return { verb: 'install-tool', tool: spec.tool };
   if (spec.config) return { verb: 'save-connection', fields: spec.config };
+  if (spec.url) return { verb: 'open-url', url: spec.url };   // desktop apps we can't install (e.g. draw.io)
   return { verb: 'recheck' };
 }
 function kitSetupStates() {
@@ -765,6 +768,8 @@ async function runSetupAction(m) {
     } else if (m.verb === 'open' && m.command) {
       try { await vscode.commands.executeCommand(m.command); }
       catch (e) { vscode.window.showWarningMessage('Could not open "' + m.command + '". Make sure the plugin is installed, then retry.'); }
+    } else if (m.verb === 'open-url' && m.url) {
+      try { await vscode.env.openExternal(vscode.Uri.parse(m.url)); vscode.window.showInformationMessage('Opened ' + m.url + '. Install it, then click Recheck.'); } catch (e) {}
     } else if (m.verb === 'install-tool' && m.tool) {
       const t = toolByName(m.tool);
       if (t && !cliInstalled(t.bin)) {
@@ -1059,6 +1064,7 @@ function guideHtml(g) {
         if (a.verb === 'install-extension') ctrl += '<button class="setupbtn" data-verb="install-extension" data-ext="' + esc(a.extId) + '" data-kit="' + K + '" data-id="' + ID + '">Install</button>';
         if (a.open || a.verb === 'open') ctrl += '<button class="setupbtn" data-verb="open" data-cmd="' + esc(a.command || a.open) + '" data-kit="' + K + '" data-id="' + ID + '">Open setup</button>';
         if (a.verb === 'install-tool') ctrl += '<button class="setupbtn" data-verb="install-tool" data-tool="' + esc(a.tool) + '" data-kit="' + K + '" data-id="' + ID + '">Install</button>';
+        if (a.verb === 'open-url') ctrl += '<button class="setupbtn" data-verb="open-url" data-url="' + esc(a.url) + '" data-kit="' + K + '" data-id="' + ID + '">Open download</button>';
         if (a.verb === 'save-connection') {
           const fields = (a.fields || []).map(f => '<label class="cfield"><span>' + esc(f.label || f.key) + '</span><input data-key="' + esc(f.key) + '" type="' + (f.secret ? 'password' : 'text') + '" placeholder="' + esc(f.placeholder || '') + '"/></label>').join('');
           ctrl += '<div class="cform">' + fields + '<button class="setupbtn" data-verb="save-connection" data-kit="' + K + '" data-id="' + ID + '">Save and connect</button></div>';
@@ -1078,7 +1084,7 @@ function guideHtml(g) {
   const uiScript = '<script>(function(){var v=acquireVsCodeApi();' +
     'document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".setupbtn");if(!b)return;' +
     'var verb=b.dataset.verb;var msg={type:(verb==="save-connection"?"saveConnection":"setupAction"),kit:b.dataset.kit,id:b.dataset.id,verb:verb};' +
-    'if(b.dataset.ext)msg.extId=b.dataset.ext;if(b.dataset.cmd)msg.command=b.dataset.cmd;if(b.dataset.tool)msg.tool=b.dataset.tool;' +
+    'if(b.dataset.ext)msg.extId=b.dataset.ext;if(b.dataset.cmd)msg.command=b.dataset.cmd;if(b.dataset.tool)msg.tool=b.dataset.tool;if(b.dataset.url)msg.url=b.dataset.url;' +
     'if(verb==="save-connection"){var box=b.closest(".setupitem");var vals={};box.querySelectorAll("input[data-key]").forEach(function(i){vals[i.dataset.key]=i.value;});msg.values=vals;}' +
     'v.postMessage(msg);});' +
     'document.querySelectorAll(".tgt input").forEach(function(cb){cb.addEventListener("change",function(){v.postMessage({type:"setKitTarget",kit:' + JSON.stringify(g.kit) + ',target:cb.dataset.id,on:cb.checked});});});' +
