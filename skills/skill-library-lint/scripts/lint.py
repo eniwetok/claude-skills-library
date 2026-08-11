@@ -288,7 +288,10 @@ def main():
                     g_broken.append((skill, "declaring skill not in vault"))
                 for it in (items or []):
                     chk = (it or {}).get("check")
-                    if chk and chk not in KNOWN_DETECTORS:
+                    # valid: a known detector, a saved connection (conn:<id>), or a bare
+                    # command name a user declared as a requirement (probed on PATH).
+                    if chk and chk not in KNOWN_DETECTORS and not chk.startswith("conn:") \
+                            and not re.match(r"^[a-z0-9][a-z0-9._-]*$", chk):
                         g_broken.append((skill, "unknown detector '%s'" % chk))
         if g_broken:
             hard_fail = True

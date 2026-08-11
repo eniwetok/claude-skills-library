@@ -480,7 +480,10 @@ function resourceMet(check) {
   }
   if (check in _resDetectorCache) return _resDetectorCache[check];
   const det = RESOURCE_DETECTORS[check];
-  const met = det ? !!det() : true;   // unknown detector → assume met (don't nag)
+  let met;
+  if (det) met = !!det();
+  else if (/^[a-z0-9][a-z0-9._-]*$/.test(check)) met = cliInstalled(check);   // user-declared CLI tool: probe PATH
+  else met = true;   // unknown → assume met (don't nag)
   _resDetectorCache[check] = met; return met;
 }
 function kitResources(kit) {
@@ -624,6 +627,37 @@ function itemContent(kind, name) {
     return fs.readFileSync(path.join(BOB_VAULT, name, 'SKILL.md'), 'utf8');
   } catch (e) { return ''; }
 }
+// List every file inside a skill (so the info view shows scripts, references, styles,
+// not just SKILL.md). Agents are a single file. SKILL.md is sorted first.
+function itemFiles(kind, name) {
+  if (kind === 'agent') return [{ rel: name + '.md' }];
+  const root = path.join(BOB_VAULT, name); const out = [];
+  const walk = (dir, base) => {
+    let entries; try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { return; }
+    for (const e of entries) {
+      if (e.name.startsWith('.') || out.length >= 400) continue;
+      const rel = base ? base + '/' + e.name : e.name;
+      if (e.isDirectory()) walk(path.join(dir, e.name), rel);
+      else { let size = 0; try { size = fs.statSync(path.join(dir, e.name)).size; } catch (_) {} out.push({ rel, size }); }
+    }
+  };
+  walk(root, '');
+  out.sort((a, b) => a.rel === 'SKILL.md' ? -1 : b.rel === 'SKILL.md' ? 1 : a.rel.localeCompare(b.rel));
+  return out;
+}
+// Read one file inside a skill/agent, guarded against path traversal and binaries.
+function itemFileContent(kind, name, rel) {
+  try {
+    const root = kind === 'agent' ? BOB_AGENTS : path.join(BOB_VAULT, name);
+    const full = path.resolve(root, rel || '');
+    if (full !== path.resolve(root) && !full.startsWith(path.resolve(root) + path.sep)) return '(blocked)';
+    const st = fs.statSync(full);
+    if (st.size > 256 * 1024) return '(file is ' + Math.round(st.size / 1024) + ' KB, too large to preview)';
+    const buf = fs.readFileSync(full);
+    if (buf.includes(0)) return '(binary file, not shown)';
+    return buf.toString('utf8');
+  } catch (e) { return ''; }
+}
 // Default scaffolds for a fresh item.
 function skillScaffold(name) { const s = slugify(name) || 'my-skill'; return '---\nname: ' + s + '\ndescription: One line on what it does and when to use it.\n---\n\n# ' + s + '\n\nStep-by-step instructions Bob should follow for this kind of task.\n'; }
 function agentScaffold(name) { const s = slugify(name) || 'my-agent'; return '---\nname: ' + s + '\ndescription: What this agent is good at.\nwhenToUse: Delegate when the task is to <the specific job>.\ngroups: [read, edit, command]\n---\nYou are a focused specialist. Do exactly this job and return the result.\n'; }
@@ -683,6 +717,39 @@ function forkItem(kind, src, rawNew) {
   // rewrite the name in the frontmatter to the new slug
   const body = content.replace(/^(name:\s*).+$/m, '$1' + name);
   return kind === 'agent' ? saveCustomAgent(name, body) : saveCustomSkill(name, body);
+}
+// Attach an extra file to a custom skill (scripts, references, templates). Path-safe.
+function saveAttachedFile(name, rel, content) {
+  if (!isCustom('skill', name)) return { error: 'Only your own skills can have files attached.' };
+  if (!rel || rel === 'SKILL.md' || /(^|\/)\.\.($|\/)/.test(rel)) return { error: 'Pick a different file name.' };
+  const root = path.resolve(path.join(BOB_VAULT, name));
+  const full = path.resolve(root, rel);
+  if (!full.startsWith(root + path.sep)) return { error: 'Bad file path.' };
+  try { fs.mkdirSync(path.dirname(full), { recursive: true }); fs.writeFileSync(full, content == null ? '' : content); invalidateVaultCache(); return { ok: true }; } catch (e) { return { error: 'Could not write the file.' }; }
+}
+function deleteAttachedFile(name, rel) {
+  if (!isCustom('skill', name) || rel === 'SKILL.md') return false;
+  const root = path.resolve(path.join(BOB_VAULT, name));
+  const full = path.resolve(root, rel || '');
+  if (!full.startsWith(root + path.sep)) return false;
+  try { fs.rmSync(full, { force: true }); invalidateVaultCache(); return true; } catch (e) { return false; }
+}
+// Declare an item's resource requirements (writes _resources.json). Requirements are
+// skill-keyed (the setup model reads them via each kit's skills).
+function saveItemResources(name, reqs) {
+  try {
+    const rp = RESOURCE_FILE(); let r = {}; try { r = JSON.parse(fs.readFileSync(rp, 'utf8')); } catch (e) {}
+    const norm = (reqs || []).map((q, i) => {
+      const label = (q.label || '').trim(); if (!label) return null;
+      const o = { id: slugify(label) || ('req' + i), label, setup: (q.setup || '').trim() };
+      if (q.connKey) { const k = slugify(q.connKey) || o.id; o.type = 'connection'; o.check = 'conn:' + k; o.config = [{ key: k, label: label, secret: true }]; }
+      else { o.type = 'tool'; if (q.check) o.check = slugify(q.check); if (q.url) o.url = (q.url || '').trim(); }
+      return o;
+    }).filter(Boolean);
+    if (norm.length) r[name] = norm; else delete r[name];
+    fs.writeFileSync(rp, JSON.stringify(r, null, 2) + '\n');
+    invalidateResourceCache();
+  } catch (e) {}
 }
 // Reconcile an item's kit membership to exactly `kits` (add where selected, remove elsewhere).
 function applyItemToKits(kind, name, kits) {
@@ -867,8 +934,27 @@ async function handleMessage(m, context) {
   if (m.type === 'openManager') { openManagerPanel(context); return; }
   if (m.type === 'getContent') {
     const content = itemContent(m.kind, m.name);
-    if (managerPanel) managerPanel.webview.postMessage({ type: 'content', kind: m.kind, name: m.name, content, editable: isCustom(m.kind, m.name), kits: itemKits(m.kind, m.name) });
+    if (managerPanel) managerPanel.webview.postMessage({ type: 'content', kind: m.kind, name: m.name, content, editable: isCustom(m.kind, m.name), kits: itemKits(m.kind, m.name), files: itemFiles(m.kind, m.name), requirements: (readResources()[m.name] || []), mode: m.mode || 'view' });
     if (builderPanel) builderPanel.webview.postMessage({ type: 'content', kind: m.kind, name: m.name, content });
+    return;
+  }
+  if (m.type === 'getFile') {
+    const content = itemFileContent(m.kind, m.name, m.rel);
+    if (managerPanel) managerPanel.webview.postMessage({ type: 'fileContent', name: m.name, rel: m.rel, content });
+    return;
+  }
+  if (m.type === 'saveFile') {
+    const r = saveAttachedFile(m.name, m.rel, m.content);
+    if (r.error) vscode.window.showErrorMessage(r.error);
+    else vscode.window.showInformationMessage('Attached ' + m.rel + ' to ' + m.name + '.');
+    if (managerPanel && !r.error) managerPanel.webview.postMessage({ type: 'content', kind: 'skill', name: m.name, content: itemContent('skill', m.name), editable: true, kits: itemKits('skill', m.name), files: itemFiles('skill', m.name), requirements: (readResources()[m.name] || []), mode: 'edit' });
+    return;
+  }
+  if (m.type === 'deleteFile') {
+    if (deleteAttachedFile(m.name, m.rel)) {
+      vscode.window.showInformationMessage('Removed ' + m.rel + '.');
+      if (managerPanel) managerPanel.webview.postMessage({ type: 'content', kind: 'skill', name: m.name, content: itemContent('skill', m.name), editable: true, kits: itemKits('skill', m.name), files: itemFiles('skill', m.name), requirements: (readResources()[m.name] || []), mode: 'edit' });
+    }
     return;
   }
   if (m.type === 'saveItem') {
@@ -877,6 +963,8 @@ async function handleMessage(m, context) {
     if (r.error) { vscode.window.showErrorMessage(r.error); if (managerPanel) managerPanel.webview.postMessage({ type: 'saveResult', ok: false, error: r.error }); return; }
     // optional kit membership
     if (Array.isArray(m.kits)) applyItemToKits(m.kind, r.name, m.kits);
+    // optional resource requirements (skills only)
+    if (m.kind === 'skill' && Array.isArray(m.requirements)) saveItemResources(r.name, m.requirements);
     vscode.window.showInformationMessage((m.kind === 'agent' ? 'Agent' : 'Skill') + ' "' + r.name + '" saved. Start a new conversation to use it.');
     if (managerPanel) managerPanel.webview.postMessage({ type: 'saveResult', ok: true, name: r.name });
     postState(); return;
@@ -1300,6 +1388,9 @@ function managerHtml() {
     .kitpick{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0} .kitpick label{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--vscode-descriptionForeground)}
     pre.preview{background:var(--vscode-textCodeBlock-background,#1e1e1e);border:1px solid var(--vscode-widget-border,#333);border-radius:6px;padding:11px;max-height:300px;overflow:auto;white-space:pre;font-size:12px;margin:6px 0}
     .bar{display:flex;gap:8px;margin-top:10px}
+    .fchip{font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid var(--vscode-widget-border,#444);background:transparent;color:var(--vscode-foreground);cursor:pointer} .fchip.on{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border-color:transparent} .fchip .fsz{opacity:.6;margin-left:4px}
+    .reqrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:5px 0;padding:6px;border:1px solid var(--vscode-widget-border,#333);border-radius:6px} .reqrow input{width:auto;flex:1;min-width:90px} .reqrow select{font:inherit;padding:5px;border-radius:5px;background:var(--vscode-input-background);color:var(--vscode-input-foreground);border:1px solid var(--vscode-widget-border,#444)} .reqrow .rm{flex:none}
+    .attrow{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px} .attrow .an{flex:1;font-family:var(--vscode-editor-font-family,monospace)}
   </style></head><body>
     <h1>My skills &amp; agents</h1>
     <p class="tag">Create, edit, and delete your own skills and agents, validated against the standard. Preview or fork any bundled one.</p>
@@ -1312,7 +1403,11 @@ function managerHtml() {
     <h2>Browse all (preview or fork)</h2>
     <input class="search" id="search" placeholder="Search…"/>
     <div id="browse" style="max-height:230px;overflow:auto"></div>
-    <pre class="preview" id="preview" style="display:none"></pre>
+    <div id="preview" style="display:none;margin-top:10px;border:1px solid var(--vscode-widget-border,#333);border-radius:8px;padding:12px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b id="pvName" style="flex:1"></b><button class="ghost" id="pvClose">Close</button></div>
+      <div id="pvFiles" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+      <pre class="preview" id="pvContent" style="margin:0"></pre>
+    </div>
 
     <div id="editor">
       <div style="font-weight:600;margin-bottom:6px" id="editorTitle">New skill</div>
@@ -1322,11 +1417,22 @@ function managerHtml() {
       <div class="val" id="val"></div>
       <div class="muted" style="margin-top:6px">Include in kits:</div>
       <div class="kitpick" id="kitpick"></div>
+      <div id="reqSection">
+        <div class="muted" style="margin-top:10px">Requirements <span style="font-weight:400">(a tool or connection this skill needs, optional)</span>:</div>
+        <div id="reqs"></div>
+        <button class="ghost" id="addReq" style="margin-top:4px">+ Add requirement</button>
+      </div>
+      <div id="filesSection" style="display:none">
+        <div class="muted" style="margin-top:10px">Attached files <span style="font-weight:400">(scripts, references, templates)</span>:</div>
+        <div id="attFiles"></div>
+        <div style="display:flex;gap:6px;margin-top:5px"><input id="fname" placeholder="scripts/helper.py" style="flex:1"/><button class="ghost" id="addFileBtn">Attach</button></div>
+        <textarea id="fbody" placeholder="File contents…" style="min-height:90px;margin-top:6px"></textarea>
+      </div>
       <div class="bar"><button id="saveBtn">Save</button><button class="ghost" id="cancelBtn">Cancel</button></div>
     </div>
 
     <script>(function(){
-      const v=acquireVsCodeApi(); let S=null; let kind='skill'; let editingNew=false;
+      const v=acquireVsCodeApi(); let S=null; let kind='skill'; let editingNew=false; let touched=false; let curPreview=null;
       const $=id=>document.getElementById(id);
       function slug(s){return (s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
       function kits(){ if(!S) return []; return [...(S.builtin||[]), ...Object.keys(S.profiles||{}).filter(p=>!(S.builtin||[]).includes(p))].filter(p=>p!=='__lean__'); }
@@ -1336,8 +1442,9 @@ function managerHtml() {
 
       window.addEventListener('message',e=>{ const m=e.data;
         if(m.type==='state'){ S=m; render(); }
-        else if(m.type==='content'){ if(m.isNew){ openEditor(true,m.name,m.content,[]); } else { showPreviewOrEdit(m); } }
-        else if(m.type==='saveResult'){ if(m.ok){ closeEditor(); } else { setVal([m.error],[]); } }
+        else if(m.type==='content'){ if(m.isNew){ openEditor(true,m.name,m.content,[],[],[]); } else if(m.mode==='edit' && m.editable){ openEditor(false,m.name,m.content,m.kits||[],m.requirements||[],m.files||[]); } else { openPreview(m); } }
+        else if(m.type==='fileContent'){ if(curPreview && m.name===curPreview.name){ $('pvContent').textContent=m.content; } }
+        else if(m.type==='saveResult'){ if(m.ok){ closeEditor(); } else { touched=true; setVal([m.error],[]); } }
         else if(m.type==='forked'){ kind=m.kind; }
       });
 
@@ -1348,42 +1455,66 @@ function managerHtml() {
         if(!list.length) mine.innerHTML='<div class="muted" style="padding:6px 0">None yet. Create one, or fork a bundled one below.</div>';
         list.forEach(n=>{ const d=document.createElement('div'); d.className='row';
           d.innerHTML='<span class="nm">'+n+' <span class="sd">'+(kind==='skill'?(descOf(n)||''):'')+'</span></span>';
-          const edit=document.createElement('button'); edit.className='ghost'; edit.textContent='Edit'; edit.onclick=()=>v.postMessage({type:'getContent',kind,name:n}); d.appendChild(edit);
+          const view=document.createElement('button'); view.className='ghost'; view.textContent='View'; view.onclick=()=>v.postMessage({type:'getContent',kind,name:n,mode:'view'}); d.appendChild(view);
+          const edit=document.createElement('button'); edit.className='ghost'; edit.textContent='Edit'; edit.onclick=()=>v.postMessage({type:'getContent',kind,name:n,mode:'edit'}); d.appendChild(edit);
           const del=document.createElement('button'); del.className='danger'; del.textContent='Delete'; del.onclick=()=>{ if(confirm('Delete '+n+'?')) v.postMessage({type:'deleteItem',kind,name:n}); }; d.appendChild(del);
           mine.appendChild(d); });
         renderBrowse();
       }
-      function renderBrowse(){ const q=(($('search').value)||'').toLowerCase(); const b=$('browse'); b.innerHTML='';
+      function renderBrowse(){ const q=(($('search').value)||'').toLowerCase(); const b=$('browse'); b.innerHTML=''; const mineSet=new Set(mineOf(kind));
         allOf(kind).filter(n=>!q||n.toLowerCase().includes(q)||(descOf(n)||'').toLowerCase().includes(q)).slice(0,200).forEach(n=>{
-          const mineSet=new Set(mineOf(kind)); const d=document.createElement('div'); d.className='row';
+          const d=document.createElement('div'); d.className='row';
           d.innerHTML='<span class="nm">'+n+' <span class="sd">'+(kind==='skill'?(descOf(n)||''):'')+'</span></span>';
-          const view=document.createElement('button'); view.className='ghost'; view.textContent='View'; view.onclick=()=>v.postMessage({type:'getContent',kind,name:n}); d.appendChild(view);
-          if(mineSet.has(n)){ const e=document.createElement('button'); e.className='ghost'; e.textContent='Edit'; e.onclick=()=>v.postMessage({type:'getContent',kind,name:n}); d.appendChild(e); }
+          const view=document.createElement('button'); view.className='ghost'; view.textContent='View'; view.onclick=()=>v.postMessage({type:'getContent',kind,name:n,mode:'view'}); d.appendChild(view);
+          if(mineSet.has(n)){ const e=document.createElement('button'); e.className='ghost'; e.textContent='Edit'; e.onclick=()=>v.postMessage({type:'getContent',kind,name:n,mode:'edit'}); d.appendChild(e); }
           else { const f=document.createElement('button'); f.textContent='Fork'; f.onclick=()=>{ const nn=prompt('Name your copy:', slug(n)+'-copy'); if(nn) v.postMessage({type:'forkItem',kind,src:n,newName:nn}); }; d.appendChild(f); }
           b.appendChild(d); });
       }
-      function showPreviewOrEdit(m){ if(m.editable){ openEditor(false,m.name,m.content,m.kits||[]); } else { const p=$('preview'); p.style.display='block'; p.textContent=m.content; p.scrollIntoView({block:'nearest'}); } }
-      function openEditor(isNew,name,content,inKits){ editingNew=isNew; $('editor').style.display='block'; $('editorTitle').textContent=(isNew?'New ':'Edit ')+kind+(name?': '+name:''); $('ename').value=name||''; $('ename').disabled=!isNew&&!!name; $('ebody').value=content||''; renderKitPick(inKits); validate(); $('editor').scrollIntoView({block:'nearest'}); }
+      function fmtSize(n){ return n>1024?Math.round(n/1024)+'KB':n+'B'; }
+      function openPreview(m){ closeEditor(); curPreview={kind:m.kind,name:m.name}; $('preview').style.display='block'; $('pvName').textContent=m.name+(m.editable?'':' (bundled, read-only)'); $('pvContent').textContent=m.content||'';
+        const fl=$('pvFiles'); fl.innerHTML=''; (m.files||[]).forEach((f,i)=>{ const c=document.createElement('button'); c.className='fchip'+(i===0?' on':''); c.innerHTML=f.rel+(f.size?'<span class="fsz">'+fmtSize(f.size)+'</span>':'');
+          c.onclick=()=>{ document.querySelectorAll('#pvFiles .fchip').forEach(x=>x.classList.remove('on')); c.classList.add('on'); if(f.rel==='SKILL.md'||m.kind==='agent'){ $('pvContent').textContent=m.content; } else { $('pvContent').textContent='Loading…'; v.postMessage({type:'getFile',kind:m.kind,name:m.name,rel:f.rel}); } }; fl.appendChild(c); });
+        $('preview').scrollIntoView({block:'nearest'}); }
+      function openEditor(isNew,name,content,inKits,reqs,files){ $('preview').style.display='none'; editingNew=isNew; touched=false; $('editor').style.display='block'; $('editorTitle').textContent=(isNew?'New ':'Edit ')+kind+(name?': '+name:''); $('ename').value=name||''; $('ename').disabled=!isNew&&!!name; $('ebody').value=content||''; renderKitPick(inKits);
+        const isSkill=(kind==='skill'); $('reqSection').style.display=isSkill?'block':'none'; renderReqs(reqs||[]);
+        $('filesSection').style.display=(isSkill&&!isNew)?'block':'none'; renderAttached(files||[],name);
+        validate(); if(isNew){ setTimeout(()=>$('ename').focus(),0); } $('editor').scrollIntoView({block:'nearest'}); }
       function closeEditor(){ $('editor').style.display='none'; }
+      function renderReqs(list){ $('reqs').innerHTML=''; (list||[]).forEach(q=>addReqRow(q)); }
+      function addReqRow(q){ q=q||{}; const isConn=(q.type==='connection'); const connKey=isConn&&q.config&&q.config[0]?q.config[0].key:''; const check=(q.check&&q.check.indexOf('conn:')!==0)?q.check:''; const esc=s=>(s||'').replace(/"/g,'&quot;');
+        const row=document.createElement('div'); row.className='reqrow';
+        row.innerHTML='<input class="rlabel" placeholder="e.g. draw.io" value="'+esc(q.label)+'"/>'
+          +'<select class="rtype"><option value="tool"'+(!isConn?' selected':'')+'>a tool</option><option value="connection"'+(isConn?' selected':'')+'>a connection/key</option></select>'
+          +'<input class="rcheck" placeholder="command to detect (e.g. drawio)" value="'+esc(check)+'"/>'
+          +'<input class="rurl" placeholder="download URL (optional)" value="'+esc(q.url)+'"/>'
+          +'<input class="rconn" placeholder="key name (e.g. token)" value="'+esc(connKey)+'" style="display:none"/>'
+          +'<button class="ghost rm">✕</button>';
+        const upd=()=>{ const conn=row.querySelector('.rtype').value==='connection'; row.querySelector('.rcheck').style.display=conn?'none':''; row.querySelector('.rurl').style.display=conn?'none':''; row.querySelector('.rconn').style.display=conn?'':'none'; };
+        row.querySelector('.rtype').onchange=upd; row.querySelector('.rm').onclick=()=>row.remove(); $('reqs').appendChild(row); upd(); }
+      function collectReqs(){ return [...document.querySelectorAll('#reqs .reqrow')].map(r=>{ const type=r.querySelector('.rtype').value; const label=r.querySelector('.rlabel').value.trim(); if(!label) return null; if(type==='connection') return {label,connKey:r.querySelector('.rconn').value.trim()||'token'}; return {label,check:r.querySelector('.rcheck').value.trim(),url:r.querySelector('.rurl').value.trim()}; }).filter(Boolean); }
+      function renderAttached(files,name){ const c=$('attFiles'); c.innerHTML=''; (files||[]).filter(f=>f.rel!=='SKILL.md').forEach(f=>{ const r=document.createElement('div'); r.className='attrow'; r.innerHTML='<span class="an">'+f.rel+'</span>'; const del=document.createElement('button'); del.className='danger'; del.textContent='Remove'; del.onclick=()=>{ if(confirm('Remove '+f.rel+'?')) v.postMessage({type:'deleteFile',name,rel:f.rel}); }; r.appendChild(del); c.appendChild(r); }); if(!c.children.length) c.innerHTML='<div class="muted" style="font-size:12px">None yet.</div>'; }
       function renderKitPick(inKits){ const set=new Set(inKits||[]); const kp=$('kitpick'); kp.innerHTML=''; kits().forEach(k=>{ const l=document.createElement('label'); l.innerHTML='<input type="checkbox" value="'+k+'" '+(set.has(k)?'checked':'')+'/> '+k; kp.appendChild(l); }); }
       function chosenKits(){ return [...document.querySelectorAll('#kitpick input:checked')].map(i=>i.value); }
-      function setVal(errs,warns){ const el=$('val'); if(!errs.length&&!warns.length){ el.innerHTML='<span class="ok">✓ Looks valid.</span>'; return; } el.innerHTML=errs.map(e=>'<div class="err">• '+e+'</div>').join('')+warns.map(w=>'<div class="warn">• '+w+'</div>').join(''); }
+      function setVal(errs,warns){ const el=$('val'); if(!touched){ el.innerHTML='<span class="muted">The definition is checked against the standard as you type.</span>'; return; } if(!errs.length&&!warns.length){ el.innerHTML='<span class="ok">✓ Looks valid.</span>'; return; } el.innerHTML=errs.map(e=>'<div class="err">• '+e+'</div>').join('')+warns.map(w=>'<div class="warn">• '+w+'</div>').join(''); }
       function validate(){ const name=$('ename').value; const body=$('ebody').value; const errs=[],warns=[];
         if(!slug(name)) errs.push('Name is required.');
         const fm=(body.match(/^---\\s*\\n([\\s\\S]*?)\\n---/)||[,''])[1];
         if(!fm) errs.push('Missing frontmatter (--- name/description --- block).');
-        else { if(!/^name:\\s*\\S/m.test(fm)) errs.push('Frontmatter needs a name:.'); if(!/^description:\\s*\\S/m.test(fm)) errs.push('Frontmatter needs a description:.'); if(kind==='agent'&&!/^whenToUse:\\s*\\S/m.test(fm)) warns.push('Add whenToUse: so Bob knows when to delegate.'); }
+        else { if(!/^name:\\s*\\S/m.test(fm)) errs.push('Frontmatter needs a name:.'); if(!/(?:^|\\n)description:\\s*\\S/.test(fm)) errs.push('Frontmatter needs a description:.'); if(kind==='agent'&&!/(?:^|\\n)whenToUse:\\s*\\S/.test(fm)) warns.push('Add whenToUse: so Bob knows when to delegate.'); }
         if(!body.replace(/^---\\s*\\n[\\s\\S]*?\\n---\\s*/,'').trim()) errs.push('The body is empty.');
         setVal(errs,warns); return errs.length===0; }
 
+      $('pvClose').onclick=()=>{ $('preview').style.display='none'; };
       $('tabSkill').onclick=()=>{ kind='skill'; closeEditor(); $('preview').style.display='none'; render(); };
       $('tabAgent').onclick=()=>{ kind='agent'; closeEditor(); $('preview').style.display='none'; render(); };
       $('search').addEventListener('input',renderBrowse);
       $('newBtn').onclick=()=>v.postMessage({type:'newScaffold',kind,name:''});
-      $('ename').addEventListener('input',()=>{ validate(); });
-      $('ebody').addEventListener('input',validate);
+      $('ename').addEventListener('input',()=>{ touched=true; validate(); });
+      $('ebody').addEventListener('input',()=>{ touched=true; validate(); });
       $('cancelBtn').onclick=closeEditor;
-      $('saveBtn').onclick=()=>{ if(!validate()) return; v.postMessage({type:'saveItem',kind,name:$('ename').value,body:$('ebody').value,kits:chosenKits()}); };
+      $('addReq').onclick=()=>addReqRow({});
+      $('addFileBtn').onclick=()=>{ const rel=($('fname').value||'').trim(); if(!rel){ return; } v.postMessage({type:'saveFile',name:$('ename').value,rel,content:$('fbody').value}); $('fname').value=''; $('fbody').value=''; };
+      $('saveBtn').onclick=()=>{ if(!validate()) return; v.postMessage({type:'saveItem',kind,name:$('ename').value,body:$('ebody').value,kits:chosenKits(),requirements:kind==='skill'?collectReqs():undefined}); };
       v.postMessage({type:'ready'});
     })();</script>
   </body></html>`;
