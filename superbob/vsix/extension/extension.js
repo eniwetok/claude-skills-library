@@ -179,6 +179,7 @@ function readAgentDef(name) {
   } catch (e) { return null; }
 }
 function kitAgents(kit) { return (readAgentsMap()[kit] || []).map(readAgentDef).filter(Boolean); }
+function listAgentDefs() { try { return fs.readdirSync(BOB_AGENTS).filter(f => f.endsWith('.md')).map(f => f.slice(0, -3)).sort(); } catch (e) { return []; } }
 function kitAgentsMap() { const all = readAgentsMap(); const out = {}; for (const k of Object.keys(all)) out[k] = kitAgents(k).map(a => ({ name: a.name, description: a.description })); return out; }
 function activeAgents() {
   const seen = new Set(); const out = [];
@@ -565,6 +566,152 @@ function deleteCustomProfile(name) {
   return false;
 }
 
+// ---- author-your-own skills & agents (CRUD) --------------------------------
+// Only items the user created (tracked here) are editable/deletable. Everything
+// else is library: preview-only, forkable into an editable copy. This keeps
+// upstream-synced skills safe and stops a mistake from breaking a shipped skill.
+const CUSTOM_FILE = () => path.join(HOME, '.bob', '.superbob-custom.json');
+function readCustom() { try { const c = JSON.parse(fs.readFileSync(CUSTOM_FILE(), 'utf8')); return { skills: c.skills || [], agents: c.agents || [] }; } catch (e) { return { skills: [], agents: [] }; } }
+function writeCustom(c) { try { fs.writeFileSync(CUSTOM_FILE(), JSON.stringify({ skills: c.skills || [], agents: c.agents || [] }, null, 2) + '\n'); } catch (e) {} }
+function isCustom(kind, name) { const c = readCustom(); return (kind === 'agent' ? c.agents : c.skills).includes(name); }
+function addCustom(kind, name) { const c = readCustom(); const arr = kind === 'agent' ? c.agents : c.skills; if (!arr.includes(name)) arr.push(name); writeCustom(c); }
+function removeCustom(kind, name) { const c = readCustom(); if (kind === 'agent') c.agents = c.agents.filter(n => n !== name); else c.skills = c.skills.filter(n => n !== name); writeCustom(c); }
+function slugify(s) { return String(s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+
+// Validate against the format standards (ported from skill-library-lint). Returns
+// { errors:[], warnings:[] }. Errors block save; warnings are advisory.
+function validateSkill(name, body) {
+  const errors = [], warnings = [];
+  const slug = slugify(name);
+  if (!slug) errors.push('Name is required (letters, numbers, hyphens).');
+  else if (slug !== String(name).trim()) warnings.push('Name will be saved as "' + slug + '".');
+  const fm = (body.match(/^---\s*\n([\s\S]*?)\n---/) || [, ''])[1];
+  if (!fm) errors.push('Missing frontmatter. Start the file with a --- name/description --- block.');
+  else {
+    const nm = (fm.match(/^name:\s*(.+)$/m) || [, ''])[1].trim();
+    const desc = (fm.match(/(?:^|\n)description:\s*([\s\S]*?)(?:\n\w+:|$)/) || [, ''])[1].replace(/\s+/g, ' ').trim();
+    if (!nm) errors.push('Frontmatter needs a `name:`.');
+    else if (slug && nm !== slug) warnings.push('Frontmatter `name:` should match the skill name "' + slug + '".');
+    if (!desc) errors.push('Frontmatter needs a `description:` (one line on what it does and when to use it).');
+    else if (desc.length > 220) warnings.push('Description is long; a tight one line reads better.');
+  }
+  const afterFm = body.replace(/^---\s*\n[\s\S]*?\n---\s*/, '').trim();
+  if (!afterFm) errors.push('Add the instructions below the frontmatter (the body is empty).');
+  return { errors, warnings };
+}
+function validateAgent(name, body) {
+  const errors = [], warnings = [];
+  const slug = slugify(name);
+  if (!slug) errors.push('Name is required (letters, numbers, hyphens).');
+  const fm = (body.match(/^---\s*\n([\s\S]*?)\n---/) || [, ''])[1];
+  if (!fm) errors.push('Missing frontmatter. Start with a --- name/description --- block.');
+  else {
+    if (!/^name:\s*\S/m.test(fm)) errors.push('Frontmatter needs a `name:`.');
+    if (!/^description:\s*\S/m.test(fm)) errors.push('Frontmatter needs a `description:` (Bob matches on it to delegate).');
+    if (!/^whenToUse:\s*\S/m.test(fm)) warnings.push('Add `whenToUse:` so the SuperBob mode knows when to delegate to this agent.');
+  }
+  const afterFm = body.replace(/^---\s*\n[\s\S]*?\n---\s*/, '').trim();
+  if (!afterFm) errors.push('Describe the agent role below the frontmatter (the body is empty).');
+  return { errors, warnings };
+}
+// Read the raw content of a skill or agent for preview / edit.
+function itemContent(kind, name) {
+  try {
+    if (kind === 'agent') return fs.readFileSync(path.join(BOB_AGENTS, name + '.md'), 'utf8');
+    return fs.readFileSync(path.join(BOB_VAULT, name, 'SKILL.md'), 'utf8');
+  } catch (e) { return ''; }
+}
+// Default scaffolds for a fresh item.
+function skillScaffold(name) { const s = slugify(name) || 'my-skill'; return '---\nname: ' + s + '\ndescription: One line on what it does and when to use it.\n---\n\n# ' + s + '\n\nStep-by-step instructions Bob should follow for this kind of task.\n'; }
+function agentScaffold(name) { const s = slugify(name) || 'my-agent'; return '---\nname: ' + s + '\ndescription: What this agent is good at.\nwhenToUse: Delegate when the task is to <the specific job>.\ngroups: [read, edit, command]\n---\nYou are a focused specialist. Do exactly this job and return the result.\n'; }
+
+// Write a custom skill: <name>/SKILL.md in the vault + track it + refresh the cache.
+function saveCustomSkill(rawName, body) {
+  const name = slugify(rawName); if (!name) return null;
+  const v = validateSkill(name, body); if (v.errors.length) return { error: v.errors[0] };
+  try {
+    const dir = path.join(BOB_VAULT, name); fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'SKILL.md'), body.endsWith('\n') ? body : body + '\n');
+    addCustom('skill', name); invalidateVaultCache();
+    return { name };
+  } catch (e) { return { error: 'Could not write the skill.' }; }
+}
+// Write a custom agent def: ~/.bob/agents/<name>.md + track it.
+function saveCustomAgent(rawName, body) {
+  const name = slugify(rawName); if (!name) return null;
+  const v = validateAgent(name, body); if (v.errors.length) return { error: v.errors[0] };
+  try {
+    fs.mkdirSync(BOB_AGENTS, { recursive: true });
+    fs.writeFileSync(path.join(BOB_AGENTS, name + '.md'), body.endsWith('\n') ? body : body + '\n');
+    addCustom('agent', name);
+    if (!isPoweredOff()) writeAgents();   // re-materialize if the agent's kit is active
+    return { name };
+  } catch (e) { return { error: 'Could not write the agent.' }; }
+}
+// Delete a custom item: file(s) + manifest + references in kits.
+function deleteCustomItem(kind, name) {
+  if (!isCustom(kind, name)) return false;   // never touch library items
+  try {
+    if (kind === 'agent') {
+      fs.rmSync(path.join(BOB_AGENTS, name + '.md'), { force: true });
+      // strip from _agents.json
+      const ap = AGENTS_FILE(); let map = {}; try { map = JSON.parse(fs.readFileSync(ap, 'utf8')); } catch (e) {}
+      for (const k of Object.keys(map)) map[k] = (map[k] || []).filter(n => n !== name);
+      fs.writeFileSync(ap, JSON.stringify(map, null, 2) + '\n');
+      if (!isPoweredOff()) writeAgents();
+    } else {
+      fs.rmSync(path.join(BOB_VAULT, name), { recursive: true, force: true });
+      // strip from every kit profile
+      for (const pf of profileNames()) {
+        const p = path.join(BOB_PROFILES, pf + '.txt');
+        const lines = readList(p);
+        if (lines.includes(name)) fs.writeFileSync(p, lines.filter(n => n !== name).join('\n') + '\n');
+      }
+      invalidateVaultCache();
+    }
+    removeCustom(kind, name);
+    return true;
+  } catch (e) { return false; }
+}
+// Fork a library item into an editable custom copy.
+function forkItem(kind, src, rawNew) {
+  const name = slugify(rawNew) || slugify(src + '-copy');
+  const content = itemContent(kind, src); if (!content) return { error: 'Could not read the source.' };
+  // rewrite the name in the frontmatter to the new slug
+  const body = content.replace(/^(name:\s*).+$/m, '$1' + name);
+  return kind === 'agent' ? saveCustomAgent(name, body) : saveCustomSkill(name, body);
+}
+// Reconcile an item's kit membership to exactly `kits` (add where selected, remove elsewhere).
+function applyItemToKits(kind, name, kits) {
+  const want = new Set(kits || []);
+  try {
+    if (kind === 'agent') {
+      const ap = AGENTS_FILE(); let map = {}; try { map = JSON.parse(fs.readFileSync(ap, 'utf8')); } catch (e) {}
+      for (const k of profileNames()) {
+        const arr = map[k] || []; const has = arr.includes(name);
+        if (want.has(k) && !has) arr.push(name); else if (!want.has(k) && has) map[k] = arr.filter(n => n !== name);
+        if (want.has(k)) map[k] = arr; if (map[k] && !map[k].length) delete map[k];
+      }
+      fs.writeFileSync(ap, JSON.stringify(map, null, 2) + '\n');
+      if (!isPoweredOff()) writeAgents();
+    } else {
+      for (const k of profileNames()) {
+        const p = path.join(BOB_PROFILES, k + '.txt'); const lines = readList(p); const has = lines.includes(name);
+        if (want.has(k) && !has) fs.writeFileSync(p, lines.concat(name).join('\n') + '\n');
+        else if (!want.has(k) && has) fs.writeFileSync(p, lines.filter(n => n !== name).join('\n') + '\n');
+      }
+      invalidateVaultCache();
+    }
+  } catch (e) {}
+}
+// Which kits currently include this item (for the membership picker).
+function itemKits(kind, name) {
+  const out = [];
+  if (kind === 'agent') { const map = readAgentsMap(); for (const k of Object.keys(map)) if ((map[k] || []).includes(name)) out.push(k); }
+  else { for (const k of profileNames()) if (readList(path.join(BOB_PROFILES, k + '.txt')).includes(name)) out.push(k); }
+  return out;
+}
+
 // ---- optional external tools (opt-in, install + network) -------------------
 // Some skills wrap a real CLI that must be installed and calls out to the network.
 // They are NOT part of the lean/egress-free kits. They live here as opt-in toggles:
@@ -665,6 +812,8 @@ function stateMessage() {
     resources: kitResourceStates(),
     setup: kitSetupStates(),
     agentsByKit: kitAgentsMap(),
+    custom: readCustom(),
+    allAgents: listAgentDefs(),
     auto: readAuto()
   };
 }
@@ -710,6 +859,39 @@ async function handleMessage(m, context) {
   }
   if (m.type === 'openBuilder') { openBuilderPanel(context); return; }
   if (m.type === 'openHowTo') { openHowToPanel(context); return; }
+  if (m.type === 'openManager') { openManagerPanel(context); return; }
+  if (m.type === 'getContent') {
+    const content = itemContent(m.kind, m.name);
+    if (managerPanel) managerPanel.webview.postMessage({ type: 'content', kind: m.kind, name: m.name, content, editable: isCustom(m.kind, m.name), kits: itemKits(m.kind, m.name) });
+    if (builderPanel) builderPanel.webview.postMessage({ type: 'content', kind: m.kind, name: m.name, content });
+    return;
+  }
+  if (m.type === 'saveItem') {
+    const r = m.kind === 'agent' ? saveCustomAgent(m.name, m.body) : saveCustomSkill(m.name, m.body);
+    if (!r) { vscode.window.showErrorMessage('Give it a valid name (letters, numbers, hyphens).'); return; }
+    if (r.error) { vscode.window.showErrorMessage(r.error); if (managerPanel) managerPanel.webview.postMessage({ type: 'saveResult', ok: false, error: r.error }); return; }
+    // optional kit membership
+    if (Array.isArray(m.kits)) applyItemToKits(m.kind, r.name, m.kits);
+    vscode.window.showInformationMessage((m.kind === 'agent' ? 'Agent' : 'Skill') + ' "' + r.name + '" saved. Start a new conversation to use it.');
+    if (managerPanel) managerPanel.webview.postMessage({ type: 'saveResult', ok: true, name: r.name });
+    postState(); return;
+  }
+  if (m.type === 'deleteItem') {
+    if (deleteCustomItem(m.kind, m.name)) vscode.window.showInformationMessage('Deleted "' + m.name + '".');
+    else vscode.window.showWarningMessage('Only items you created can be deleted.');
+    postState(); return;
+  }
+  if (m.type === 'forkItem') {
+    const r = forkItem(m.kind, m.src, m.newName);
+    if (r && !r.error) { vscode.window.showInformationMessage('Forked "' + m.src + '" into your editable "' + r.name + '".'); if (managerPanel) managerPanel.webview.postMessage({ type: 'forked', kind: m.kind, name: r.name }); }
+    else vscode.window.showErrorMessage((r && r.error) || 'Could not fork.');
+    postState(); return;
+  }
+  if (m.type === 'newScaffold') {
+    const content = m.kind === 'agent' ? agentScaffold(m.name) : skillScaffold(m.name);
+    if (managerPanel) managerPanel.webview.postMessage({ type: 'content', kind: m.kind, name: slugify(m.name), content, editable: true, isNew: true });
+    return;
+  }
   if (m.type === 'closeBuilder') { if (builderPanel) builderPanel.dispose(); return; }
   if (m.type === 'deleteMode') { deleteCustomProfile(m.name); postState(); return; }
   if (m.type === 'openGuide') { openGuidePanel(m.kit, context); return; }
@@ -1083,6 +1265,124 @@ npx rulesync generate --targets "*" --features "*"</pre></li>
   </body></html>`;
 }
 
+// ---- "My skills & agents" manager (CRUD, its own page) --------------------
+let managerPanel;
+function openManagerPanel(context) {
+  if (managerPanel) { managerPanel.reveal(vscode.ViewColumn.Active); postState(); return; }
+  managerPanel = vscode.window.createWebviewPanel('superbobManager', 'My skills & agents', vscode.ViewColumn.Active, { enableScripts: true, retainContextWhenHidden: true });
+  managerPanel.webview.html = managerHtml();
+  webviews.add(managerPanel.webview);   // receives postState broadcasts
+  managerPanel.webview.onDidReceiveMessage(m => handleMessage(m, context));
+  managerPanel.onDidDispose(() => { webviews.delete(managerPanel.webview); managerPanel = null; }, null, context.subscriptions);
+  postState();
+}
+function managerHtml() {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>
+    body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);max-width:760px;margin:0 auto;padding:22px 26px;line-height:1.55;font-size:13px}
+    h1{font-size:1.4rem;margin:0 0 3px} .tag{color:var(--vscode-descriptionForeground);margin:0 0 14px}
+    h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--vscode-descriptionForeground);margin:20px 0 8px;border-top:1px solid var(--vscode-widget-border,#333);padding-top:12px}
+    .tabs{display:flex;gap:6px;margin:4px 0 6px} .tab{padding:5px 14px;border-radius:6px;cursor:pointer;border:1px solid var(--vscode-widget-border,#444);background:transparent;color:var(--vscode-foreground)} .tab.on{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border-color:transparent}
+    .row{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--vscode-widget-border,#2a2a2a)} .row:first-child{border-top:0}
+    .row .nm{font-weight:600;flex:1} .row .sd{color:var(--vscode-descriptionForeground);font-weight:400;font-size:12px}
+    button{font:inherit;font-size:12px;padding:4px 11px;border-radius:5px;border:0;cursor:pointer;background:var(--vscode-button-background);color:var(--vscode-button-foreground)}
+    button.ghost{background:transparent;color:var(--vscode-foreground);border:1px solid var(--vscode-widget-border,#444)} button.danger{background:transparent;color:var(--vscode-errorForeground,#f14c4c);border:1px solid currentColor}
+    input,textarea{font:inherit;width:100%;box-sizing:border-box;padding:7px 9px;border-radius:6px;border:1px solid var(--vscode-widget-border,#444);background:var(--vscode-input-background);color:var(--vscode-input-foreground)}
+    textarea{min-height:280px;font-family:var(--vscode-editor-font-family,monospace);font-size:12.5px;white-space:pre}
+    .muted{color:var(--vscode-descriptionForeground)} .search{margin:6px 0}
+    #editor{display:none;margin-top:8px;border:1px solid var(--vscode-widget-border,#333);border-radius:8px;padding:14px}
+    .val{margin:8px 0;font-size:12px} .err{color:var(--vscode-errorForeground,#f14c4c)} .warn{color:var(--vscode-charts-yellow,#d29922)} .ok{color:var(--vscode-charts-green,#3fb950)}
+    .kitpick{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0} .kitpick label{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--vscode-descriptionForeground)}
+    pre.preview{background:var(--vscode-textCodeBlock-background,#1e1e1e);border:1px solid var(--vscode-widget-border,#333);border-radius:6px;padding:11px;max-height:300px;overflow:auto;white-space:pre;font-size:12px;margin:6px 0}
+    .bar{display:flex;gap:8px;margin-top:10px}
+  </style></head><body>
+    <h1>My skills &amp; agents</h1>
+    <p class="tag">Create, edit, and delete your own skills and agents, validated against the standard. Preview or fork any bundled one.</p>
+    <div class="tabs"><button class="tab on" data-kind="skill" id="tabSkill">Skills</button><button class="tab" data-kind="agent" id="tabAgent">Agents</button></div>
+
+    <h2>Yours (editable)</h2>
+    <div id="mine"></div>
+    <div class="bar"><button id="newBtn">+ New <span class="kindword">skill</span></button></div>
+
+    <h2>Browse all (preview or fork)</h2>
+    <input class="search" id="search" placeholder="Search…"/>
+    <div id="browse" style="max-height:230px;overflow:auto"></div>
+    <pre class="preview" id="preview" style="display:none"></pre>
+
+    <div id="editor">
+      <div style="font-weight:600;margin-bottom:6px" id="editorTitle">New skill</div>
+      <input id="ename" placeholder="name-in-kebab-case"/>
+      <div class="muted" style="margin:6px 0 3px">Definition (frontmatter + body):</div>
+      <textarea id="ebody"></textarea>
+      <div class="val" id="val"></div>
+      <div class="muted" style="margin-top:6px">Include in kits:</div>
+      <div class="kitpick" id="kitpick"></div>
+      <div class="bar"><button id="saveBtn">Save</button><button class="ghost" id="cancelBtn">Cancel</button></div>
+    </div>
+
+    <script>(function(){
+      const v=acquireVsCodeApi(); let S=null; let kind='skill'; let editingNew=false;
+      const $=id=>document.getElementById(id);
+      function slug(s){return (s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+      function kits(){ if(!S) return []; return [...(S.builtin||[]), ...Object.keys(S.profiles||{}).filter(p=>!(S.builtin||[]).includes(p))].filter(p=>p!=='__lean__'); }
+      function descOf(n){ const s=(S.skills||[]).find(x=>x.name===n); return s?s.desc:''; }
+      function allOf(k){ return k==='agent' ? (S.allAgents||[]) : (S.skills||[]).map(s=>s.name); }
+      function mineOf(k){ return ((S&&S.custom)?(k==='agent'?S.custom.agents:S.custom.skills):[])||[]; }
+
+      window.addEventListener('message',e=>{ const m=e.data;
+        if(m.type==='state'){ S=m; render(); }
+        else if(m.type==='content'){ if(m.isNew){ openEditor(true,m.name,m.content,[]); } else { showPreviewOrEdit(m); } }
+        else if(m.type==='saveResult'){ if(m.ok){ closeEditor(); } else { setVal([m.error],[]); } }
+        else if(m.type==='forked'){ kind=m.kind; }
+      });
+
+      function render(){ if(!S) return;
+        document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.kind===kind));
+        document.querySelectorAll('.kindword').forEach(x=>x.textContent=kind);
+        const mine=$('mine'); mine.innerHTML=''; const list=mineOf(kind);
+        if(!list.length) mine.innerHTML='<div class="muted" style="padding:6px 0">None yet. Create one, or fork a bundled one below.</div>';
+        list.forEach(n=>{ const d=document.createElement('div'); d.className='row';
+          d.innerHTML='<span class="nm">'+n+' <span class="sd">'+(kind==='skill'?(descOf(n)||''):'')+'</span></span>';
+          const edit=document.createElement('button'); edit.className='ghost'; edit.textContent='Edit'; edit.onclick=()=>v.postMessage({type:'getContent',kind,name:n}); d.appendChild(edit);
+          const del=document.createElement('button'); del.className='danger'; del.textContent='Delete'; del.onclick=()=>{ if(confirm('Delete '+n+'?')) v.postMessage({type:'deleteItem',kind,name:n}); }; d.appendChild(del);
+          mine.appendChild(d); });
+        renderBrowse();
+      }
+      function renderBrowse(){ const q=(($('search').value)||'').toLowerCase(); const b=$('browse'); b.innerHTML='';
+        allOf(kind).filter(n=>!q||n.toLowerCase().includes(q)||(descOf(n)||'').toLowerCase().includes(q)).slice(0,200).forEach(n=>{
+          const mineSet=new Set(mineOf(kind)); const d=document.createElement('div'); d.className='row';
+          d.innerHTML='<span class="nm">'+n+' <span class="sd">'+(kind==='skill'?(descOf(n)||''):'')+'</span></span>';
+          const view=document.createElement('button'); view.className='ghost'; view.textContent='View'; view.onclick=()=>v.postMessage({type:'getContent',kind,name:n}); d.appendChild(view);
+          if(mineSet.has(n)){ const e=document.createElement('button'); e.className='ghost'; e.textContent='Edit'; e.onclick=()=>v.postMessage({type:'getContent',kind,name:n}); d.appendChild(e); }
+          else { const f=document.createElement('button'); f.textContent='Fork'; f.onclick=()=>{ const nn=prompt('Name your copy:', slug(n)+'-copy'); if(nn) v.postMessage({type:'forkItem',kind,src:n,newName:nn}); }; d.appendChild(f); }
+          b.appendChild(d); });
+      }
+      function showPreviewOrEdit(m){ if(m.editable){ openEditor(false,m.name,m.content,m.kits||[]); } else { const p=$('preview'); p.style.display='block'; p.textContent=m.content; p.scrollIntoView({block:'nearest'}); } }
+      function openEditor(isNew,name,content,inKits){ editingNew=isNew; $('editor').style.display='block'; $('editorTitle').textContent=(isNew?'New ':'Edit ')+kind+(name?': '+name:''); $('ename').value=name||''; $('ename').disabled=!isNew&&!!name; $('ebody').value=content||''; renderKitPick(inKits); validate(); $('editor').scrollIntoView({block:'nearest'}); }
+      function closeEditor(){ $('editor').style.display='none'; }
+      function renderKitPick(inKits){ const set=new Set(inKits||[]); const kp=$('kitpick'); kp.innerHTML=''; kits().forEach(k=>{ const l=document.createElement('label'); l.innerHTML='<input type="checkbox" value="'+k+'" '+(set.has(k)?'checked':'')+'/> '+k; kp.appendChild(l); }); }
+      function chosenKits(){ return [...document.querySelectorAll('#kitpick input:checked')].map(i=>i.value); }
+      function setVal(errs,warns){ const el=$('val'); if(!errs.length&&!warns.length){ el.innerHTML='<span class="ok">✓ Looks valid.</span>'; return; } el.innerHTML=errs.map(e=>'<div class="err">• '+e+'</div>').join('')+warns.map(w=>'<div class="warn">• '+w+'</div>').join(''); }
+      function validate(){ const name=$('ename').value; const body=$('ebody').value; const errs=[],warns=[];
+        if(!slug(name)) errs.push('Name is required.');
+        const fm=(body.match(/^---\\s*\\n([\\s\\S]*?)\\n---/)||[,''])[1];
+        if(!fm) errs.push('Missing frontmatter (--- name/description --- block).');
+        else { if(!/^name:\\s*\\S/m.test(fm)) errs.push('Frontmatter needs a name:.'); if(!/^description:\\s*\\S/m.test(fm)) errs.push('Frontmatter needs a description:.'); if(kind==='agent'&&!/^whenToUse:\\s*\\S/m.test(fm)) warns.push('Add whenToUse: so Bob knows when to delegate.'); }
+        if(!body.replace(/^---\\s*\\n[\\s\\S]*?\\n---\\s*/,'').trim()) errs.push('The body is empty.');
+        setVal(errs,warns); return errs.length===0; }
+
+      $('tabSkill').onclick=()=>{ kind='skill'; closeEditor(); $('preview').style.display='none'; render(); };
+      $('tabAgent').onclick=()=>{ kind='agent'; closeEditor(); $('preview').style.display='none'; render(); };
+      $('search').addEventListener('input',renderBrowse);
+      $('newBtn').onclick=()=>v.postMessage({type:'newScaffold',kind,name:''});
+      $('ename').addEventListener('input',()=>{ validate(); });
+      $('ebody').addEventListener('input',validate);
+      $('cancelBtn').onclick=closeEditor;
+      $('saveBtn').onclick=()=>{ if(!validate()) return; v.postMessage({type:'saveItem',kind,name:$('ename').value,body:$('ebody').value,kits:chosenKits()}); };
+      v.postMessage({type:'ready'});
+    })();</script>
+  </body></html>`;
+}
+
 // ---- kit builder (its own page) -------------------------------------------
 let builderPanel;
 function openBuilderPanel(context) {
@@ -1111,6 +1411,8 @@ function builderHtml(vault) {
   button{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border:0;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px}
   button.sec{background:var(--vscode-button-secondaryBackground,#3a3a3a);color:var(--vscode-button-secondaryForeground,#ccc)}
   .hint{background:var(--vscode-editorWidget-background);border-radius:6px;padding:8px 11px;font-size:12px;margin-top:4px}
+  .row .view{width:auto;background:var(--vscode-button-secondaryBackground,#3a3a3a);color:var(--vscode-button-secondaryForeground,#ccc);padding:2px 10px;font-size:12px;flex:none}
+  pre.preview{background:var(--vscode-textCodeBlock-background,#1e1e1e);border:1px solid var(--vscode-widget-border,#333);border-radius:6px;padding:10px;max-height:280px;overflow:auto;white-space:pre;font-size:12px;margin-top:8px}
 </style></head><body>
   <h1>Create a SuperBob kit</h1>
   <p class="sub muted">A kit is a set of skills you load together for one kind of work, plus the context that tells <b>you</b> and SuperBob's <b>Auto mode</b> when to reach for it. Fill the context in here; it powers routing and the "How to use" page.</p>
@@ -1128,6 +1430,7 @@ function builderHtml(vault) {
   <label>Skills <span class="muted" id="cnt"></span></label>
   <input id="search" placeholder="Search skills…"/>
   <div class="list" id="list"></div>
+  <pre class="preview" id="bpreview" style="display:none"></pre>
 
   <label>Worked example <span class="muted">(one step per line, optional; shows in "How to use")</span></label>
   <textarea id="example" rows="4" placeholder="Load the kit and start a new chat.&#10;Paste the question and the agent's answer.&#10;Score retrieval and answer quality separately."></textarea>
@@ -1143,12 +1446,15 @@ function builderHtml(vault) {
   function count(){ document.getElementById('cnt').textContent='· '+(sel.size+2)+' skills (incl. 2 core)'; }
   function render(){ const q=(document.getElementById('search').value||'').toLowerCase(); list.innerHTML='';
     SK.forEach(s=>{ if(q && !(s.n.includes(q)||(s.d||'').toLowerCase().includes(q))) return;
-      const row=document.createElement('label'); row.className='row';
+      const row=document.createElement('div'); row.className='row';
       const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=sel.has(s.n);
       cb.onchange=()=>{ cb.checked?sel.add(s.n):sel.delete(s.n); count(); };
-      const mid=document.createElement('div'); mid.innerHTML='<div class="n">'+s.n+'</div>'+(s.d?'<div class="d">'+s.d+'</div>':'');
-      row.appendChild(cb); row.appendChild(mid); list.appendChild(row); });
+      const mid=document.createElement('div'); mid.style.flex='1'; mid.style.cursor='pointer'; mid.innerHTML='<div class="n">'+s.n+'</div>'+(s.d?'<div class="d">'+s.d+'</div>':'');
+      mid.onclick=()=>{ cb.checked=!cb.checked; cb.checked?sel.add(s.n):sel.delete(s.n); count(); };
+      const view=document.createElement('button'); view.className='view'; view.textContent='View'; view.title='See this skill\\'s full content'; view.onclick=()=>vscode.postMessage({type:'getContent',kind:'skill',name:s.n});
+      row.appendChild(cb); row.appendChild(mid); row.appendChild(view); list.appendChild(row); });
   }
+  window.addEventListener('message',e=>{ if(e.data.type==='content'){ const p=document.getElementById('bpreview'); p.style.display='block'; p.textContent=e.data.content; p.scrollIntoView({block:'nearest'}); }});
   document.getElementById('search').addEventListener('input',render);
   document.getElementById('cancel').onclick=()=>vscode.postMessage({type:'closeBuilder'});
   document.getElementById('save').onclick=()=>{
@@ -1303,7 +1609,8 @@ function getWebviewHtml() {
   </details>
 
   <button id="createBtn">+ Create your own kit</button>
-  <button class="sec" id="howToBtn" style="margin-left:6px">How to create &amp; import ↗</button>
+  <button class="sec" id="manageBtn" style="margin-left:6px">Manage my skills &amp; agents</button>
+  <button class="sec" id="howToBtn" style="margin-left:6px">How to ↗</button>
 
   <div id="builder" style="display:none">
     <div style="font-weight:600;margin-bottom:4px">Create your own kit</div>
@@ -1528,6 +1835,7 @@ function getWebviewHtml() {
   document.addEventListener('click',e=>{
     if(e.target.id==='createBtn') vscode.postMessage({type:'openBuilder'});
     if(e.target.id==='howToBtn') vscode.postMessage({type:'openHowTo'});
+    if(e.target.id==='manageBtn') vscode.postMessage({type:'openManager'});
     if(e.target.id==='bcancel') closeBuilder();
     if(e.target.id==='installBtn') vscode.postMessage({type:'install'});
     if(e.target.id==='docsBtn') vscode.postMessage({type:'openDocs'});
