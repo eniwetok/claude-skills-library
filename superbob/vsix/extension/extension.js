@@ -1412,9 +1412,10 @@ function managerHtml() {
     .muted{color:var(--vscode-descriptionForeground)} .search{margin:6px 0}
     #editor{display:none;margin-top:8px;border:1px solid var(--vscode-widget-border,#333);border-radius:8px;padding:14px}
     .val{margin:8px 0;font-size:12px} .err{color:var(--vscode-errorForeground,#f14c4c)} .warn{color:var(--vscode-charts-yellow,#d29922)} .ok{color:var(--vscode-charts-green,#3fb950)}
-    .kitpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:6px 12px;margin:8px 0;max-height:32vh;overflow:auto;border:1px solid var(--vscode-widget-border,#333);border-radius:6px;padding:11px}
-    .kitpick label{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:var(--vscode-foreground);line-height:1.35;cursor:pointer;overflow-wrap:anywhere}
-    .kitpick input{margin:0;margin-top:2px;flex:none;cursor:pointer}
+    .kitpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px 14px;margin:8px 0;max-height:34vh;overflow:auto;border:1px solid var(--vscode-widget-border,#333);border-radius:6px;padding:12px}
+    .kitpick label{display:grid;grid-template-columns:16px 1fr;align-items:start;gap:8px;font-size:12px;color:var(--vscode-foreground);line-height:1.3;cursor:pointer}
+    .kitpick input{margin:1px 0 0 0;cursor:pointer}
+    .kitpick label span{overflow-wrap:break-word;word-break:normal;min-width:0}
     pre.preview{background:var(--vscode-textCodeBlock-background,#1e1e1e);border:1px solid var(--vscode-widget-border,#333);border-radius:6px;padding:11px;max-height:300px;overflow:auto;white-space:pre;font-size:12px;margin:6px 0}
     .bar{display:flex;gap:8px;margin-top:10px}
     .fchip{font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid var(--vscode-widget-border,#444);background:transparent;color:var(--vscode-foreground);cursor:pointer} .fchip.on{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border-color:transparent} .fchip .fsz{opacity:.6;margin-left:4px}
@@ -1525,7 +1526,7 @@ function managerHtml() {
         row.querySelector('.rtype').onchange=upd; row.querySelector('.rm').onclick=()=>row.remove(); $('reqs').appendChild(row); upd(); }
       function collectReqs(){ return [...document.querySelectorAll('#reqs .reqrow')].map(r=>{ const type=r.querySelector('.rtype').value; const label=r.querySelector('.rlabel').value.trim(); if(!label) return null; if(type==='connection') return {label,connKey:r.querySelector('.rconn').value.trim()||'token'}; return {label,check:r.querySelector('.rcheck').value.trim(),url:r.querySelector('.rurl').value.trim()}; }).filter(Boolean); }
       function renderAttached(files,name){ const c=$('attFiles'); c.innerHTML=''; (files||[]).filter(f=>f.rel!=='SKILL.md').forEach(f=>{ const r=document.createElement('div'); r.className='attrow'; r.innerHTML='<span class="an">'+f.rel+'</span>'; const del=document.createElement('button'); del.className='danger'; del.textContent='Remove'; del.onclick=()=>{ if(confirm('Remove '+f.rel+'?')) v.postMessage({type:'deleteFile',name,rel:f.rel}); }; r.appendChild(del); c.appendChild(r); }); if(!c.children.length) c.innerHTML='<div class="muted" style="font-size:12px">None yet.</div>'; }
-      function renderKitPick(inKits){ const set=new Set(inKits||[]); const kp=$('kitpick'); kp.innerHTML=''; kits().forEach(k=>{ const l=document.createElement('label'); l.innerHTML='<input type="checkbox" value="'+k+'" '+(set.has(k)?'checked':'')+'/> '+k; kp.appendChild(l); }); }
+      function renderKitPick(inKits){ const set=new Set(inKits||[]); const kp=$('kitpick'); kp.innerHTML=''; kits().forEach(k=>{ const l=document.createElement('label'); l.innerHTML='<input type="checkbox" value="'+k+'"'+(set.has(k)?' checked':'')+'/><span>'+k+'</span>'; kp.appendChild(l); }); }
       function chosenKits(){ return [...document.querySelectorAll('#kitpick input:checked')].map(i=>i.value); }
       function setVal(errs,warns){ const el=$('val'); if(!touched){ el.innerHTML='<span class="muted">The definition is checked against the standard as you type.</span>'; return; } if(!errs.length&&!warns.length){ el.innerHTML='<span class="ok">✓ Looks valid.</span>'; return; } el.innerHTML=errs.map(e=>'<div class="err">• '+e+'</div>').join('')+warns.map(w=>'<div class="warn">• '+w+'</div>').join(''); }
       function validate(){ const name=$('ename').value; const body=$('ebody').value; const errs=[],warns=[];
