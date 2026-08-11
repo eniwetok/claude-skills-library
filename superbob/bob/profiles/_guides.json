@@ -385,5 +385,30 @@
       "You get an editable .drawio file, not a flat image, so you can keep refining it by hand.",
       "Chain diagram-review after any tool: generate the diagram, then say \"review this diagram\" to get professional-layout fixes. It is tool-agnostic."
     ]
+  },
+  "web-design": {
+    "tagline": "Design and build web interfaces: Figma to components, a real design system, and professional UI standards.",
+    "jtbd": "When I am designing or building a web UI, I want to move from Figma to clean, on-system components without reinventing the design language each time.",
+    "description": "Work in Figma (read files, generate and implement designs), scaffold UI with shadcn components, and hold to real design-system standards and the Vercel web-design guidelines (layout, typography, color, accessibility). Turns a design into on-brand, accessible front-end instead of one-off screens.",
+    "outline": [
+      "figma-use: read and work with a Figma file via the Figma connection",
+      "figma-generate-design / figma-implement-design: create designs in Figma and turn them into code",
+      "shadcn-ui + design-system: build with a component library on a consistent design system",
+      "web-design-guidelines + ui-ux-pro-max: apply layout, typography, color, and accessibility standards",
+      "baseline-ui: a clean starting baseline for a new UI"
+    ],
+    "examples": [
+      "Say \"turn this Figma frame into shadcn components\". figma-implement-design plus shadcn-ui build it to the design system.",
+      "Say \"design a settings page in Figma from this spec\". figma-generate-design lays it out in the file.",
+      "Say \"review this UI against the design guidelines\". web-design-guidelines checks layout, type, color, and accessibility.",
+      "Say \"scaffold a dashboard with shadcn\". shadcn-ui plus design-system give you consistent components.",
+      "Say \"build a landing hero on our design system\". baseline-ui and design-system keep it on-brand.",
+      "Say \"pull the components from our Figma library\". figma-use reads the file through the Figma connection."
+    ],
+    "tips": [
+      "figma-use needs the Figma connection set up; the kit's Requirements section links it.",
+      "Start from the design system (shadcn + design-system) so screens stay consistent instead of one-off.",
+      "Run web-design-guidelines as a final pass to catch layout, contrast, and accessibility issues."
+    ]
   }
 }

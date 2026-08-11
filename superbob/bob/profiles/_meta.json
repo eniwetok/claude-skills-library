@@ -18,5 +18,6 @@
   "product-frameworks": "The three PM thinking frameworks most tools skip - Jobs to Be Done (why users come), Hook Model (why they stay), CRO (why they convert) - plus discovery and retention-measurement to apply them.",
   "pm-methodology": "A repeatable product methodology (product-on-purpose): one anchor skill per phase - Foundation, Discover, Define (JTBD), Develop, Deliver (PRD), Measure (experiments), Iterate (retro). Walk a product idea end to end.",
   "agentic-authoring": "A full workbench for agentic artifacts: author skills, design agents to the AGENTS.md standard, compose subagents, and build the MCP tools they call.",
-  "diagramming": "Turn ideas, specs, and code into editable diagrams: draw.io files, mermaid, sketches, and UI wireframes, all local."
+  "diagramming": "Turn ideas, specs, and code into editable diagrams: draw.io files, mermaid, sketches, and UI wireframes, all local.",
+  "web-design": "Design and build web UI: work in Figma, turn designs into components, and apply real design-system standards (shadcn, Vercel guidelines)."
 }
