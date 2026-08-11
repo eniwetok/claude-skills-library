@@ -1263,8 +1263,16 @@ function howToHtml() {
     .muted{color:var(--vscode-descriptionForeground)} b{font-weight:600}
     table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12.5px} td,th{border:1px solid var(--vscode-widget-border,#333);padding:6px 9px;text-align:left;vertical-align:top}
   </style></head><body>
-    <h1>Create &amp; import in SuperBob</h1>
-    <p class="tag">Bring your own skills, agents, and connectors into Bob, then assemble them into a kit. Everything below happens in plain files SuperBob reads. No coding required beyond editing text.</p>
+    <h1>How SuperBob works</h1>
+    <p class="tag">Load a kit of expert skills for the task at hand, then bring your own skills, agents, and connectors and assemble kits of your own. Everything lives in plain files SuperBob reads.</p>
+
+    <h2>Using it day to day</h2>
+    <ol>
+      <li>Leave <b>Auto mode</b> on and SuperBob picks the right skills per task. For most work, that is the whole setup.</li>
+      <li>Or flip a kit's <b>blue toggle</b> to load it; stack several and their skills combine. <b>Learn more</b> shows a kit's pitch and a worked example; each skill has a <b>view</b> to read its content.</li>
+      <li>Or type <code>/superbob &lt;kit&gt;</code> in the Bob chat (e.g. <code>/superbob software-development</code>). <code>/superbob</code> alone lists them.</li>
+      <li>After switching, <b>start a new conversation</b> so the skills come online.</li>
+    </ol>
 
     <div class="note">A <b>kit</b> is a named bundle you load together. It can hold three kinds of things: <b>skills</b> (know-how loaded into context), <b>agents</b> (subagents Bob delegates subtasks to), and <b>connectors</b> (MCP tools the skills or agents call). You mix and match them per task.</div>
 
@@ -1411,7 +1419,7 @@ function managerHtml() {
 
     <h2>Browse all (preview or fork)</h2>
     <input class="search" id="search" placeholder="Search…"/>
-    <div id="browse" style="max-height:230px;overflow:auto"></div>
+    <div id="browse" style="max-height:46vh;overflow:auto"></div>
     <div id="preview" style="display:none;margin-top:10px;border:1px solid var(--vscode-widget-border,#333);border-radius:8px;padding:12px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b id="pvName" style="flex:1"></b><button class="ghost" id="pvClose">Close</button></div>
       <div id="pvFiles" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
@@ -1583,7 +1591,7 @@ function builderHtml(vault) {
   label{display:block;font-weight:600;margin:16px 0 5px} label .muted{font-weight:400;font-size:12px}
   input,textarea{width:100%;box-sizing:border-box;background:var(--vscode-input-background);color:var(--vscode-input-foreground);border:1px solid var(--vscode-input-border,#555);border-radius:6px;padding:7px 9px;font-family:inherit;font-size:13px}
   textarea{resize:vertical}
-  .list{max-height:230px;overflow:auto;border:1px solid var(--vscode-widget-border,#333);border-radius:6px;margin-top:6px}
+  .list{max-height:52vh;overflow:auto;border:1px solid var(--vscode-widget-border,#333);border-radius:6px;margin-top:6px}
   .row{display:flex;gap:8px;padding:7px 9px;border-top:1px solid var(--vscode-widget-border,#2a2a2a);cursor:pointer;align-items:flex-start}
   .row:first-child{border-top:0} .row input{width:auto;margin-top:2px}
   .row .n{font-weight:600} .row .d{color:var(--vscode-descriptionForeground);font-size:12px}
@@ -1706,6 +1714,8 @@ function getWebviewHtml() {
   button{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border:0;border-radius:5px;padding:5px 13px;cursor:pointer;font-size:12px}
   button.sec{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground)}
   button:hover{filter:brightness(1.12)}
+  .actionbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .foot a{color:var(--vscode-textLink-foreground);text-decoration:none} .foot a:hover{text-decoration:underline}
   .linkbtn{background:none;color:var(--vscode-textLink-foreground,#4aa8d8);padding:4px 6px}
   .del{background:none;color:var(--vscode-descriptionForeground);padding:4px 6px;font-size:13px}
   .del:hover{color:var(--vscode-errorForeground,#e05561)}
@@ -1725,7 +1735,7 @@ function getWebviewHtml() {
   #createBtn{margin-top:14px}
   #builder{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:8px;padding:14px;margin-top:12px}
   input[type=text]{background:var(--vscode-input-background);color:var(--vscode-input-foreground);border:1px solid var(--vscode-input-border,#3c3c3c);border-radius:5px;padding:7px 10px;font-size:13px;width:100%;box-sizing:border-box;margin-bottom:8px}
-  .blist{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:6px;max-height:38vh;overflow:auto}
+  .blist{border:1px solid var(--vscode-widget-border,#3c3c3c);border-radius:6px;max-height:52vh;overflow:auto}
   .brow{display:flex;gap:9px;align-items:baseline;padding:6px 10px;border-bottom:1px solid var(--vscode-widget-border,#2a2a2a)}
   .brow:last-child{border-bottom:0}
   .brow:hover{background:var(--vscode-list-hoverBackground)}
@@ -1787,9 +1797,11 @@ function getWebviewHtml() {
     <div id="builtinModes" style="margin-top:8px"></div>
   </details>
 
-  <button id="createBtn">+ Create your own kit</button>
-  <button class="sec" id="manageBtn" style="margin-left:6px">Manage my skills &amp; agents</button>
-  <button class="sec" id="howToBtn" style="margin-left:6px">How to ↗</button>
+  <div class="actionbar">
+    <button id="createBtn">+ Create your own kit</button>
+    <button class="sec" id="manageBtn">Manage my skills &amp; agents</button>
+    <button class="sec" id="howToBtn">How it works ↗</button>
+  </div>
 
   <div id="builder" style="display:none">
     <div style="font-weight:600;margin-bottom:4px">Create your own kit</div>
@@ -1814,22 +1826,7 @@ function getWebviewHtml() {
     <div id="tools"></div>
   </div>
 
-  <details class="help">
-    <summary>❔ How to use SuperBob</summary>
-    <div class="helpbody">
-      <p>A <b>kit</b> is a set of expert skills for one kind of work. SuperBob loads only the current kit, so Bob stays fast and focused.</p>
-      <ol>
-        <li>Leave <b>Auto mode</b> on and SuperBob picks the skills for each task. For most work, that's the whole setup.</li>
-        <li>Or flip a kit's <b>blue toggle</b> on to load it, <b>stack several</b> and their skills combine. Click <b>Learn more</b> for its pitch and a worked example; <b>skills</b> shows what's inside and where each comes from.</li>
-        <li>Or, in the Bob chat, type <code>/superbob software-development</code> (or any kit). <code>/superbob</code> alone lists them.</li>
-        <li>After switching, <b>start a new conversation</b> so the skills load.</li>
-        <li>Use <b>+ Create your own kit</b> to build one, with its own guide.</li>
-      </ol>
-      <button class="sec" id="docsBtn">Open full guide ↗</button>
-    </div>
-  </details>
-
-  <div class="foot">The 2 core skills are always on. After switching a kit, <b>start a new conversation</b> so it loads.</div>
+  <div class="foot">The 2 core skills are always on. After switching a kit, <b>start a new conversation</b> so it loads. New here? <a href="#" id="howLink">How it works ↗</a></div>
 </div>
 <script nonce="${nonce}">
   const vscode = acquireVsCodeApi();
@@ -1869,7 +1866,7 @@ function getWebviewHtml() {
       const origin=(S.provenance&&S.provenance[n])||'';
       const dup = shared && shared[n] && shared[n].length>1;   // skill is in more than one active kit
       const dupBadge = dup ? '<span class="dup" title="in: '+shared[n].join(', ')+', loaded once">shared · once</span>' : '';
-      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">always on</span>':'')+dupBadge+'</span><span class="stk">'+fmtTok(s.tokens)+'</span><button class="skview2" title="View this skill\'s content">view</button></div>'+(desc?'<div class="sd">'+desc+'</div>':'')+(origin?'<div class="sorc">from '+origin+'</div>':'');
+      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">always on</span>':'')+dupBadge+'</span><span class="stk">'+fmtTok(s.tokens)+'</span><button class="skview2" title="View this skill">view</button></div>'+(desc?'<div class="sd">'+desc+'</div>':'')+(origin?'<div class="sorc">from '+origin+'</div>':'');
       r.querySelector('.skview2').onclick=()=>vscode.postMessage({type:'viewContent',kind:'skill',name:n});
       d.appendChild(r); });
     return d;
@@ -2014,7 +2011,7 @@ function getWebviewHtml() {
   }
   document.addEventListener('click',e=>{
     if(e.target.id==='createBtn') vscode.postMessage({type:'openBuilder'});
-    if(e.target.id==='howToBtn') vscode.postMessage({type:'openHowTo'});
+    if(e.target.id==='howToBtn'||e.target.id==='howLink'){ e.preventDefault&&e.preventDefault(); vscode.postMessage({type:'openHowTo'}); }
     if(e.target.id==='manageBtn') vscode.postMessage({type:'openManager'});
     if(e.target.id==='bcancel') closeBuilder();
     if(e.target.id==='installBtn') vscode.postMessage({type:'install'});
