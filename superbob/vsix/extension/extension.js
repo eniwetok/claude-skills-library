@@ -933,6 +933,16 @@ async function handleMessage(m, context) {
   if (m.type === 'openHowTo') { openHowToPanel(context); return; }
   if (m.type === 'openManager') { openManagerPanel(context); return; }
   if (m.type === 'viewContent') { openViewerPanel(m.kind, m.name, context); return; }
+  if (m.type === 'sendToBob') {
+    const text = (m.prompt || '').trim(); if (!text) return;
+    try { await vscode.env.clipboard.writeText(text); } catch (e) {}
+    let inserted = false;
+    try { await vscode.commands.executeCommand('bob.insertPrompt', text); inserted = true; } catch (e) {}
+    vscode.window.showInformationMessage(inserted
+      ? 'Sent to Bob chat (also copied). It will use the authoring skills to help; paste the result back into the editor.'
+      : 'Prompt copied. Paste it into Bob chat to get AI help, then paste the result back into the editor.');
+    return;
+  }
   if (m.type === 'closeViewer') { if (viewerPanel) viewerPanel.dispose(); return; }
   if (m.type === 'getContent') {
     const content = itemContent(m.kind, m.name);
@@ -1408,6 +1418,8 @@ function managerHtml() {
     .fchip{font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid var(--vscode-widget-border,#444);background:transparent;color:var(--vscode-foreground);cursor:pointer} .fchip.on{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border-color:transparent} .fchip .fsz{opacity:.6;margin-left:4px}
     .reqrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:5px 0;padding:6px;border:1px solid var(--vscode-widget-border,#333);border-radius:6px} .reqrow input{width:auto;flex:1;min-width:90px} .reqrow select{font:inherit;padding:5px;border-radius:5px;background:var(--vscode-input-background);color:var(--vscode-input-foreground);border:1px solid var(--vscode-widget-border,#444)} .reqrow .rm{flex:none}
     .attrow{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px} .attrow .an{flex:1;font-family:var(--vscode-editor-font-family,monospace)}
+    .etoolbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 4px} .etoolbar .ttl{font-size:11px;color:var(--vscode-descriptionForeground)} .etoolbar .tsep{width:1px;height:16px;background:var(--vscode-widget-border,#444);margin:0 4px} .etoolbar button{font-size:11px;padding:3px 9px} .aih{color:var(--vscode-charts-blue,#3794ff)!important;border-color:currentColor!important}
+    .fmtguide{background:var(--vscode-editorWidget-background);border-left:3px solid var(--vscode-charts-blue,#3794ff);border-radius:0 6px 6px 0;padding:9px 12px;font-size:12.5px;color:var(--vscode-descriptionForeground);margin:2px 0 6px}
   </style></head><body>
     <h1>My skills &amp; agents</h1>
     <p class="tag">Create, edit, and delete your own skills and agents, validated against the standard. Preview or fork any bundled one.</p>
@@ -1420,15 +1432,21 @@ function managerHtml() {
     <h2>Browse all (preview or fork)</h2>
     <input class="search" id="search" placeholder="Search…"/>
     <div id="browse" style="max-height:46vh;overflow:auto"></div>
-    <div id="preview" style="display:none;margin-top:10px;border:1px solid var(--vscode-widget-border,#333);border-radius:8px;padding:12px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b id="pvName" style="flex:1"></b><button class="ghost" id="pvClose">Close</button></div>
-      <div id="pvFiles" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
-      <pre class="preview" id="pvContent" style="margin:0"></pre>
-    </div>
 
     <div id="editor">
       <div style="font-weight:600;margin-bottom:6px" id="editorTitle">New skill</div>
       <input id="ename" placeholder="name-in-kebab-case"/>
+      <div class="etoolbar">
+        <span class="ttl">Start from a template:</span>
+        <span id="tplBtns"></span>
+        <span class="tsep"></span>
+        <span class="ttl">AI help:</span>
+        <button class="ghost aih" id="aiDraft">Draft with Bob</button>
+        <button class="ghost aih" id="aiImprove">Improve</button>
+        <button class="ghost aih" id="aiCheck">Check</button>
+        <button class="ghost" id="fmtGuideBtn">Format guide</button>
+      </div>
+      <div id="fmtGuide" class="fmtguide" style="display:none"></div>
       <div class="muted" style="margin:6px 0 3px">Definition (frontmatter + body):</div>
       <textarea id="ebody"></textarea>
       <div class="val" id="val"></div>
@@ -1459,8 +1477,7 @@ function managerHtml() {
 
       window.addEventListener('message',e=>{ const m=e.data;
         if(m.type==='state'){ S=m; render(); }
-        else if(m.type==='content'){ if(m.isNew){ openEditor(true,m.name,m.content,[],[],[]); } else if(m.mode==='edit' && m.editable){ openEditor(false,m.name,m.content,m.kits||[],m.requirements||[],m.files||[]); } else { openPreview(m); } }
-        else if(m.type==='fileContent'){ if(curPreview && m.name===curPreview.name){ $('pvContent').textContent=m.content; } }
+        else if(m.type==='content'){ if(m.isNew){ openEditor(true,m.name,m.content,[],[],[]); } else if(m.editable){ openEditor(false,m.name,m.content,m.kits||[],m.requirements||[],m.files||[]); } }
         else if(m.type==='saveResult'){ if(m.ok){ closeEditor(); } else { touched=true; setVal([m.error],[]); } }
         else if(m.type==='forked'){ kind=m.kind; }
       });
@@ -1472,7 +1489,7 @@ function managerHtml() {
         if(!list.length) mine.innerHTML='<div class="muted" style="padding:6px 0">None yet. Create one, or fork a bundled one below.</div>';
         list.forEach(n=>{ const d=document.createElement('div'); d.className='row';
           d.innerHTML='<span class="nm">'+n+' <span class="sd">'+(kind==='skill'?(descOf(n)||''):'')+'</span></span>';
-          const view=document.createElement('button'); view.className='ghost'; view.textContent='View'; view.onclick=()=>v.postMessage({type:'getContent',kind,name:n,mode:'view'}); d.appendChild(view);
+          const view=document.createElement('button'); view.className='ghost'; view.textContent='View'; view.onclick=()=>v.postMessage({type:'viewContent',kind,name:n}); d.appendChild(view);
           const edit=document.createElement('button'); edit.className='ghost'; edit.textContent='Edit'; edit.onclick=()=>v.postMessage({type:'getContent',kind,name:n,mode:'edit'}); d.appendChild(edit);
           const del=document.createElement('button'); del.className='danger'; del.textContent='Delete'; del.onclick=()=>{ if(confirm('Delete '+n+'?')) v.postMessage({type:'deleteItem',kind,name:n}); }; d.appendChild(del);
           mine.appendChild(d); });
@@ -1482,17 +1499,13 @@ function managerHtml() {
         allOf(kind).filter(n=>!q||n.toLowerCase().includes(q)||(descOf(n)||'').toLowerCase().includes(q)).slice(0,200).forEach(n=>{
           const d=document.createElement('div'); d.className='row';
           d.innerHTML='<span class="nm">'+n+' <span class="sd">'+(kind==='skill'?(descOf(n)||''):'')+'</span></span>';
-          const view=document.createElement('button'); view.className='ghost'; view.textContent='View'; view.onclick=()=>v.postMessage({type:'getContent',kind,name:n,mode:'view'}); d.appendChild(view);
+          const view=document.createElement('button'); view.className='ghost'; view.textContent='View'; view.onclick=()=>v.postMessage({type:'viewContent',kind,name:n}); d.appendChild(view);
           if(mineSet.has(n)){ const e=document.createElement('button'); e.className='ghost'; e.textContent='Edit'; e.onclick=()=>v.postMessage({type:'getContent',kind,name:n,mode:'edit'}); d.appendChild(e); }
           else { const f=document.createElement('button'); f.textContent='Fork'; f.onclick=()=>{ const nn=prompt('Name your copy:', slug(n)+'-copy'); if(nn) v.postMessage({type:'forkItem',kind,src:n,newName:nn}); }; d.appendChild(f); }
           b.appendChild(d); });
       }
-      function fmtSize(n){ return n>1024?Math.round(n/1024)+'KB':n+'B'; }
-      function openPreview(m){ closeEditor(); curPreview={kind:m.kind,name:m.name}; $('preview').style.display='block'; $('pvName').textContent=m.name+(m.editable?'':' (bundled, read-only)'); $('pvContent').textContent=m.content||'';
-        const fl=$('pvFiles'); fl.innerHTML=''; (m.files||[]).forEach((f,i)=>{ const c=document.createElement('button'); c.className='fchip'+(i===0?' on':''); c.innerHTML=f.rel+(f.size?'<span class="fsz">'+fmtSize(f.size)+'</span>':'');
-          c.onclick=()=>{ document.querySelectorAll('#pvFiles .fchip').forEach(x=>x.classList.remove('on')); c.classList.add('on'); if(f.rel==='SKILL.md'||m.kind==='agent'){ $('pvContent').textContent=m.content; } else { $('pvContent').textContent='Loading…'; v.postMessage({type:'getFile',kind:m.kind,name:m.name,rel:f.rel}); } }; fl.appendChild(c); });
-        $('preview').scrollIntoView({block:'nearest'}); }
-      function openEditor(isNew,name,content,inKits,reqs,files){ $('preview').style.display='none'; editingNew=isNew; touched=false; $('editor').style.display='block'; $('editorTitle').textContent=(isNew?'New ':'Edit ')+kind+(name?': '+name:''); $('ename').value=name||''; $('ename').disabled=!isNew&&!!name; $('ebody').value=content||''; renderKitPick(inKits);
+      function openEditor(isNew,name,content,inKits,reqs,files){ editingNew=isNew; touched=false; $('editor').style.display='block'; $('editorTitle').textContent=(isNew?'New ':'Edit ')+kind+(name?': '+name:''); $('ename').value=name||''; $('ename').disabled=!isNew&&!!name; $('ebody').value=content||''; renderKitPick(inKits);
+        renderTemplates(); $('fmtGuide').style.display='none';
         const isSkill=(kind==='skill'); $('reqSection').style.display=isSkill?'block':'none'; renderReqs(reqs||[]);
         $('filesSection').style.display=(isSkill&&!isNew)?'block':'none'; renderAttached(files||[],name);
         validate(); if(isNew){ setTimeout(()=>$('ename').focus(),0); } $('editor').scrollIntoView({block:'nearest'}); }
@@ -1521,9 +1534,29 @@ function managerHtml() {
         if(!body.replace(/^---\\s*\\n[\\s\\S]*?\\n---\\s*/,'').trim()) errs.push('The body is empty.');
         setVal(errs,warns); return errs.length===0; }
 
-      $('pvClose').onclick=()=>{ $('preview').style.display='none'; };
-      $('tabSkill').onclick=()=>{ kind='skill'; closeEditor(); $('preview').style.display='none'; render(); };
-      $('tabAgent').onclick=()=>{ kind='agent'; closeEditor(); $('preview').style.display='none'; render(); };
+      const TPL={ skill:[
+          {n:'Minimal', t:'---\\nname: NAME\\ndescription: One line on what it does and when to use it.\\n---\\n\\n# NAME\\n\\nStep-by-step instructions Bob should follow for this kind of task.\\n'},
+          {n:'With a script', t:'---\\nname: NAME\\ndescription: One line on what it does and when to use it.\\n---\\n\\n# NAME\\n\\nWhen to run: ...\\n\\nSteps:\\n1. Run: python3 scripts/helper.py <args>  (add the script below under Attached files).\\n2. Read the output and ...\\n'},
+          {n:'Checklist', t:'---\\nname: NAME\\ndescription: A checklist for ...\\n---\\n\\n# NAME\\n\\nGo through each item and report pass or fail:\\n- [ ] First thing to verify\\n- [ ] Second thing to verify\\n'} ],
+        agent:[
+          {n:'Reviewer', t:'---\\nname: NAME\\ndescription: Review X and report the issues that matter.\\nwhenToUse: Delegate when the task is to review X.\\ngroups: [read]\\n---\\nYou review X. Check for A, B, and C. Return a short list of concrete issues, most important first.\\n'},
+          {n:'Builder', t:'---\\nname: NAME\\ndescription: Build X to spec.\\nwhenToUse: Delegate when the task is to build or scaffold X.\\ngroups: [read, edit, command]\\n---\\nYou build X. Scaffold to the spec, keep it small and typed, and return the files.\\n'},
+          {n:'Researcher', t:'---\\nname: NAME\\ndescription: Research X and summarize the findings.\\nwhenToUse: Delegate when the task is to research X.\\ngroups: [read]\\n---\\nYou research X. Gather the key facts, cite sources, and return a tight summary.\\n'} ] };
+      function renderTemplates(){ const c=$('tplBtns'); c.innerHTML=''; (TPL[kind]||[]).forEach(t=>{ const b=document.createElement('button'); b.className='ghost tpl'; b.textContent=t.n; b.onclick=()=>{ const nm=slug($('ename').value)||(kind==='agent'?'my-agent':'my-skill'); $('ebody').value=t.t.replace(/NAME/g,nm); touched=true; validate(); }; c.appendChild(b); }); }
+      const G_SKILL='A skill is a SKILL.md file. The frontmatter needs a name (kebab-case) and a one-line description that says what it does and WHEN to use it, that line is how Bob picks it. Below, write clear step-by-step instructions and keep it focused. The skill-creator and skill-comply skills (in the agentic-authoring kit) can scaffold and check it for you.';
+      const G_AGENT='An agent becomes a subagent Bob can hand a subtask to. The frontmatter needs name, description, and whenToUse (Bob matches on these to delegate), plus optional groups (read, edit, command, mcp). The body is the role: keep it narrow and single-purpose. The agent-designer skill can shape the role for you.';
+      function toggleGuide(){ const g=$('fmtGuide'); if(g.style.display==='none'){ g.textContent=(kind==='agent'?G_AGENT:G_SKILL); g.style.display='block'; } else g.style.display='none'; }
+      function aiPrompt(a){ const nm=$('ename').value||'(name)'; const body=$('ebody').value;
+        if(a==='draft'){ const d=prompt('Describe what this '+kind+' should do:'); if(!d) return null; return kind==='agent'
+          ? 'Use the agent-designer skill to design a Bob subagent named "'+nm+'" that: '+d+'. Return a definition with frontmatter (name, description, whenToUse, groups) and a focused role body. Output only the file contents.'
+          : 'Use the skill-creator skill to write a complete SKILL.md for a skill named "'+nm+'" that: '+d+'. Return only the file contents (frontmatter + body).'; }
+        if(a==='improve') return 'Use the no-ai-slop and writing-skills skills to tighten this '+kind+' definition without changing its meaning. Return only the improved file:\\n\\n'+body;
+        if(a==='check') return (kind==='agent' ? 'Review this Bob subagent definition against the subagent format (name, description, whenToUse, a narrow role). List concrete fixes:\\n\\n' : 'Use the skill-comply skill to review this SKILL.md against the standard. List concrete fixes:\\n\\n')+body;
+        return null; }
+      function ai(a){ const p=aiPrompt(a); if(p) v.postMessage({type:'sendToBob',prompt:p}); }
+      $('aiDraft').onclick=()=>ai('draft'); $('aiImprove').onclick=()=>ai('improve'); $('aiCheck').onclick=()=>ai('check'); $('fmtGuideBtn').onclick=toggleGuide;
+      $('tabSkill').onclick=()=>{ kind='skill'; closeEditor(); render(); };
+      $('tabAgent').onclick=()=>{ kind='agent'; closeEditor(); render(); };
       $('search').addEventListener('input',renderBrowse);
       $('newBtn').onclick=()=>v.postMessage({type:'newScaffold',kind,name:''});
       $('ename').addEventListener('input',()=>{ touched=true; validate(); });
