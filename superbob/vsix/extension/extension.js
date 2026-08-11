@@ -932,15 +932,22 @@ async function handleMessage(m, context) {
   if (m.type === 'openBuilder') { openBuilderPanel(context); return; }
   if (m.type === 'openHowTo') { openHowToPanel(context); return; }
   if (m.type === 'openManager') { openManagerPanel(context); return; }
+  if (m.type === 'viewContent') { openViewerPanel(m.kind, m.name, context); return; }
+  if (m.type === 'closeViewer') { if (viewerPanel) viewerPanel.dispose(); return; }
   if (m.type === 'getContent') {
     const content = itemContent(m.kind, m.name);
-    if (managerPanel) managerPanel.webview.postMessage({ type: 'content', kind: m.kind, name: m.name, content, editable: isCustom(m.kind, m.name), kits: itemKits(m.kind, m.name), files: itemFiles(m.kind, m.name), requirements: (readResources()[m.name] || []), mode: m.mode || 'view' });
-    if (builderPanel) builderPanel.webview.postMessage({ type: 'content', kind: m.kind, name: m.name, content });
+    const msg = { type: 'content', kind: m.kind, name: m.name, content, editable: isCustom(m.kind, m.name), kits: itemKits(m.kind, m.name), files: itemFiles(m.kind, m.name), requirements: (readResources()[m.name] || []), mode: m.mode || 'view' };
+    const t = m.target || 'manager';   // route the reply only to the panel that asked
+    if (t === 'viewer') { if (viewerPanel) viewerPanel.webview.postMessage(msg); }
+    else if (t === 'builder') { if (builderPanel) builderPanel.webview.postMessage(msg); }
+    else if (managerPanel) managerPanel.webview.postMessage(msg);
     return;
   }
   if (m.type === 'getFile') {
     const content = itemFileContent(m.kind, m.name, m.rel);
-    if (managerPanel) managerPanel.webview.postMessage({ type: 'fileContent', name: m.name, rel: m.rel, content });
+    const fmsg = { type: 'fileContent', name: m.name, rel: m.rel, content };
+    if ((m.target || 'manager') === 'viewer') { if (viewerPanel) viewerPanel.webview.postMessage(fmsg); }
+    else if (managerPanel) managerPanel.webview.postMessage(fmsg);
     return;
   }
   if (m.type === 'saveFile') {
@@ -1127,7 +1134,7 @@ function guideFor(kit) {
 }
 function esc(s) { return String(s || '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
 function guideHtml(g) {
-  const skillRows = g.skills.map(s => '<div class="s"><div class="sn">' + esc(s.name) + '</div>' + (s.desc ? '<div class="sd">' + esc(s.desc) + '</div>' : '') + (s.origin ? '<div class="sorc">from ' + esc(s.origin) + '</div>' : '') + '</div>').join('');
+  const skillRows = g.skills.map(s => '<div class="s"><div class="srow"><div class="sn">' + esc(s.name) + '</div><button class="skview" data-kind="skill" data-skill="' + esc(s.name) + '">view</button></div>' + (s.desc ? '<div class="sd">' + esc(s.desc) + '</div>' : '') + (s.origin ? '<div class="sorc">from ' + esc(s.origin) + '</div>' : '') + '</div>').join('');
   const jtbd = g.jtbd ? '<p class="jtbd"><b>The job:</b> ' + esc(g.jtbd) + '</p>' : '';
   const desc = g.description ? '<p class="desc">' + esc(g.description) + '</p>' : '';
   const when = g.when ? '<p class="when"><b>When to reach for it:</b> ' + esc(g.when) + '</p>' : '';
@@ -1167,7 +1174,7 @@ function guideHtml(g) {
   const agents = (g.agents && g.agents.length) ? (
     '<h2>Agents this kit installs</h2>' +
     '<p class="usehint">Loading the kit adds these as subagents (not modes, so your mode picker stays clean). The SuperBob mode can hand a specific subtask to one. Unload the kit to remove them.</p>' +
-    g.agents.map(a => '<div class="s"><div class="sn">' + esc(a.name) + '</div>' + (a.description ? '<div class="sd">' + esc(a.description) + '</div>' : '') + '</div>').join('')
+    g.agents.map(a => '<div class="s"><div class="srow"><div class="sn">' + esc(a.name) + '</div><button class="skview" data-kind="agent" data-skill="' + esc(a.name) + '">view</button></div>' + (a.description ? '<div class="sd">' + esc(a.description) + '</div>' : '') + '</div>').join('')
   ) : '';
   const uiScript = '<script>(function(){var v=acquireVsCodeApi();' +
     'document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".setupbtn");if(!b)return;' +
@@ -1175,6 +1182,7 @@ function guideHtml(g) {
     'if(b.dataset.ext)msg.extId=b.dataset.ext;if(b.dataset.cmd)msg.command=b.dataset.cmd;if(b.dataset.tool)msg.tool=b.dataset.tool;if(b.dataset.url)msg.url=b.dataset.url;' +
     'if(verb==="save-connection"){var box=b.closest(".setupitem");var vals={};box.querySelectorAll("input[data-key]").forEach(function(i){vals[i.dataset.key]=i.value;});msg.values=vals;}' +
     'v.postMessage(msg);});' +
+    'document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".skview");if(!b)return;v.postMessage({type:"viewContent",kind:b.dataset.kind||"skill",name:b.dataset.skill});});' +
     'document.querySelectorAll(".tgt input").forEach(function(cb){cb.addEventListener("change",function(){v.postMessage({type:"setKitTarget",kit:' + JSON.stringify(g.kit) + ',target:cb.dataset.id,on:cb.checked});});});' +
     '})();</script>';
   const note = g.authored ? '' : '<p class="muted auto">Generated from the kit\'s skills. A fuller walkthrough is coming.</p>';
@@ -1185,7 +1193,8 @@ function guideHtml(g) {
     .jtbd{background:var(--vscode-editorWidget-background);border-left:3px solid var(--vscode-charts-blue,#3794ff);border-radius:0 6px 6px 0;padding:9px 13px;margin:0 0 12px}
     .desc{margin:0 0 12px} .when{color:var(--vscode-descriptionForeground);margin:0 0 4px}
     .s{padding:8px 0;border-top:1px solid var(--vscode-widget-border,#2a2a2a)} .s:first-child{border-top:0}
-    .sn{font-weight:600} .sd{color:var(--vscode-descriptionForeground);font-size:13px;margin-top:2px}
+    .srow{display:flex;align-items:center;gap:8px} .sn{font-weight:600;flex:1} .sd{color:var(--vscode-descriptionForeground);font-size:13px;margin-top:2px}
+    .skview{font:inherit;font-size:11px;padding:2px 9px;border-radius:5px;border:1px solid var(--vscode-widget-border,#444);background:transparent;color:var(--vscode-foreground);cursor:pointer;flex:none}
     .sorc{color:var(--vscode-descriptionForeground);font-size:12px;opacity:.8;font-style:italic;margin-top:1px}
     ol,ul{padding-left:22px;margin:0} li{margin:7px 0} .outline li{margin:4px 0}
     .usehint{color:var(--vscode-descriptionForeground);font-size:13px;margin:0 0 10px} .uses li{margin:9px 0}
@@ -1520,6 +1529,40 @@ function managerHtml() {
   </body></html>`;
 }
 
+// ---- reusable content viewer (open a skill/agent's content from anywhere) --
+let viewerPanel;
+function openViewerPanel(kind, name, context) {
+  if (viewerPanel) { viewerPanel.title = 'View: ' + name; viewerPanel.webview.html = viewerHtml(kind, name); viewerPanel.reveal(vscode.ViewColumn.Beside); return; }
+  viewerPanel = vscode.window.createWebviewPanel('superbobViewer', 'View: ' + name, vscode.ViewColumn.Beside, { enableScripts: true });
+  viewerPanel.webview.html = viewerHtml(kind, name);
+  viewerPanel.webview.onDidReceiveMessage(m => handleMessage(m, context));
+  viewerPanel.onDidDispose(() => { viewerPanel = null; }, null, context.subscriptions);
+}
+function viewerHtml(kind, name) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>
+    body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);margin:0;padding:16px 20px;font-size:13px}
+    .top{display:flex;align-items:center;gap:10px;margin-bottom:10px} h1{font-size:1.1rem;margin:0;flex:1;word-break:break-all}
+    button{font:inherit;font-size:12px;padding:4px 12px;border-radius:5px;border:0;cursor:pointer;background:var(--vscode-button-background);color:var(--vscode-button-foreground)}
+    .files{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+    .fchip{font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid var(--vscode-widget-border,#444);background:transparent;color:var(--vscode-foreground);cursor:pointer} .fchip.on{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border-color:transparent} .fchip .fsz{opacity:.6;margin-left:4px}
+    pre{background:var(--vscode-textCodeBlock-background,#1e1e1e);border:1px solid var(--vscode-widget-border,#333);border-radius:6px;padding:12px;overflow:auto;white-space:pre;font-size:12.5px;margin:0;max-height:80vh}
+  </style></head><body>
+    <div class="top"><h1 id="t">${esc(name)}</h1><button id="close">Close</button></div>
+    <div class="files" id="files"></div>
+    <pre id="c">Loading…</pre>
+    <script>(function(){var v=acquireVsCodeApi();var KIND=${JSON.stringify(kind)},NAME=${JSON.stringify(name)};var content='';
+      window.addEventListener('message',function(e){var m=e.data;
+        if(m.type==='content'&&m.name===NAME){ content=m.content||''; document.getElementById('c').textContent=content; renderFiles(m.files||[]); }
+        else if(m.type==='fileContent'&&m.name===NAME){ document.getElementById('c').textContent=m.content; } });
+      function fmt(n){return n>1024?Math.round(n/1024)+'KB':n+'B';}
+      function renderFiles(files){ var fl=document.getElementById('files'); fl.innerHTML=''; files.forEach(function(f,i){ var b=document.createElement('button'); b.className='fchip'+(i===0?' on':''); b.innerHTML=f.rel+(f.size?'<span class="fsz">'+fmt(f.size)+'</span>':'');
+        b.onclick=function(){ document.querySelectorAll('#files .fchip').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); if(f.rel==='SKILL.md'||KIND==='agent'){document.getElementById('c').textContent=content;} else { document.getElementById('c').textContent='Loading…'; v.postMessage({type:'getFile',kind:KIND,name:NAME,rel:f.rel,target:'viewer'}); } }; fl.appendChild(b); }); }
+      document.getElementById('close').onclick=function(){ v.postMessage({type:'closeViewer'}); };
+      v.postMessage({type:'getContent',kind:KIND,name:NAME,mode:'view',target:'viewer'});
+    })();</script>
+  </body></html>`;
+}
+
 // ---- kit builder (its own page) -------------------------------------------
 let builderPanel;
 function openBuilderPanel(context) {
@@ -1567,7 +1610,6 @@ function builderHtml(vault) {
   <label>Skills <span class="muted" id="cnt"></span></label>
   <input id="search" placeholder="Search skills…"/>
   <div class="list" id="list"></div>
-  <pre class="preview" id="bpreview" style="display:none"></pre>
 
   <label>Worked example <span class="muted">(one step per line, optional; shows in "How to use")</span></label>
   <textarea id="example" rows="4" placeholder="Load the kit and start a new chat.&#10;Paste the question and the agent's answer.&#10;Score retrieval and answer quality separately."></textarea>
@@ -1588,10 +1630,9 @@ function builderHtml(vault) {
       cb.onchange=()=>{ cb.checked?sel.add(s.n):sel.delete(s.n); count(); };
       const mid=document.createElement('div'); mid.style.flex='1'; mid.style.cursor='pointer'; mid.innerHTML='<div class="n">'+s.n+'</div>'+(s.d?'<div class="d">'+s.d+'</div>':'');
       mid.onclick=()=>{ cb.checked=!cb.checked; cb.checked?sel.add(s.n):sel.delete(s.n); count(); };
-      const view=document.createElement('button'); view.className='view'; view.textContent='View'; view.title='See this skill\\'s full content'; view.onclick=()=>vscode.postMessage({type:'getContent',kind:'skill',name:s.n});
+      const view=document.createElement('button'); view.className='view'; view.textContent='View'; view.title='See this skill\\'s full content'; view.onclick=()=>vscode.postMessage({type:'viewContent',kind:'skill',name:s.n});
       row.appendChild(cb); row.appendChild(mid); row.appendChild(view); list.appendChild(row); });
   }
-  window.addEventListener('message',e=>{ if(e.data.type==='content'){ const p=document.getElementById('bpreview'); p.style.display='block'; p.textContent=e.data.content; p.scrollIntoView({block:'nearest'}); }});
   document.getElementById('search').addEventListener('input',render);
   document.getElementById('cancel').onclick=()=>vscode.postMessage({type:'closeBuilder'});
   document.getElementById('save').onclick=()=>{
@@ -1630,6 +1671,7 @@ function getWebviewHtml() {
   .skrow .sn{font-weight:600}
   .skrow .sn .ao{font-size:9px;color:var(--vscode-charts-blue,#4aa8d8);border:1px solid currentColor;border-radius:7px;padding:0 5px;margin-left:5px;text-transform:uppercase}
   .skrow .stk{color:var(--vscode-descriptionForeground);font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .skrow .skview2{font:inherit;font-size:10px;padding:1px 8px;border-radius:5px;border:1px solid var(--vscode-widget-border,#444);background:transparent;color:var(--vscode-foreground);cursor:pointer;white-space:nowrap;flex:none}
   .skrow .sd{color:var(--vscode-descriptionForeground);font-size:11.5px;margin-top:1px;line-height:1.4}
   .powerbar{display:flex;gap:10px;align-items:center;padding:9px 11px;margin:10px 0;border:1px solid var(--vscode-widget-border,#333);border-radius:8px}
   .pswitch{position:relative;width:34px;height:20px;flex:none;cursor:pointer;display:inline-block}
@@ -1827,7 +1869,8 @@ function getWebviewHtml() {
       const origin=(S.provenance&&S.provenance[n])||'';
       const dup = shared && shared[n] && shared[n].length>1;   // skill is in more than one active kit
       const dupBadge = dup ? '<span class="dup" title="in: '+shared[n].join(', ')+', loaded once">shared · once</span>' : '';
-      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">always on</span>':'')+dupBadge+'</span><span class="stk">'+fmtTok(s.tokens)+'</span></div>'+(desc?'<div class="sd">'+desc+'</div>':'')+(origin?'<div class="sorc">from '+origin+'</div>':'');
+      r.innerHTML='<div class="sh"><span class="sn">'+n+(core?'<span class="ao">always on</span>':'')+dupBadge+'</span><span class="stk">'+fmtTok(s.tokens)+'</span><button class="skview2" title="View this skill\'s content">view</button></div>'+(desc?'<div class="sd">'+desc+'</div>':'')+(origin?'<div class="sorc">from '+origin+'</div>':'');
+      r.querySelector('.skview2').onclick=()=>vscode.postMessage({type:'viewContent',kind:'skill',name:n});
       d.appendChild(r); });
     return d;
   }
