@@ -7,6 +7,16 @@ OUT="$SB_DIST"
 VER="$(node -e "console.log(require('$REPO/vsix/extension/package.json').version)")"
 NAME="$(node -e "console.log(require('$REPO/vsix/extension/package.json').name)")"
 
+# GATE: every webview's emitted inline script must parse. A stray backtick or an
+# apostrophe escaped as \' inside a template-literal HTML string blanks the whole
+# panel at runtime (node --check passes it because the SOURCE is valid). This renders
+# each *Html() function and syntax-checks the JS the browser will actually run.
+echo "Validating webview scripts…"
+if ! node "$REPO/vsix/validate-webviews.js"; then
+  echo "ABORT: a webview inline script does not parse — fix before building (it would blank the panel)." >&2
+  exit 1
+fi
+
 # Always rebuild the payload from the library so the .vsix never ships a stale package
 # and the skill-library-lint gate always runs. (A cached zip previously shipped skills
 # that no longer matched the library and silently skipped the gate.)
