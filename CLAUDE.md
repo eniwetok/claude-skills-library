@@ -95,6 +95,7 @@ Upstreams to check:
 - `https://github.com/hamelsmu/evals-skills`
 - `https://github.com/dietrichgebert/ponytail`
 - `https://github.com/Agents365-ai/drawio-skill`
+- `https://github.com/DavidROliverBA/Daves-Claude-Code-Skills`
 
 ---
 

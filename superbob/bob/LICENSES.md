@@ -27,6 +27,7 @@ SuperBob's own code — the installer, the profile system, and the mission-contr
 | [product-on-purpose/pm-skills](https://github.com/product-on-purpose/pm-skills) | Product on Purpose | Apache 2.0 |
 | [dyoshikawa/rulesync](https://github.com/dyoshikawa/rulesync) | dyoshikawa | MIT |
 | [Agents365-ai/drawio-skill](https://github.com/Agents365-ai/drawio-skill) | Agents365-ai | MIT |
+| [DavidROliverBA/Daves-Claude-Code-Skills](https://github.com/DavidROliverBA/Daves-Claude-Code-Skills) | David R Oliver | MIT |
 | [anthropics/skills](https://github.com/anthropics/skills) | Anthropic | Apache 2.0 |
 | [anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) | Anthropic | Apache 2.0 |
 | [nexu-io/open-design](https://github.com/nexu-io/open-design) | nexu-io | Apache 2.0 |

@@ -368,7 +368,8 @@
       "drawio-skill: describe it and get an editable .drawio plus exports, or turn code, SQL, and infra into a diagram",
       "utility-mermaid-diagrams: quick flowcharts and sequence diagrams from plain text",
       "hand-drawn-diagrams: loose, sketchy diagrams for early thinking",
-      "wireframe-sketch: low-fidelity UI wireframes"
+      "wireframe-sketch: low-fidelity UI wireframes",
+      "diagram-review: after you generate with any tool above, critique the diagram for readability, hierarchy, and edge crossings, then apply the fixes so it looks professional"
     ],
     "examples": [
       "Say \"diagram the data flow from source to dashboard\". drawio-skill lays it out as an editable .drawio and exports a PNG.",
@@ -381,7 +382,8 @@
     "tips": [
       "drawio-skill renders and exports with the draw.io desktop app's command line. The kit's Requirements section checks for it and links the download if it is missing.",
       "Graphviz is optional but improves auto-layout for large diagrams.",
-      "You get an editable .drawio file, not a flat image, so you can keep refining it by hand."
+      "You get an editable .drawio file, not a flat image, so you can keep refining it by hand.",
+      "Chain diagram-review after any tool: generate the diagram, then say \"review this diagram\" to get professional-layout fixes. It is tool-agnostic."
     ]
   }
 }

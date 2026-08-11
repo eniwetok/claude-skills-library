@@ -684,3 +684,11 @@ The AGENTS.md authoring engine the library lacked. One `.rulesync/` source gener
 **Skill:** skills/drawio-skill/ · scanned clean (0 injection findings) · zip: zips/drawio-skill.zip
 
 Natural-language to **editable `.drawio`** diagrams with PNG/SVG/PDF export; also converts code, SQL schemas, and infra (Terraform/K8s) into auto-laid-out diagrams and self-checks its own layout from the rendered image. Pure prompt/transformer (no API keys); needs the **draw.io desktop CLI** to render/export, Graphviz optional. Anchors the SuperBob **`diagramming`** kit (drawio-skill + utility-mermaid-diagrams + hand-drawn-diagrams + wireframe-sketch), with the draw.io CLI declared as an actionable resource.
+
+
+## Group 27 — DavidROliverBA/Daves-Claude-Code-Skills (diagram-review · professional diagram critique)
+
+**Source:** [github.com/DavidROliverBA/Daves-Claude-Code-Skills](https://github.com/DavidROliverBA/Daves-Claude-Code-Skills) - MIT
+**Skill:** skills/diagram-review/ · scanned clean (0 injection findings) · zip: zips/diagram-review.zip
+
+Tool-agnostic diagram-quality layer built on graph-drawing research (declaration order controls layout, minimise edge crossings, Gestalt proximity). Reviews any rendered diagram — draw.io, mermaid, excalidraw — for readability, hierarchy, and layout, then recommends concrete fixes. Added to the SuperBob **`diagramming`** kit so you chain it after any tool to make the output professional.
