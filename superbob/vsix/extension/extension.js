@@ -1416,6 +1416,8 @@ function bundledDiagramDir(context) { return path.join(context.extensionPath, 'd
 const DIAGRAM_TITLES = {
   '00a-overview-phases': 'Overview — Phases (end-to-end)',
   '00b-overview-tools': 'Overview — Tools (kits & Propel, end-to-end)',
+  '00c-process-detailed': 'Unified Process — every step, end-to-end',
+  '00d-tools-detailed': 'Detailed Toolings — the kit & tool per step (and why)',
   '01-phase1-spec-creation': 'Phase 1 — Spec Creation',
   '02-tooling-spec-creation': 'Tooling — Spec Creation',
   '03-phase2-implementation-planning': 'Phase 2 — Implementation Planning',
@@ -1470,7 +1472,7 @@ function diagramHtml(webview, imgs, ver) {
   .muted{color:var(--vscode-descriptionForeground)}
 </style></head><body>
   <h1>SuperBob across the delivery lifecycle ${vlabel ? '<span class="ver">' + vlabel + '</span>' : ''}</h1>
-  <p class="tag">The Spec-Driven Development flow, with the SuperBob kit to load at each step mapped in. The two <b>Overview</b> pages up top show the whole process end-to-end — phases, then all kits &amp; tools.</p>
+  <p class="tag">The Spec-Driven Development flow, with the SuperBob kit to load at each step mapped in. The four summary pages up top show the whole process end-to-end: <b>Overview — Phases</b> &amp; <b>Overview — Tools</b> (the big picture), then <b>Unified Process</b> &amp; <b>Detailed Toolings</b> (every step, with the why). Below them are the per-phase detail pages.</p>
   <div class="bar">
     <button id="openFile">Open the editable .drawio ↗</button>
     <span class="legend"><span class="swatch" style="background:#f4f8ff;border-color:#6c8ebf"></span>blue dashed = SuperBob kit to load

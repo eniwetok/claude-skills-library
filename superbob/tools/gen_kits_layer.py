@@ -171,7 +171,52 @@ def tools_page():
         y+=rh
     c.append(f'<mxCell id="ver" value="{STAMP}" style="text;html=1;fontSize=10;fontColor=#9aa0a6;align=right;" vertex="1" parent="1"><mxGeometry x="{X0}" y="{y+16}" width="{wP+wK+wR}" height="16" as="geometry"/></mxCell>')
     return '<diagram name="Overview — Tools" id="ov-tools"><mxGraphModel dx="1500" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1560" pageHeight="640" math="0" shadow="0"><root>'+''.join(c)+'</root></mxGraphModel></diagram>'
+def process_detail_page():
+    c=['<mxCell id="0"/>','<mxCell id="1" parent="0"/>']
+    c.append(f'<mxCell id="t" value="{E("Unified Process — Every Step, End to End")}" style="text;html=1;fontStyle=1;fontSize=20;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="22" width="1660" height="32" as="geometry"/></mxCell>')
+    c.append(f'<mxCell id="ts" value="{E("The whole delivery flow as one picture: five phases (columns) with each step in order. Colour = phase.")}" style="text;html=1;fontSize=13;fontColor=#666;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="56" width="1660" height="22" as="geometry"/></mxCell>')
+    colW=308; gap=24; x0=40; topY=100; hdrH=42; stepH=56; stepGap=12
+    hids=[]
+    for i,pk in enumerate(PORDER):
+        x=x0+i*(colW+gap); col=SBCOL[pk]; hid=f'h{i}'; hids.append((hid,x))
+        c.append(f'<mxCell id="{hid}" value="{E(PNAME[pk])}" style="rounded=1;whiteSpace=wrap;html=1;fillColor={col};strokeColor={col};fontColor=#ffffff;fontStyle=1;fontSize=13;" vertex="1" parent="1"><mxGeometry x="{x}" y="{topY}" width="{colW}" height="{hdrH}" as="geometry"/></mxCell>')
+        y=topY+hdrH+14; prev=hid
+        for j,(_,step,kits,prop) in enumerate(M[pk]):
+            sid=f's{i}_{j}'; tags=[k for k,_ in kits]
+            sub=(' &#183; '.join(tags)) if tags else 'Bob / Propel'
+            raw=f'<b>{step}</b><br><font color="#888" style="font-size:10px">{sub}</font>'
+            c.append(f'<mxCell id="{sid}" value="{E(raw)}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8faff;strokeColor={col};fontSize=11;align=left;spacingLeft=8;spacingRight=8;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="{x}" y="{int(y)}" width="{colW}" height="{stepH}" as="geometry"/></mxCell>')
+            c.append(f'<mxCell id="e{sid}" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor={col};endArrow=block;endFill=1;strokeWidth=1;" edge="1" parent="1" source="{prev}" target="{sid}"><mxGeometry relative="1" as="geometry"/></mxCell>')
+            prev=sid; y+=stepH+stepGap
+    for a in range(len(hids)-1):
+        (hid,_)=hids[a]; (hid2,_)=hids[a+1]
+        c.append(f'<mxCell id="ph{a}" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#999999;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1" source="{hid}" target="{hid2}"><mxGeometry relative="1" as="geometry"/></mxCell>')
+    c.append(f'<mxCell id="ver" value="{STAMP}" style="text;html=1;fontSize=10;fontColor=#9aa0a6;align=right;" vertex="1" parent="1"><mxGeometry x="40" y="640" width="1660" height="16" as="geometry"/></mxCell>')
+    return '<diagram name="Process — Detailed" id="ov-process"><mxGraphModel dx="1660" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1740" pageHeight="680" math="0" shadow="0"><root>'+''.join(c)+'</root></mxGraphModel></diagram>'
+def tools_detail_page():
+    c=['<mxCell id="0"/>','<mxCell id="1" parent="0"/>']
+    c.append(f'<mxCell id="t" value="{E("Detailed Toolings — Every Step, the Kit and Tool to Use (and why)")}" style="text;html=1;fontStyle=1;fontSize=20;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="22" width="1560" height="32" as="geometry"/></mxCell>')
+    c.append(f'<mxCell id="ts" value="{E("The master table: for each step, the SuperBob kit (blue) or Propel tool (teal) a team loads, and what it is for. Blank = Bob / Propel handles it.")}" style="text;html=1;fontSize=13;fontColor=#666;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="56" width="1560" height="22" as="geometry"/></mxCell>')
+    X0=40; wS=300; wK=780; wR=420; y=100; hh=32
+    def cell(cid,x,w,yy,ht,val,style): c.append(f'<mxCell id="{cid}" value="{val}" style="{style}" vertex="1" parent="1"><mxGeometry x="{x}" y="{int(yy)}" width="{w}" height="{int(ht)}" as="geometry"/></mxCell>')
+    hs='text;html=1;fontStyle=1;fontSize=12;align=left;verticalAlign=middle;fillColor=#eef1f5;strokeColor=#c8ccd2;spacingLeft=10;'
+    cell('h0',X0,wS,y,hh,E("Step"),hs); cell('h1',X0+wS,wK,y,hh,E("SuperBob kit — what it is for"),hs); cell('h2',X0+wS+wK,wR,y,hh,E("Propel tool — what it is for"),hs)
+    y+=hh; n=0
+    for pk in PORDER:
+        col=SBCOL[pk]
+        cell(f'band{pk}'.replace(' ','').replace('.',''),X0,wS+wK+wR,y,26,E(f'<b><font color="{col}">{PNAME[pk]}</font></b>'),f'text;html=1;fontSize=12;align=left;verticalAlign=middle;fillColor=#f4f6f9;strokeColor=#dfe3e8;spacingLeft=10;')
+        y+=26
+        for (_,step,kits,prop) in M[pk]:
+            rows=max(1,len(kits),len(prop)); rh=30+18*rows
+            cell(f'st{n}',X0,wS,y,rh,E(f'<b><font color="{col}">{step}</font></b>'),'text;html=1;fontSize=11;align=left;verticalAlign=top;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#e9ecf1;spacingLeft=10;spacingTop=6;')
+            kraw='<br>'.join(f'<b><font color="{col}">{k}</font></b> <font color="#777">— {w}</font>' for k,w in kits) if kits else '<font color="#999">—</font>'
+            cell(f'kt{n}',X0+wS,wK,y,rh,E(kraw),'text;html=1;fontSize=11;align=left;verticalAlign=top;whiteSpace=wrap;fillColor=#f8faff;strokeColor=#e9ecf1;spacingLeft=10;spacingTop=6;')
+            praw='<br>'.join(f'<b><font color="{PST}">{k}</font></b> <font color="#777">— {w}</font>' for k,w in prop) if prop else '<font color="#999">—</font>'
+            cell(f'pt{n}',X0+wS+wK,wR,y,rh,E(praw),'text;html=1;fontSize=11;align=left;verticalAlign=top;whiteSpace=wrap;fillColor=#fbfefe;strokeColor=#e9ecf1;spacingLeft=10;spacingTop=6;')
+            y+=rh; n+=1
+    c.append(f'<mxCell id="ver" value="{STAMP}" style="text;html=1;fontSize=10;fontColor=#9aa0a6;align=right;" vertex="1" parent="1"><mxGeometry x="{X0}" y="{int(y+14)}" width="{wS+wK+wR}" height="16" as="geometry"/></mxCell>')
+    return '<diagram name="Tools — Detailed" id="ov-tools-detail"><mxGraphModel dx="1560" dy="1200" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1620" pageHeight="'+str(int(y+60))+'" math="0" shadow="0"><root>'+''.join(c)+'</root></mxGraphModel></diagram>'
 out=re.sub(r'(<diagram[^>]*name=")([^"]*)("[^>]*>)(.*?)</diagram>', proc, xml, flags=re.S)
-out=out.replace('</mxfile>', phases_page()+tools_page()+'</mxfile>')
+out=out.replace('</mxfile>', phases_page()+tools_page()+process_detail_page()+tools_detail_page()+'</mxfile>')
 open(dst,'w',encoding='utf8').write(out)
 print("wrote:",dst,"| phase/tool pages stamped v"+VERSION+" | mapped pages:",pi[0],"| +2 overview pages")
