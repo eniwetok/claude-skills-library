@@ -31,6 +31,7 @@ SuperBob's own code — the installer, the profile system, and the mission-contr
 | [scoobynko/claude-code-design-skills](https://github.com/scoobynko/claude-code-design-skills) | scoobynko | MIT |
 | [madebysan/claude-figma-skills](https://github.com/madebysan/claude-figma-skills) | madebysan | MIT |
 | [senlindesign/claude2figma](https://github.com/senlindesign/claude2figma) | senlindesign | MIT |
+| [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) | Cathryn Lavery | MIT |
 | [anthropics/skills](https://github.com/anthropics/skills) | Anthropic | Apache 2.0 |
 | [anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) | Anthropic | Apache 2.0 |
 | [nexu-io/open-design](https://github.com/nexu-io/open-design) | nexu-io | Apache 2.0 |

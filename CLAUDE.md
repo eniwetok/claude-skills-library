@@ -99,6 +99,7 @@ Upstreams to check:
 - `https://github.com/scoobynko/claude-code-design-skills`
 - `https://github.com/madebysan/claude-figma-skills`
 - `https://github.com/senlindesign/claude2figma`
+- `https://github.com/cathrynlavery/diagram-design`
 
 ---
 

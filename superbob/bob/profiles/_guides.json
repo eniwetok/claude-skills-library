@@ -366,6 +366,7 @@
     "description": "Describe a flow, architecture, ERD, or process and get an editable .drawio diagram with PNG/SVG/PDF export, a mermaid diagram from text, a rough hand-drawn sketch, or a UI wireframe. drawio-skill can also turn existing code, SQL schemas, or infrastructure configs into auto-laid-out diagrams, and it self-checks its own layout. Everything runs locally with no API keys.",
     "outline": [
       "drawio-skill: describe it and get an editable .drawio plus exports, or turn code, SQL, and infra into a diagram",
+      "diagram-design: generate editorial, brand-matched diagrams (29 types) as self-contained HTML+SVG, or convert an existing draw.io / mermaid diagram into that polished design system",
       "utility-mermaid-diagrams: quick flowcharts and sequence diagrams from plain text",
       "hand-drawn-diagrams: loose, sketchy diagrams for early thinking",
       "wireframe-sketch: low-fidelity UI wireframes",
@@ -383,7 +384,8 @@
       "drawio-skill renders and exports with the draw.io desktop app's command line. The kit's Requirements section checks for it and links the download if it is missing.",
       "Graphviz is optional but improves auto-layout for large diagrams.",
       "You get an editable .drawio file, not a flat image, so you can keep refining it by hand.",
-      "Chain diagram-review after any tool: generate the diagram, then say \"review this diagram\" to get professional-layout fixes. It is tool-agnostic."
+      "Chain diagram-review after any tool: generate the diagram, then say \"review this diagram\" to get professional-layout fixes. It is tool-agnostic.",
+      "For a professional, on-brand look, use diagram-design; it can also restyle a draw.io or mermaid diagram into its editorial system (PNG/SVG export uses Playwright)."
     ]
   },
   "web-design": {
