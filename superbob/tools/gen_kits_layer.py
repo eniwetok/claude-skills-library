@@ -1,8 +1,20 @@
 import sys,re,html
 src,dst=sys.argv[1],sys.argv[2]
+VERSION=sys.argv[3] if len(sys.argv)>3 else '1.82.0'
+DATE=sys.argv[4] if len(sys.argv)>4 else '2026-08-12'
+STAMP=f'SuperBob kits mapping &#183; v{VERSION} &#183; {DATE}'
 xml=open(src,encoding='utf8').read()
 SBCOL={'Phase 1':'#6c8ebf','Phase 2':'#82b366','Phase 2.1':'#d79b00','Phase 3':'#9673a6','Phase 4':'#b85450'}
 PST='#0e8088'
+PORDER=['Phase 1','Phase 2','Phase 2.1','Phase 3','Phase 4']
+PNAME={'Phase 1':'Phase 1 — Spec Creation','Phase 2':'Phase 2 — Implementation Planning','Phase 2.1':'Phase 2.1 — QA Planning','Phase 3':'Phase 3 — Development','Phase 4':'Phase 4 — QA Test Execution'}
+PH_META={
+ 'Phase 1':('Turn a PM brief into a unified, dev + QA-approved spec via Bob interrogation.','Final Approved Spec'),
+ 'Phase 2':('Bob drafts the implementation plan; dev reviews; work is broken into Jira tasks.','Tasks in Jira'),
+ 'Phase 2.1':('QA agent drafts test plans & cases; QA reviews; uploaded to TestRail.','Test cases in TestRail'),
+ 'Phase 3':('Bob codes test-first; devs review PRs; CI/CD builds for QA.','Builds for QA'),
+ 'Phase 4':('Automated tests authored & run; devs fix failures; results logged.','Ship / no-ship decision'),
+}
 def pkey(name):
     n=name.lower()
     if 'spec creation' in n or name.startswith('Phase 1'): return 'Phase 1'
@@ -98,9 +110,9 @@ def proc(mm):
             if g: xs.append(g[0]); bt.append(g[1]+g[3])
     x0=int(min(xs)) if xs else 40
     y0=int(max(bt))+120 if bt else 40
-    W=1000; rowh=44; head=44
+    W=1000; rowh=44; head=44; foot=22
     Cm=[f'<mxCell id="{mLid}" value="How to use SuperBob" style="locked=0;" parent="{rootId}" />',
-        f'<mxCell id="{mLid}_bg" value="" style="rounded=1;fillColor=#ffffff;strokeColor=#999999;opacity=80;" vertex="1" parent="{mLid}"><mxGeometry x="{x0}" y="{y0}" width="{W}" height="{head+rowh*len(rules)+14}" as="geometry"/></mxCell>',
+        f'<mxCell id="{mLid}_bg" value="" style="rounded=1;fillColor=#ffffff;strokeColor=#999999;opacity=80;" vertex="1" parent="{mLid}"><mxGeometry x="{x0}" y="{y0}" width="{W}" height="{head+rowh*len(rules)+14+foot}" as="geometry"/></mxCell>',
         f'<mxCell id="{mLid}_h" value="How to use SuperBob in this stage — the kit to load at each step (blank = Bob or Propel handles it, no SuperBob kit needed).  Blue = SuperBob kit, teal = Propel." style="text;html=1;fontStyle=1;fontSize=13;align=left;verticalAlign=middle;whiteSpace=wrap;strokeColor=none;fillColor=none;" vertex="1" parent="{mLid}"><mxGeometry x="{x0+16}" y="{y0+8}" width="{W-32}" height="30" as="geometry"/></mxCell>']
     for i,(_,step,kits,prop) in enumerate(rules):
         ry=y0+head+i*rowh; parts=[]
@@ -110,7 +122,56 @@ def proc(mm):
         raw=f'<b>{step}</b> &#8212; {line}'
         val=html.escape(raw, quote=True)
         Cm.append(f'<mxCell id="{mLid}_r{i}" value="{val}" style="text;html=1;fontSize=11;align=left;verticalAlign=middle;whiteSpace=wrap;strokeColor=#e5e7eb;fillColor=#fafbfc;spacingLeft=8;spacingRight=8;spacingTop=2;" vertex="1" parent="{mLid}"><mxGeometry x="{x0+12}" y="{int(ry)}" width="{W-24}" height="{rowh-6}" as="geometry"/></mxCell>')
+    verY=y0+head+rowh*len(rules)+6
+    Cm.append(f'<mxCell id="{mLid}_ver" value="{STAMP}" style="text;html=1;fontSize=10;fontColor=#9aa0a6;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;" vertex="1" parent="{mLid}"><mxGeometry x="{x0+12}" y="{int(verY)}" width="{W-24}" height="16" as="geometry"/></mxCell>')
     layer='\n        '+'\n        '.join(S+P+Cm)+'\n      '
     return f'{openTag}{re.sub(r"</root>",layer+"</root>",body,count=1)}</diagram>'
-open(dst,'w',encoding='utf8').write(re.sub(r'(<diagram[^>]*name=")([^"]*)("[^>]*>)(.*?)</diagram>', proc, xml, flags=re.S))
-print("wrote:",dst,"| pages:",pi[0])
+def agg(pk):
+    kits=[]; props=[]
+    for (_,_,ks,ps) in M[pk]:
+        for k,_ in ks:
+            if k not in kits: kits.append(k)
+        for k,_ in ps:
+            if k not in props: props.append(k)
+    return kits,props
+def E(raw): return html.escape(raw, quote=True)
+def phases_page():
+    c=['<mxCell id="0"/>','<mxCell id="1" parent="0"/>']
+    c.append(f'<mxCell id="t" value="{E("Spec-Driven Development — End-to-End Phases")}" style="text;html=1;fontStyle=1;fontSize=20;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="22" width="1620" height="32" as="geometry"/></mxCell>')
+    c.append(f'<mxCell id="ts" value="{E("Input → five phases → shipped feature. Each phase output feeds the next. Colour = phase.")}" style="text;html=1;fontSize=13;fontColor=#666;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="56" width="1620" height="22" as="geometry"/></mxCell>')
+    y=140; h=155; bw=220; gap=40; x=40
+    c.append(f'<mxCell id="in" value="{E("<b>Input</b><br>Jira Capability")}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=12;" vertex="1" parent="1"><mxGeometry x="{x}" y="{y+48}" width="120" height="60" as="geometry"/></mxCell>')
+    prev='in'; x+=120+gap
+    for i,pk in enumerate(PORDER):
+        col=SBCOL[pk]; purpose,output=PH_META[pk]; pid=f'p{i}'
+        raw=f'<b><font color="{col}">{PNAME[pk]}</font></b><br><br>{purpose}<br><br><b>&#8594; {output}</b>'
+        c.append(f'<mxCell id="{pid}" value="{E(raw)}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor={col};fontSize=12;align=left;spacingLeft=10;spacingRight=10;verticalAlign=top;spacingTop=10;" vertex="1" parent="1"><mxGeometry x="{x}" y="{y}" width="{bw}" height="{h}" as="geometry"/></mxCell>')
+        c.append(f'<mxCell id="e{i}" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#999999;endArrow=block;endFill=1;" edge="1" parent="1" source="{prev}" target="{pid}"><mxGeometry relative="1" as="geometry"/></mxCell>')
+        prev=pid; x+=bw+gap
+    c.append(f'<mxCell id="out" value="{E("<b>Shipped</b><br>Feature")}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1"><mxGeometry x="{x}" y="{y+48}" width="120" height="60" as="geometry"/></mxCell>')
+    c.append(f'<mxCell id="eout" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#999999;endArrow=block;endFill=1;" edge="1" parent="1" source="{prev}" target="out"><mxGeometry relative="1" as="geometry"/></mxCell>')
+    c.append(f'<mxCell id="ver" value="{STAMP}" style="text;html=1;fontSize=10;fontColor=#9aa0a6;align=right;" vertex="1" parent="1"><mxGeometry x="40" y="{y+h+34}" width="1620" height="16" as="geometry"/></mxCell>')
+    return '<diagram name="Overview — Phases" id="ov-phases"><mxGraphModel dx="1600" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="560" math="0" shadow="0"><root>'+''.join(c)+'</root></mxGraphModel></diagram>'
+def tools_page():
+    c=['<mxCell id="0"/>','<mxCell id="1" parent="0"/>']
+    c.append(f'<mxCell id="t" value="{E("Tooling Across the Lifecycle — Kits & Tools End to End")}" style="text;html=1;fontStyle=1;fontSize=20;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="22" width="1460" height="32" as="geometry"/></mxCell>')
+    c.append(f'<mxCell id="ts" value="{E("Every SuperBob kit (blue) and Propel tool (teal) a team loads at each phase. Blank = handled by Bob / Propel, no kit needed.")}" style="text;html=1;fontSize=13;fontColor=#666;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="56" width="1460" height="22" as="geometry"/></mxCell>')
+    X0=40; wP=240; wK=740; wR=480; hy=100; hh=32
+    def cell(cid,x,w,y,ht,val,style): c.append(f'<mxCell id="{cid}" value="{val}" style="{style}" vertex="1" parent="1"><mxGeometry x="{x}" y="{y}" width="{w}" height="{ht}" as="geometry"/></mxCell>')
+    hs='text;html=1;fontStyle=1;fontSize=12;align=left;verticalAlign=middle;fillColor=#eef1f5;strokeColor=#c8ccd2;spacingLeft=10;'
+    cell('h0',X0,wP,hy,hh,E("Phase"),hs); cell('h1',X0+wP,wK,hy,hh,E("SuperBob kits used"),hs); cell('h2',X0+wP+wK,wR,hy,hh,E("Propel tools used"),hs)
+    y=hy+hh
+    for i,pk in enumerate(PORDER):
+        col=SBCOL[pk]; kits,props=agg(pk); rh=90
+        cell(f'pr{i}',X0,wP,y,rh,E(f'<b><font color="{col}">{PNAME[pk]}</font></b>'),f'text;html=1;fontSize=12;align=left;verticalAlign=top;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#e5e7eb;spacingLeft=10;spacingTop=8;')
+        kraw=' &#183; '.join(f'<b><font color="{col}">{k}</font></b>' for k in kits) if kits else '<font color="#999">—</font>'
+        cell(f'kr{i}',X0+wP,wK,y,rh,E(kraw),'text;html=1;fontSize=12;align=left;verticalAlign=top;whiteSpace=wrap;fillColor=#f8faff;strokeColor=#e5e7eb;spacingLeft=10;spacingTop=8;')
+        praw=' &#183; '.join(f'<b><font color="{PST}">{k}</font></b>' for k in props) if props else '<font color="#999">— (Bob / Propel handles it)</font>'
+        cell(f'rr{i}',X0+wP+wK,wR,y,rh,E(praw),'text;html=1;fontSize=12;align=left;verticalAlign=top;whiteSpace=wrap;fillColor=#e0f7f710;strokeColor=#e5e7eb;spacingLeft=10;spacingTop=8;')
+        y+=rh
+    c.append(f'<mxCell id="ver" value="{STAMP}" style="text;html=1;fontSize=10;fontColor=#9aa0a6;align=right;" vertex="1" parent="1"><mxGeometry x="{X0}" y="{y+16}" width="{wP+wK+wR}" height="16" as="geometry"/></mxCell>')
+    return '<diagram name="Overview — Tools" id="ov-tools"><mxGraphModel dx="1500" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1560" pageHeight="640" math="0" shadow="0"><root>'+''.join(c)+'</root></mxGraphModel></diagram>'
+out=re.sub(r'(<diagram[^>]*name=")([^"]*)("[^>]*>)(.*?)</diagram>', proc, xml, flags=re.S)
+out=out.replace('</mxfile>', phases_page()+tools_page()+'</mxfile>')
+open(dst,'w',encoding='utf8').write(out)
+print("wrote:",dst,"| phase/tool pages stamped v"+VERSION+" | mapped pages:",pi[0],"| +2 overview pages")

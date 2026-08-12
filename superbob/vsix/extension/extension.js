@@ -1414,6 +1414,8 @@ const DIAGRAM_DIR = () => path.join(HOME, '.bob', 'diagram');            // writ
 function bundledDiagramDir(context) { return path.join(context.extensionPath, 'diagram'); }
 // filename (without .png) -> friendly page title
 const DIAGRAM_TITLES = {
+  '00a-overview-phases': 'Overview — Phases (end-to-end)',
+  '00b-overview-tools': 'Overview — Tools (kits & Propel, end-to-end)',
   '01-phase1-spec-creation': 'Phase 1 — Spec Creation',
   '02-tooling-spec-creation': 'Tooling — Spec Creation',
   '03-phase2-implementation-planning': 'Phase 2 — Implementation Planning',
@@ -1439,12 +1441,14 @@ function openDiagramPanel(context) {
     const base = f.replace(/\.png$/, '');
     return { title: DIAGRAM_TITLES[base] || base, uri: diagramPanel.webview.asWebviewUri(vscode.Uri.file(path.join(pagesDir, f))).toString() };
   });
-  diagramPanel.webview.html = diagramHtml(diagramPanel.webview, imgs);
+  let ver = ''; try { ver = require(path.join(context.extensionPath, 'package.json')).version; } catch (e) {}
+  diagramPanel.webview.html = diagramHtml(diagramPanel.webview, imgs, ver);
   diagramPanel.webview.onDidReceiveMessage(m => handleMessage(m, context));
   diagramPanel.onDidDispose(() => { diagramPanel = null; }, null, context.subscriptions);
 }
-function diagramHtml(webview, imgs) {
+function diagramHtml(webview, imgs, ver) {
   const nonce = 'sbd' + Date.now();
+  const vlabel = ver ? ('v' + esc(ver)) : '';
   const pages = imgs.length ? imgs.map(im =>
     `<figure><figcaption>${esc(im.title)}</figcaption><img src="${im.uri}" alt="${esc(im.title)}"/></figure>`
   ).join('\n') : `<p class="muted">Diagram images were not found in this build.</p>`;
@@ -1453,6 +1457,7 @@ function diagramHtml(webview, imgs) {
 <style>
   body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);margin:0;padding:22px 26px;line-height:1.5;font-size:14px}
   h1{font-size:1.4rem;margin:0 0 4px} .tag{color:var(--vscode-descriptionForeground);margin:0 0 14px}
+  .ver{font-size:.7rem;font-weight:600;color:var(--vscode-descriptionForeground);border:1px solid var(--vscode-widget-border,#444);border-radius:10px;padding:1px 8px;vertical-align:middle;margin-left:8px}
   .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 16px}
   button{font:inherit;padding:5px 11px;border-radius:6px;border:1px solid var(--vscode-button-border,transparent);background:var(--vscode-button-background);color:var(--vscode-button-foreground);cursor:pointer}
   button.sec{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground)}
@@ -1464,8 +1469,8 @@ function diagramHtml(webview, imgs) {
   .note{background:var(--vscode-editorWidget-background);border-left:3px solid var(--vscode-charts-blue,#3794ff);border-radius:0 6px 6px 0;padding:9px 13px;margin:0 0 16px;font-size:13px}
   .muted{color:var(--vscode-descriptionForeground)}
 </style></head><body>
-  <h1>SuperBob across the delivery lifecycle</h1>
-  <p class="tag">The Spec-Driven Development flow, with the SuperBob kit to load at each step mapped in.</p>
+  <h1>SuperBob across the delivery lifecycle ${vlabel ? '<span class="ver">' + vlabel + '</span>' : ''}</h1>
+  <p class="tag">The Spec-Driven Development flow, with the SuperBob kit to load at each step mapped in. The two <b>Overview</b> pages up top show the whole process end-to-end — phases, then all kits &amp; tools.</p>
   <div class="bar">
     <button id="openFile">Open the editable .drawio ↗</button>
     <span class="legend"><span class="swatch" style="background:#f4f8ff;border-color:#6c8ebf"></span>blue dashed = SuperBob kit to load
