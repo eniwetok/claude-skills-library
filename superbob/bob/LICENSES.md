@@ -28,6 +28,9 @@ SuperBob's own code — the installer, the profile system, and the mission-contr
 | [dyoshikawa/rulesync](https://github.com/dyoshikawa/rulesync) | dyoshikawa | MIT |
 | [Agents365-ai/drawio-skill](https://github.com/Agents365-ai/drawio-skill) | Agents365-ai | MIT |
 | [DavidROliverBA/Daves-Claude-Code-Skills](https://github.com/DavidROliverBA/Daves-Claude-Code-Skills) | David R Oliver | MIT |
+| [scoobynko/claude-code-design-skills](https://github.com/scoobynko/claude-code-design-skills) | scoobynko | MIT |
+| [madebysan/claude-figma-skills](https://github.com/madebysan/claude-figma-skills) | madebysan | MIT |
+| [senlindesign/claude2figma](https://github.com/senlindesign/claude2figma) | senlindesign | MIT |
 | [anthropics/skills](https://github.com/anthropics/skills) | Anthropic | Apache 2.0 |
 | [anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) | Anthropic | Apache 2.0 |
 | [nexu-io/open-design](https://github.com/nexu-io/open-design) | nexu-io | Apache 2.0 |

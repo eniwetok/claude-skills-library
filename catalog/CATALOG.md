@@ -692,3 +692,10 @@ Natural-language to **editable `.drawio`** diagrams with PNG/SVG/PDF export; als
 **Skill:** skills/diagram-review/ · scanned clean (0 injection findings) · zip: zips/diagram-review.zip
 
 Tool-agnostic diagram-quality layer built on graph-drawing research (declaration order controls layout, minimise edge crossings, Gestalt proximity). Reviews any rendered diagram — draw.io, mermaid, excalidraw — for readability, hierarchy, and layout, then recommends concrete fixes. Added to the SuperBob **`diagramming`** kit so you chain it after any tool to make the output professional.
+
+
+## Group 28 — Figma design-to-code skills (scoobynko, madebysan, senlindesign · all MIT)
+
+**Sources:** [scoobynko/claude-code-design-skills](https://github.com/scoobynko/claude-code-design-skills), [madebysan/claude-figma-skills](https://github.com/madebysan/claude-figma-skills), [senlindesign/claude2figma](https://github.com/senlindesign/claude2figma) — all MIT, scanned clean.
+
+Curated 5 skills that complement the existing open-design Figma set: **figma-to-code** (Figma → production React/Next.js), **figma-extract** (design tokens/specs), **figma-review** (in-Figma design review), **figma-style-binding** + **figma-component-rules** (design-system enforcement — components as instances, values bound to tokens). figma-to-code / figma-extract / figma-review are in the SuperBob **`web-design`** kit; the two enforcement skills sit in the vault.

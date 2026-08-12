@@ -96,6 +96,9 @@ Upstreams to check:
 - `https://github.com/dietrichgebert/ponytail`
 - `https://github.com/Agents365-ai/drawio-skill`
 - `https://github.com/DavidROliverBA/Daves-Claude-Code-Skills`
+- `https://github.com/scoobynko/claude-code-design-skills`
+- `https://github.com/madebysan/claude-figma-skills`
+- `https://github.com/senlindesign/claude2figma`
 
 ---
 
