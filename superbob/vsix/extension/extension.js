@@ -2189,7 +2189,27 @@ function getWebviewHtml() {
 
 
 // ---- install (unchanged behaviour) ----------------------------------------
-async function doInstall(context) {
+// ---- clean self-refresh on update ------------------------------------------
+// Installing a new .vsix ships a new payload, but ~/.bob is per-machine data. On
+// refresh we PURGE shipped kits that are no longer part of the current set (so old
+// generations like code/data/pm do not linger) while never touching a user's own
+// custom kits, and we MERGE _meta/_guides/_resources so custom-kit entries survive.
+const LEGACY_SHIPPED_KITS = ['code', 'data', 'declutter', 'knowledge', 'pm', 'quick-fix', 'rag', 'agent-authoring'];
+const SHIPPED_FILE = () => path.join(HOME, '.bob', '.superbob-shipped.json');
+function readShipped() { try { const a = JSON.parse(fs.readFileSync(SHIPPED_FILE(), 'utf8')); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+function writeShipped(a) { try { fs.writeFileSync(SHIPPED_FILE(), JSON.stringify(a, null, 2) + '\n'); } catch (e) {} }
+const VAULT_VER_FILE = () => path.join(HOME, '.bob', '.superbob-vault-version');
+function readVaultVersion() { try { return fs.readFileSync(VAULT_VER_FILE(), 'utf8').trim(); } catch (e) { return ''; } }
+function writeVaultVersion(v) { try { fs.writeFileSync(VAULT_VER_FILE(), String(v || '') + '\n'); } catch (e) {} }
+function extVersion(context) { try { return JSON.parse(fs.readFileSync(path.join(context.extensionPath, 'package.json'), 'utf8')).version; } catch (e) { return ''; } }
+function mergeProfileJson(destFile, srcFile, purgeKeys) {
+  let live = {}; try { live = JSON.parse(fs.readFileSync(destFile, 'utf8')); } catch (e) {}
+  let ship = {}; try { ship = JSON.parse(fs.readFileSync(srcFile, 'utf8')); } catch (e) {}
+  for (const k of purgeKeys) delete live[k];
+  try { fs.writeFileSync(destFile, JSON.stringify(Object.assign(live, ship), null, 2) + '\n'); } catch (e) {}   // shipped wins for shipped keys; user keys preserved
+}
+async function doInstall(context, opts) {
+  opts = opts || {};
   await vscode.window.withProgress(
     { location: vscode.ProgressLocation.Notification, title: 'SuperBob: installing…', cancellable: false },
     async (progress) => {
@@ -2208,7 +2228,18 @@ async function doInstall(context) {
           fs.mkdirSync(path.join(BOB_VAULT, 'mission-control'), { recursive: true });
           fs.copyFileSync(bobMeta, path.join(BOB_VAULT, 'mission-control', 'SKILL.md'));
           fs.mkdirSync(BOB_PROFILES, { recursive: true });
-          for (const f of fs.readdirSync(path.join(pkg, 'profiles'))) fs.copyFileSync(path.join(pkg, 'profiles', f), path.join(BOB_PROFILES, f));
+          const payloadProfiles = fs.readdirSync(path.join(pkg, 'profiles'));
+          const newKits = payloadProfiles.filter(f => f.endsWith('.txt')).map(f => f.slice(0, -4));
+          // purge shipped kits (previously shipped or known-legacy) that this payload no longer ships,
+          // never a user's own custom kit
+          const purge = [...new Set([...readShipped(), ...LEGACY_SHIPPED_KITS])].filter(k => !newKits.includes(k));
+          for (const k of purge) fs.rmSync(path.join(BOB_PROFILES, k + '.txt'), { force: true });
+          for (const f of payloadProfiles) {
+            const src = path.join(pkg, 'profiles', f), dst = path.join(BOB_PROFILES, f);
+            if (f === '_meta.json' || f === '_guides.json' || f === '_resources.json') mergeProfileJson(dst, src, purge);
+            else fs.copyFileSync(src, dst);
+          }
+          writeShipped(newKits);
           // Bob chat slash commands (e.g. /superbob) go in ~/.bob/commands/
           const cmdSrc = path.join(pkg, 'commands');
           if (fs.existsSync(cmdSrc)) {
@@ -2222,16 +2253,21 @@ async function doInstall(context) {
             fs.mkdirSync(BOB_AGENTS, { recursive: true });
             for (const f of fs.readdirSync(agentsSrc)) fs.copyFileSync(path.join(agentsSrc, f), path.join(BOB_AGENTS, f));
           }
-          applyProfile([]);
+          // keep the user's currently loaded kits if they still exist; else fall back to lean
+          const keep = activeKitNames().filter(k => fs.existsSync(path.join(BOB_PROFILES, k + '.txt')));
+          applyProfile(keep);
           if (bk) log('Bob skills backed up to ' + bk);
         }
       } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
     }
   );
+  writeVaultVersion(extVersion(context));   // stamp the vault so we know it matches this build
   invalidateVaultCache();   // the vault just changed; drop the cached skill metadata
   invalidateResourceCache();   // re-detect resource availability after an install
   updateStatus();
-  vscode.window.showInformationMessage('SuperBob installed (' + target + '). Restart Bob / start a new VS Code session so skills load.');
+  vscode.window.showInformationMessage(opts.auto
+    ? 'SuperBob skills updated to v' + extVersion(context) + '. Start a new conversation so they load.'
+    : 'SuperBob skills installed (v' + extVersion(context) + '). Start a new conversation so they load.');
 }
 
 async function doLoadProfile() {
@@ -2246,6 +2282,13 @@ async function doLoadProfile() {
 function activate(context) {
   cleanupLegacyAgentModes();   // heal any custom_modes.yaml pollution from an earlier build
   if (!isPoweredOff()) writeAgents();   // reconcile subagents to the currently loaded kits
+  // Auto-refresh: if the vault was populated by an OLDER build than the one now installed,
+  // re-unpack the payload so kits/skills match the code (purges stale old-generation kits).
+  try {
+    if (fs.existsSync(BOB_VAULT) && readVaultVersion() !== extVersion(context)) {
+      doInstall(context, { auto: true }).catch(() => {});
+    }
+  } catch (e) {}
   statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   statusItem.command = 'superBobSkills.openPanel';
   statusItem.tooltip = 'SuperBob, open the skills control panel';

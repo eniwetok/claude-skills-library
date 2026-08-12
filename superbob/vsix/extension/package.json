@@ -2,7 +2,7 @@
   "name": "super-bob-skills",
   "displayName": "Super-bob-skills",
   "description": "SuperBob gives Bob a library of expert skills and loads the right ones for the task you're on, grouped into kits for each kind of work (coding, testing, review, security, product, and more), so Bob brings focused expertise instead of generic help.",
-  "version": "1.83.0",
+  "version": "1.84.0",
   "publisher": "felipe-campo",
   "icon": "icon.png",
   "engines": {
