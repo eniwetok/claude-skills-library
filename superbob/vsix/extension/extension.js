@@ -93,8 +93,29 @@ function writeAutoRule() {
       text += '\n## Scope: stay within the loaded kit' + (kits.length > 1 ? 's' : '') + '\n\n' +
         kits.length + ' kit' + (kits.length > 1 ? 's are' : ' is') + ' loaded (' + kits.join(', ') + '). Their skills are in `~/.bob/skills`. For each task, prefer a skill from these loaded kits. Only reach into the wider `~/.bob/skills-vault` if none of the loaded skills fits, and say so when you do.\n';
     }
+    // Kit awareness: let the router notice when a task fits a kit that is NOT loaded, and offer it.
+    text += kitCatalogSection(kits);
     fs.writeFileSync(AUTO_RULE_FILE(), text);
   } catch (e) {}
+}
+// The full kit catalog + a "suggest an unloaded kit when a task fits it" instruction, appended to the
+// auto-routing rule so mission-control is aware of kits it could offer to enable — not just loaded ones.
+function kitCatalogSection(loadedKits) {
+  try {
+    const all = profileNames();
+    if (!all.length) return '';
+    const guides = readGuides(), meta = readMeta();
+    const loaded = new Set(loadedKits || []);
+    const rows = all.slice().sort().map(k => {
+      const tag = (guides[k] && guides[k].tagline) || meta[k] || ('skills for ' + k.replace(/-/g, ' '));
+      return '- **' + k + '**' + (loaded.has(k) ? ' _(loaded)_' : '') + ' — ' + String(tag).replace(/\s+/g, ' ').trim();
+    }).join('\n');
+    return '\n## Kits you can suggest enabling\n\n' +
+      'These skill bundles are available; only the ones marked _(loaded)_ are active right now. ' +
+      'If a task clearly fits a kit that is NOT loaded, tell the user once, briefly — e.g. "This is a <domain> task; the **<kit>** kit would handle it better. Want me to enable it? (flip its blue toggle in the SuperBob panel, or run `/superbob <kit>`)" — then continue with what you already have. ' +
+      'Suggest at most one kit per task, only when the fit is clear, and never block on it: a sensible default answer still comes first.\n\n' +
+      rows + '\n';
+  } catch (e) { return ''; }
 }
 function removeAutoRule() { try { fs.rmSync(AUTO_RULE_FILE(), { force: true }); } catch (e) {} }
 
@@ -932,6 +953,8 @@ async function handleMessage(m, context) {
   if (m.type === 'openBuilder') { openBuilderPanel(context); return; }
   if (m.type === 'openHowTo') { openHowToPanel(context); return; }
   if (m.type === 'openManager') { openManagerPanel(context); return; }
+  if (m.type === 'openDiagram') { openDiagramPanel(context); return; }
+  if (m.type === 'openDiagramFile') { openDiagramFile(context); return; }
   if (m.type === 'viewContent') { openViewerPanel(m.kind, m.name, context); return; }
   if (m.type === 'sendToBob') {
     const text = (m.prompt || '').trim(); if (!text) return;
@@ -1386,6 +1409,87 @@ npx rulesync generate --targets "*" --features "*"</pre></li>
   </body></html>`;
 }
 
+// ---- Lifecycle diagram viewer (SDLC pages with the kit-per-step mapping) ---
+const DIAGRAM_DIR = () => path.join(HOME, '.bob', 'diagram');            // writable copy of the editable .drawio
+function bundledDiagramDir(context) { return path.join(context.extensionPath, 'diagram'); }
+// filename (without .png) -> friendly page title
+const DIAGRAM_TITLES = {
+  '01-phase1-spec-creation': 'Phase 1 — Spec Creation',
+  '02-tooling-spec-creation': 'Tooling — Spec Creation',
+  '03-phase2-implementation-planning': 'Phase 2 — Implementation Planning',
+  '04-tooling-implementation': 'Tooling — Implementation',
+  '05-phase2.1-qa-planning': 'Phase 2.1 — QA Planning',
+  '06-tooling-qa-planning': 'Tooling — QA Planning',
+  '07-phase3-development': 'Phase 3 — Development',
+  '08-tooling-development': 'Tooling — Development',
+  '09-phase4-qa-test-execution': 'Phase 4 — QA Test Execution',
+  '10-qa-test-execution': 'Tooling — QA Test Execution'
+};
+let diagramPanel;
+function openDiagramPanel(context) {
+  if (diagramPanel) { diagramPanel.reveal(vscode.ViewColumn.Active); return; }
+  const pagesDir = path.join(bundledDiagramDir(context), 'pages');
+  diagramPanel = vscode.window.createWebviewPanel(
+    'superbobDiagram', 'SuperBob: lifecycle diagram', vscode.ViewColumn.Active,
+    { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [vscode.Uri.file(pagesDir)] }
+  );
+  let files = [];
+  try { files = fs.readdirSync(pagesDir).filter(f => f.endsWith('.png')).sort(); } catch (e) {}
+  const imgs = files.map(f => {
+    const base = f.replace(/\.png$/, '');
+    return { title: DIAGRAM_TITLES[base] || base, uri: diagramPanel.webview.asWebviewUri(vscode.Uri.file(path.join(pagesDir, f))).toString() };
+  });
+  diagramPanel.webview.html = diagramHtml(diagramPanel.webview, imgs);
+  diagramPanel.webview.onDidReceiveMessage(m => handleMessage(m, context));
+  diagramPanel.onDidDispose(() => { diagramPanel = null; }, null, context.subscriptions);
+}
+function diagramHtml(webview, imgs) {
+  const nonce = 'sbd' + Date.now();
+  const pages = imgs.length ? imgs.map(im =>
+    `<figure><figcaption>${esc(im.title)}</figcaption><img src="${im.uri}" alt="${esc(im.title)}"/></figure>`
+  ).join('\n') : `<p class="muted">Diagram images were not found in this build.</p>`;
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';"/>
+<style>
+  body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);margin:0;padding:22px 26px;line-height:1.5;font-size:14px}
+  h1{font-size:1.4rem;margin:0 0 4px} .tag{color:var(--vscode-descriptionForeground);margin:0 0 14px}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 16px}
+  button{font:inherit;padding:5px 11px;border-radius:6px;border:1px solid var(--vscode-button-border,transparent);background:var(--vscode-button-background);color:var(--vscode-button-foreground);cursor:pointer}
+  button.sec{background:var(--vscode-button-secondaryBackground);color:var(--vscode-button-secondaryForeground)}
+  .legend{font-size:12.5px;color:var(--vscode-descriptionForeground)}
+  .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:middle;margin:0 4px 0 10px;border:1px solid #0003}
+  figure{margin:0 0 26px;border:1px solid var(--vscode-widget-border,#333);border-radius:8px;overflow:hidden;background:#fff}
+  figcaption{font-weight:600;padding:8px 12px;background:var(--vscode-editorWidget-background);color:var(--vscode-foreground);border-bottom:1px solid var(--vscode-widget-border,#333)}
+  img{display:block;width:100%;height:auto}
+  .note{background:var(--vscode-editorWidget-background);border-left:3px solid var(--vscode-charts-blue,#3794ff);border-radius:0 6px 6px 0;padding:9px 13px;margin:0 0 16px;font-size:13px}
+  .muted{color:var(--vscode-descriptionForeground)}
+</style></head><body>
+  <h1>SuperBob across the delivery lifecycle</h1>
+  <p class="tag">The Spec-Driven Development flow, with the SuperBob kit to load at each step mapped in.</p>
+  <div class="bar">
+    <button id="openFile">Open the editable .drawio ↗</button>
+    <span class="legend"><span class="swatch" style="background:#f4f8ff;border-color:#6c8ebf"></span>blue dashed = SuperBob kit to load
+      <span class="swatch" style="background:#e0f7f7;border-color:#0e8088"></span>teal = Propel tool</span>
+  </div>
+  <div class="note">Under each step, <b>Load ▸ kit</b> is the SuperBob kit a team would load there; the <b>How to use SuperBob</b> panel at the bottom of every page lists it step-by-step. Steps with no tag are handled by Bob or Propel — no kit needed (the mapping stays honest, not forced).</div>
+  ${pages}
+<script nonce="${nonce}">
+  const vscode=acquireVsCodeApi();
+  document.getElementById('openFile').addEventListener('click',()=>vscode.postMessage({type:'openDiagramFile'}));
+</script></body></html>`;
+}
+function openDiagramFile(context) {
+  try {
+    const srcName = 'SuperBob-Kits-Lifecycle.drawio';
+    const src = path.join(bundledDiagramDir(context), srcName);
+    if (!fs.existsSync(src)) { vscode.window.showErrorMessage('SuperBob: bundled diagram not found in this build.'); return; }
+    fs.mkdirSync(DIAGRAM_DIR(), { recursive: true });
+    const dest = path.join(DIAGRAM_DIR(), srcName);
+    fs.copyFileSync(src, dest);   // writable copy the user can edit without touching the bundle
+    vscode.commands.executeCommand('vscode.open', vscode.Uri.file(dest));
+  } catch (e) { vscode.window.showErrorMessage('SuperBob: could not open the diagram — ' + e.message); }
+}
+
 // ---- "My skills & agents" manager (CRUD, its own page) --------------------
 let managerPanel;
 function openManagerPanel(context) {
@@ -1838,6 +1942,7 @@ function getWebviewHtml() {
   <div class="actionbar">
     <button id="createBtn">+ Create your own kit</button>
     <button class="sec" id="manageBtn">Manage my skills &amp; agents</button>
+    <button class="sec" id="diagramBtn">Lifecycle diagram ↗</button>
     <button class="sec" id="howToBtn">How it works ↗</button>
   </div>
 
@@ -2053,6 +2158,7 @@ function getWebviewHtml() {
     if(e.target.id==='createBtn') vscode.postMessage({type:'openBuilder'});
     if(e.target.id==='howToBtn'||e.target.id==='howLink'){ e.preventDefault&&e.preventDefault(); vscode.postMessage({type:'openHowTo'}); }
     if(e.target.id==='manageBtn') vscode.postMessage({type:'openManager'});
+    if(e.target.id==='diagramBtn') vscode.postMessage({type:'openDiagram'});
     if(e.target.id==='bcancel') closeBuilder();
     if(e.target.id==='installBtn') vscode.postMessage({type:'install'});
     if(e.target.id==='docsBtn') vscode.postMessage({type:'openDocs'});

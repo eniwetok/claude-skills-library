@@ -9,7 +9,7 @@ function extract(fnName){
   return src.slice(start,j);
 }
 const stubs={ esc:s=>String(s||''), path, os, JSON, Math, Date:{now:()=>0}, RULESYNC_TARGETS:[], process:{env:{},platform:'darwin'} };
-const names=['managerHtml','getWebviewHtml','viewerHtml','howToHtml','builderHtml','guideHtml'];
+const names=['managerHtml','getWebviewHtml','viewerHtml','howToHtml','builderHtml','guideHtml','diagramHtml'];
 let fail=0;
 for(const nm of names){
   const code=extract(nm); if(!code){ console.log('  skip '+nm); continue; }
@@ -20,6 +20,7 @@ for(const nm of names){
     const call = nm==='guideHtml' ? nm+'({kit:"k",tagline:"t",skills:[],examples:[],tips:[],outline:[]})'
                : nm==='builderHtml' ? nm+'([])'
                : nm==='viewerHtml' ? nm+'("skill","x")'
+               : nm==='diagramHtml' ? nm+'({cspSource:"vscode-resource:"},[{title:"P",uri:"u"}])'
                : nm+'()';
     vm.runInContext(code+'\n; globalThis.__out='+call+';', ctx, {timeout:2000});
     html=ctx.__out;
