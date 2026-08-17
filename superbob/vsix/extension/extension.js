@@ -311,6 +311,16 @@ function log(msg) { console.log('[super-bob-skills] ' + msg); }
 
 function unzip(zipPath, destDir) {
   fs.mkdirSync(destDir, { recursive: true });
+  if (process.platform === 'win32') {
+    // Windows has no `unzip`. Prefer bundled tar (bsdtar, Win10 1803+), fall back to PowerShell.
+    try { cp.execFileSync('tar', ['-xf', zipPath, '-C', destDir], { stdio: 'ignore' }); return; }
+    catch (e) {
+      const q = s => "'" + String(s).replace(/'/g, "''") + "'";
+      cp.execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command',
+        'Expand-Archive -LiteralPath ' + q(zipPath) + ' -DestinationPath ' + q(destDir) + ' -Force'], { stdio: 'ignore', maxBuffer: 1024 * 1024 * 64 });
+    }
+    return;
+  }
   cp.execFileSync('unzip', ['-o', '-q', zipPath, '-d', destDir], { stdio: 'ignore' });
 }
 function copyDir(src, dest) { fs.mkdirSync(dest, { recursive: true }); fs.cpSync(src, dest, { recursive: true }); }
@@ -816,8 +826,13 @@ const OPTIONAL_TOOLS = [];
 function toolByName(n) { return OPTIONAL_TOOLS.find(t => t.name === n); }
 // Run through a login shell so we pick up Bob's / the user's real PATH and env
 // (GUI-launched apps otherwise miss node/npm and shell exports).
-function loginShell(cmd) { return '/bin/zsh -lc ' + JSON.stringify(cmd); }
-function cliInstalled(bin) { try { cp.execSync(loginShell('command -v ' + bin), { stdio: 'ignore' }); return true; } catch (e) { return false; } }
+function loginShell(cmd) { return process.platform === 'win32' ? cmd : '/bin/zsh -lc ' + JSON.stringify(cmd); }
+function cliInstalled(bin) {
+  try {
+    if (process.platform === 'win32') { cp.execSync('where ' + bin, { stdio: 'ignore' }); return true; }
+    cp.execSync(loginShell('command -v ' + bin), { stdio: 'ignore' }); return true;
+  } catch (e) { return false; }
+}
 function toolActive(name) { return fs.existsSync(path.join(BOB_ACTIVE, name, 'SKILL.md')); }
 function bobEnvHasKey(vars) {
   const files = [path.join(HOME, '.bob', '.env')];
