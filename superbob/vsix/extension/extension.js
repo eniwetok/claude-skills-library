@@ -180,7 +180,7 @@ const BOB_SUBAGENTS = path.join(HOME, '.bob', 'subagents');                    /
 const BOB_SETTINGS = path.join(HOME, '.bob', 'settings', 'settings.json');     // Bob's user settings
 const AGENT_LOC_KEY = 'chat.agents.config.locations';                          // Bob's native agent-locations setting
 const DEFAULT_AGENT_LOCS = ['**/.github/agents/*.md', '**/.claude/agents/*.md'];  // Bob's built-in defaults (preserve them)
-const OUR_AGENT_LOC = path.join(BOB_SUBAGENTS, '*.md');                        // absolute glob for our folder
+const OUR_AGENT_LOC = BOB_SUBAGENTS.split(path.sep).join('/') + '/*.md';       // forward-slash glob so Bob's matcher works on Windows too
 const LEGACY_CLAUDE_AGENTS = path.join(HOME, '.claude', 'agents');            // earlier (Claude-route) build wrote here; clean up
 const AGENTS_FILE = () => path.join(BOB_PROFILES, '_agents.json');
 const AGENTS_MANIFEST = () => path.join(HOME, '.bob', '.superbob-agents.json');
@@ -500,7 +500,7 @@ const RESOURCE_DETECTORS = {
   node: () => cliInstalled('node'),
   npx: () => cliInstalled('npx'),
   propel: PREREQ_DETECTORS.propel,
-  drawio: () => cliInstalled('drawio') || cliInstalled('draw.io') || fs.existsSync('/Applications/draw.io.app'),
+  drawio: () => cliInstalled('drawio') || cliInstalled('draw.io') || (process.platform === 'darwin' && fs.existsSync('/Applications/draw.io.app')),
   graphviz: () => cliInstalled('dot')
 };
 function resourceMet(check) {
