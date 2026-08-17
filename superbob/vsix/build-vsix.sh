@@ -26,6 +26,11 @@ if ! node "$REPO/vsix/test-platform.js"; then
   echo "ABORT: a cross-platform test failed — the extension would misbehave on Windows or macOS." >&2
   exit 1
 fi
+echo "Real extraction on this OS…"
+if ! node "$REPO/vsix/test-extract-real.js"; then
+  echo "ABORT: the installer's unzip() did not extract on this OS." >&2
+  exit 1
+fi
 
 # Always rebuild the payload from the library so the .vsix never ships a stale package
 # and the skill-library-lint gate always runs. (A cached zip previously shipped skills

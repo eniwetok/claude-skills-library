@@ -26,6 +26,14 @@ extension files into `skills/`, `packages/`, or the top level. It reads the libr
 input via `superbob/config.sh` (`SB_LIBRARY`), so it can be lifted into its own repo later with
 no code changes. Build it with `superbob/vsix/build-vsix.sh`. See `superbob/README.md`.
 
+**SuperBob must stay Windows + macOS + Linux compatible.** Before editing
+`superbob/vsix/extension/extension.js`, read `superbob/CROSS-PLATFORM.md` — it lists the rules
+(use `path.join`/`os.homedir`; route shell-outs through `loginShell`/`cliInstalled`/`unzip`; no
+`/bin/zsh`, bare `unzip`, or OS-specific file openers; forward-slash globs in config). Four gates
+in `build-vsix.sh` (`validate-webviews.js`, `validate-platform.js`, `test-platform.js`,
+`test-extract-real.js`) plus CI on real Windows/macOS/Linux enforce it — the build aborts on any
+failure. Any new platform-touching change must add a `test-platform.js` case.
+
 ---
 
 ## Skill groups and their upstreams
