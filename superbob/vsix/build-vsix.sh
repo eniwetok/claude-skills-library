@@ -21,6 +21,11 @@ if ! node "$REPO/vsix/validate-platform.js"; then
   echo "ABORT: a Windows-incompatible pattern was found — fix before building (it would break setup on Windows)." >&2
   exit 1
 fi
+echo "Running cross-platform tests (win32 + darwin)…"
+if ! node "$REPO/vsix/test-platform.js"; then
+  echo "ABORT: a cross-platform test failed — the extension would misbehave on Windows or macOS." >&2
+  exit 1
+fi
 
 # Always rebuild the payload from the library so the .vsix never ships a stale package
 # and the skill-library-lint gate always runs. (A cached zip previously shipped skills
