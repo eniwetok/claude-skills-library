@@ -36,5 +36,9 @@ lines.forEach((l, i) => { if (/fs\.existsSync\('\/Applications/.test(l) && !/dar
 // 6) no raw /tmp (must use os.tmpdir())
 lines.forEach((l, i) => { if (/['"`]\/tmp[\/'"`]/.test(l) && !l.trim().startsWith('//')) fails.push((i + 1) + ': raw /tmp path (use os.tmpdir())'); });
 
+// 7) no OS-specific file/URL openers shelled out (macOS `open`, Linux `xdg-open`, Windows `start`/`explorer`).
+//    Use vscode.env.openExternal or the `vscode.open` command instead.
+lines.forEach((l, i) => { if (/cp\.(exec|execSync|execFile|execFileSync)\(\s*['"`](open|start|xdg-open|explorer)['"` ]/.test(l)) fails.push((i + 1) + ': OS-specific opener shelled out (use vscode.env.openExternal / the vscode.open command)'); });
+
 if (fails.length) { console.log('PLATFORM CHECK FAILED:'); fails.forEach(f => console.log('  ❌ ' + f)); process.exit(1); }
 console.log('PLATFORM CHECKS PASS (Windows/macOS/Linux safe)');
