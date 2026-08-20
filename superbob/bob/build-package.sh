@@ -27,7 +27,10 @@ fi
 #   mission-control is target-specific (shipped via meta/).
 #   Obsidian / personal-knowledge-base skills are intentionally NOT shipped —
 #   users manage their own Obsidian setup; SuperBob does not touch it.
+#   PERSONAL, Claude-only (never ship to Bob/SuperBob): Felipe's private PM
+#   task-tracker (drives his own GitHub boards). Belongs in ~/.claude/skills only.
 EXCLUDE=(mission-control \
+  pm-tracker felipe-pm-tracker \
   codebase-exploration codebase-management \
   docx pdf pptx xlsx \
   wiki wiki-cli wiki-fold wiki-ingest wiki-lint wiki-mode wiki-query wiki-retrieve \
@@ -39,9 +42,15 @@ EXCLUDE=(mission-control \
 
 mkdir -p "$STAGE/skills" "$STAGE/profiles" "$STAGE/meta" "$STAGE/commands" "$STAGE/agents" "$OUT"
 
+# PERSONAL-SKILL MARKER: any SKILL.md whose frontmatter has `bob: false`,
+# `personal: true`, or `share: false` is Claude-only and never ships to Bob. This is
+# the systematic "personal skills" space — mark the skill once, no need to edit the
+# EXCLUDE list. (The name list above still works for skills that cannot carry a marker.)
 while IFS= read -r f; do
   d="$(dirname "$f")"; name="$(basename "$d")"
   for x in "${EXCLUDE[@]}"; do [ "$name" = "$x" ] && continue 2; done
+  # skip if the frontmatter marks it personal / not-for-bob (only scan the top of the file)
+  if head -20 "$f" | grep -qiE '^(bob|share):[[:space:]]*false[[:space:]]*$|^personal:[[:space:]]*true[[:space:]]*$'; then continue; fi
   rsync -a --exclude '.DS_Store' "$d"/ "$STAGE/skills/$name"/ 2>/dev/null || true
 done < <(find "$LIB/packages" "$LIB/skills" -name SKILL.md 2>/dev/null)
 
