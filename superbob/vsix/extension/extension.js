@@ -922,6 +922,7 @@ function stateMessage() {
     agentsByKit: kitAgentsMap(),
     custom: readCustom(),
     allAgents: listAgentDefs(),
+    propel: propelState(),
     auto: readAuto()
   };
 }
@@ -967,6 +968,17 @@ async function handleMessage(m, context) {
   }
   if (m.type === 'openBuilder') { openBuilderPanel(context); return; }
   if (m.type === 'openHowTo') { openHowToPanel(context); return; }
+  if (m.type === 'setPropel') {
+    if (m.on) restorePropel(m.name); else stashPropel(m.name);
+    postState(); return;
+  }
+  if (m.type === 'setPropelAll') {
+    const st = propelState();
+    if (m.on) st.stashed.forEach(s => restorePropel(s.name));
+    else st.active.forEach(s => stashPropel(s.name));
+    vscode.window.showInformationMessage(m.on ? 'Propel skills restored. Start a new conversation.' : 'Propel skills disabled (moved to ~/.bob/.propel-off). Start a new conversation.');
+    postState(); return;
+  }
   if (m.type === 'openManager') { openManagerPanel(context); return; }
   if (m.type === 'openDiagram') { openDiagramPanel(context); return; }
   if (m.type === 'openDiagramFile') { openDiagramFile(context); return; }
@@ -1873,6 +1885,10 @@ function getWebviewHtml() {
   .lockbadge{font-size:10px;color:var(--vscode-descriptionForeground);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap}
   .setupbadge{font-size:10px;color:var(--vscode-charts-yellow,#d29922);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap;cursor:help}
   .agentbadge{font-size:10px;color:var(--vscode-charts-purple,#b180d7);border:1px solid currentColor;border-radius:8px;padding:0 7px;white-space:nowrap}
+  .propelbar{display:flex;gap:8px;margin-bottom:6px}
+  .propel-details summary{cursor:pointer;font-size:12px;color:var(--vscode-textLink-foreground)}
+  .propelrow{display:flex;align-items:center;gap:9px;margin:6px 0}
+  .propelrow .pn{font-size:12px} .propelrow .nm{font-weight:600} .propelrow .pd{color:var(--vscode-descriptionForeground);margin-left:6px}
   .pswitch input:disabled ~ .track{opacity:.4} .pswitch input:disabled ~ .knob{opacity:.4}
   .mode-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
   button{background:var(--vscode-button-background);color:var(--vscode-button-foreground);border:0;border-radius:5px;padding:5px 13px;cursor:pointer;font-size:12px}
@@ -1991,6 +2007,13 @@ function getWebviewHtml() {
     <div id="tools"></div>
   </div>
 
+  <div id="propelSection" style="display:none">
+    <h2>Propel skills <span id="propelCount" class="muted" style="text-transform:none;font-weight:400"></span></h2>
+    <div class="muted" style="margin:-6px 0 8px;font-size:12px">Propel (another extension) adds its skills to Bob's global folder. Toggle them off to keep them out of context; toggle on to restore. Stored in <code>~/.bob/.propel-off</code>.</div>
+    <div class="propelbar"><button class="sec" id="propelOff">Disable all</button><button class="sec" id="propelOn">Enable all</button></div>
+    <details class="propel-details"><summary id="propelSummary">Review</summary><div id="propelList"></div></details>
+  </div>
+
   <div class="foot">The 2 core skills are always on. After switching a kit, <b>start a new conversation</b> so it loads. New here? <a href="#" id="howLink">How it works ↗</a></div>
 </div>
 <script nonce="${nonce}">
@@ -2052,6 +2075,19 @@ function getWebviewHtml() {
     });
   }
 
+  function renderPropel(){
+    const sec=document.getElementById('propelSection'); if(!sec) return;
+    const p=S.propel||{active:[],stashed:[]}; const total=p.active.length+p.stashed.length;
+    sec.style.display=total?'block':'none'; if(!total) return;
+    document.getElementById('propelCount').textContent='('+p.active.length+' on, '+p.stashed.length+' off)';
+    document.getElementById('propelSummary').textContent='Review '+total+' Propel skill'+(total>1?'s':'');
+    const list=document.getElementById('propelList'); list.innerHTML='';
+    const rows=[...p.active.map(s=>({s,on:true})),...p.stashed.map(s=>({s,on:false}))].sort((a,b)=>a.s.name.localeCompare(b.s.name));
+    rows.forEach(({s,on})=>{ const row=document.createElement('div'); row.className='propelrow';
+      row.innerHTML='<label class="pswitch"><input type="checkbox" class="propelsw" data-name="'+s.name+'" '+(on?'checked':'')+'/><span class="track"></span><span class="knob"></span></label>'+
+        '<span class="pn"><span class="nm">'+s.name+'</span>'+(s.desc?'<span class="pd">'+s.desc+'</span>':'')+'</span>';
+      list.appendChild(row); });
+  }
   function renderTools(){
     const sec=document.getElementById('toolsSection'); if(sec) sec.style.display=(S.tools&&S.tools.length)?'block':'none';
     const c=document.getElementById('tools'); if(!c) return; c.innerHTML='';
@@ -2113,6 +2149,7 @@ function getWebviewHtml() {
     document.getElementById('activeSkillsSummary').textContent =
       total + ' skills loaded: ' + S.core.length + ' core' + (extras.length? (' + ' + extras.length + ' from ' + (AK.length||1) + ' kit' + ((AK.length||1)>1?'s':'')) : '') + (dupCount? (', ' + dupCount + ' shared (loaded once)') : '') + ' · view';
     renderAddons();
+    renderPropel();
 
     // your kits = the user's own (non-builtin) kits. Lean is the Auto/base state,
     // controlled by the Auto toggle and shown in the active card, so it is not a card here.
@@ -2180,6 +2217,8 @@ function getWebviewHtml() {
     if(e.target.id==='createBtn') vscode.postMessage({type:'openBuilder'});
     if(e.target.id==='howToBtn'||e.target.id==='howLink'){ e.preventDefault&&e.preventDefault(); vscode.postMessage({type:'openHowTo'}); }
     if(e.target.id==='manageBtn') vscode.postMessage({type:'openManager'});
+    if(e.target.id==='propelOff') vscode.postMessage({type:'setPropelAll', on:false});
+    if(e.target.id==='propelOn') vscode.postMessage({type:'setPropelAll', on:true});
     if(e.target.id==='diagramBtn') vscode.postMessage({type:'openDiagram'});
     if(e.target.id==='bcancel') closeBuilder();
     if(e.target.id==='installBtn') vscode.postMessage({type:'install'});
@@ -2192,6 +2231,7 @@ function getWebviewHtml() {
     if(e.target.name==='scope' && e.target.checked){ vscode.postMessage({type:'setScope', scope:e.target.value}); }
     if(e.target.classList && e.target.classList.contains('toolsw')){ vscode.postMessage({type:'toolToggle', tool:e.target.dataset.tool, on:e.target.checked}); }
     if(e.target.classList && e.target.classList.contains('addonsw')){ vscode.postMessage({type:'setAddon', name:e.target.dataset.addon, on:e.target.checked}); }
+    if(e.target.classList && e.target.classList.contains('propelsw')){ vscode.postMessage({type:'setPropel', name:e.target.dataset.name, on:e.target.checked}); }
     if(e.target.classList && e.target.classList.contains('kitsw')){
       const kit=e.target.dataset.kit; const cur=activeKits();
       pendingScrollKit=kit;   // after re-render, bring this kit into view at its new home so it never jumps out of sight
@@ -2204,6 +2244,35 @@ function getWebviewHtml() {
 
 
 // ---- install (unchanged behaviour) ----------------------------------------
+// ---- temporarily disable another extension's (Propel's) skills -------------
+// Propel adds ~40 of its own skills into the shared global ~/.bob/skills folder, so
+// Bob loads them all into context. This lets the user stash the Propel skills into a
+// separate vault (~/.bob/.propel-off) to keep them out of context, and restore them
+// later. Reversible; never touches SuperBob's core, the user's custom skills, or
+// Propel's actual extension. Detection is by Propel's own frontmatter markers.
+const PROPEL_OFF_DIR = () => path.join(HOME, '.bob', '.propel-off');
+const PROPEL_MARKERS = /IBM Winning Products|Product Excellence Office|Winning Products methodology|license:\s*Proprietary/i;
+function isPropelSkill(name) {
+  if (CORE.includes(name) || isCustom('skill', name)) return false;
+  try { if (managedSet().has(name)) return false; } catch (e) {}
+  try { return PROPEL_MARKERS.test(fs.readFileSync(path.join(BOB_ACTIVE, name, 'SKILL.md'), 'utf8')); } catch (e) { return false; }
+}
+function propelState() {
+  const active = [];
+  try { for (const n of fs.readdirSync(BOB_ACTIVE)) { if (!n.startsWith('.') && isPropelSkill(n)) active.push({ name: n, desc: frontmatterTokens(path.join(BOB_ACTIVE, n)).desc }); } } catch (e) {}
+  let stashed = [];
+  try { stashed = fs.readdirSync(PROPEL_OFF_DIR()).filter(n => !n.startsWith('.') && fs.existsSync(path.join(PROPEL_OFF_DIR(), n, 'SKILL.md'))).map(n => ({ name: n, desc: frontmatterTokens(path.join(PROPEL_OFF_DIR(), n)).desc })); } catch (e) {}
+  return { active: active.sort((a, b) => a.name.localeCompare(b.name)), stashed: stashed.sort((a, b) => a.name.localeCompare(b.name)) };
+}
+function stashPropel(name) {   // active -> off (path-safe: only a bare folder name)
+  if (!name || name.indexOf('/') >= 0 || name.indexOf('\\') >= 0 || name.startsWith('.')) return false;
+  try { const src = path.join(BOB_ACTIVE, name), dst = path.join(PROPEL_OFF_DIR(), name); if (!fs.existsSync(path.join(src, 'SKILL.md'))) return false; fs.mkdirSync(PROPEL_OFF_DIR(), { recursive: true }); fs.rmSync(dst, { recursive: true, force: true }); fs.renameSync(src, dst); return true; } catch (e) { return false; }
+}
+function restorePropel(name) {   // off -> active
+  if (!name || name.indexOf('/') >= 0 || name.indexOf('\\') >= 0 || name.startsWith('.')) return false;
+  try { const src = path.join(PROPEL_OFF_DIR(), name), dst = path.join(BOB_ACTIVE, name); if (!fs.existsSync(path.join(src, 'SKILL.md'))) return false; fs.rmSync(dst, { recursive: true, force: true }); fs.renameSync(src, dst); return true; } catch (e) { return false; }
+}
+
 // ---- clean self-refresh on update ------------------------------------------
 // Installing a new .vsix ships a new payload, but ~/.bob is per-machine data. On
 // refresh we PURGE shipped kits that are no longer part of the current set (so old
