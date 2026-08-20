@@ -19,5 +19,6 @@
   "pm-methodology": "A repeatable product methodology (product-on-purpose): one anchor skill per phase - Foundation, Discover, Define (JTBD), Develop, Deliver (PRD), Measure (experiments), Iterate (retro). Walk a product idea end to end.",
   "agentic-authoring": "A full workbench for agentic artifacts: author skills, design agents to the AGENTS.md standard, compose subagents, and build the MCP tools they call.",
   "diagramming": "Turn ideas, specs, and code into editable diagrams: draw.io files, mermaid, sketches, and UI wireframes, all local.",
-  "web-design": "Design and build web UI: work in Figma, turn designs into components, and apply real design-system standards (shadcn, Vercel guidelines)."
+  "web-design": "Design and build web UI: work in Figma, turn designs into components, and apply real design-system standards (shadcn, Vercel guidelines).",
+  "spec-driven-delivery": "Run the full delivery loop with an AI specialist per phase: clarify, plan, design, build, verify, learn. Complements pm-methodology by covering the whole build lifecycle."
 }

@@ -1,0 +1,16 @@
+brainstorming
+define-problem-statement
+jobs-to-be-done
+deliver-prd
+deliver-user-stories
+define-prioritization-framework
+system-design
+api-design
+test-driven-development
+executing-plans
+systematic-debugging
+verification-before-completion
+code-review
+delivery-gate
+iterate-retrospective
+iterate-lessons-log

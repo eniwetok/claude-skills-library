@@ -412,5 +412,31 @@
       "Start from the design system (shadcn + design-system) so screens stay consistent instead of one-off.",
       "Run web-design-guidelines as a final pass to catch layout, contrast, and accessibility issues."
     ]
+  },
+  "spec-driven-delivery": {
+    "tagline": "Run the full delivery loop with a team of AI specialists: clarify, plan, design, build, verify, learn.",
+    "jtbd": "When I take a feature from a vague idea to shipped, I want a repeatable loop with a specialist for each phase, so assumptions become explicit and nothing skips the gate.",
+    "description": "A document-driven delivery method. Clarify the problem into a brief, plan it into a PRD and stories, design the approach, build it test-first, verify it against acceptance criteria, and run a retro that feeds the next loop. It loads the phase skills and installs six role subagents (analyst, product-manager, architect, developer, qa-reviewer, retro-facilitator) that the SuperBob mode hands each phase to.",
+    "outline": [
+      "Clarify: the analyst turns a vague idea into a grounded brief",
+      "Plan: the product-manager writes the PRD and prioritized stories with acceptance criteria",
+      "Design: the architect defines the smallest sound approach and the build order",
+      "Build: the developer implements test-first, in small verifiable steps",
+      "Verify: qa-reviewer checks every acceptance criterion before ship",
+      "Learn: retro-facilitator captures lessons and feeds the next loop"
+    ],
+    "examples": [
+      "Say \"clarify what we are really building for the metrics export\". The analyst writes a brief with the job and the risky assumptions.",
+      "Say \"turn this brief into a PRD and stories\". The product-manager plans the smallest shippable slice with acceptance criteria.",
+      "Say \"design the approach for the export service\". The architect sketches components, interfaces, and the one risk to watch.",
+      "Say \"build the first story test-first\". The developer implements it in small steps and tells you exactly what to run.",
+      "Say \"verify this against the acceptance criteria before we ship\". qa-reviewer returns pass or fail per criterion, failures first.",
+      "Say \"run a retro on the slice we shipped\". retro-facilitator returns keep, drop, and the one change for the next loop."
+    ],
+    "tips": [
+      "Go phase by phase; each specialist hands the next a concrete artifact: brief, PRD, design, change, verdict, retro.",
+      "This complements pm-methodology (PM only) by covering the whole build lifecycle, and reuses your existing engineering and PM skills.",
+      "Load it, then say what phase you are in; the SuperBob mode delegates to the right specialist."
+    ]
   }
 }
