@@ -1,0 +1,38 @@
+{
+  "rulesync": [
+    {
+      "id": "node",
+      "type": "tool",
+      "label": "Node.js",
+      "check": "node",
+      "setup": "rulesync runs via `npx rulesync`, which needs Node.js. Bob normally ships it; if it is missing, install Node from nodejs.org."
+    }
+  ],
+  "mcp-builder": [
+    {
+      "id": "node",
+      "type": "tool",
+      "label": "Node.js",
+      "check": "node",
+      "setup": "Scaffolding an MCP server needs Node.js and npm. Bob normally ships it; if it is missing, install Node from nodejs.org."
+    }
+  ],
+  "drawio-skill": [
+    {
+      "id": "drawio",
+      "type": "tool",
+      "label": "draw.io desktop (for rendering and export)",
+      "check": "drawio",
+      "url": "https://www.drawio.com/",
+      "setup": "drawio-skill renders and exports diagrams with the draw.io desktop app. Install draw.io Desktop, then click Recheck."
+    },
+    {
+      "id": "graphviz",
+      "type": "tool",
+      "label": "Graphviz (optional, better auto-layout)",
+      "check": "graphviz",
+      "url": "https://graphviz.org/download/",
+      "setup": "Optional. Graphviz improves auto-layout for large diagrams (e.g. brew install graphviz), then Recheck."
+    }
+  ]
+}

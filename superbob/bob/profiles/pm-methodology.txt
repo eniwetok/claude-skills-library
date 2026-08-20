@@ -1,0 +1,7 @@
+foundation-lean-canvas
+discover-interview-synthesis
+define-jtbd-canvas
+develop-solution-brief
+deliver-prd
+measure-experiment-design
+iterate-retrospective

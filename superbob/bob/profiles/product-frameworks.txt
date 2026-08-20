@@ -1,0 +1,7 @@
+jobs-to-be-done
+hook-model
+cro-objections
+opportunity-solution-tree
+cohort-analysis
+value-proposition
+north-star-metric

@@ -1,0 +1,7 @@
+code-review
+verification-before-completion
+test-driven-development
+karpathy-guidelines
+ponytail
+ponytail-review
+vibesec

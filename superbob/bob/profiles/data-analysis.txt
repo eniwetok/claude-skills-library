@@ -1,0 +1,17 @@
+eval-audit
+error-analysis
+generate-synthetic-data
+write-judge-prompt
+validate-evaluator
+evaluate-rag
+build-review-interface
+eval-harness
+benchmark
+sql-queries
+postgres-patterns
+clickhouse-io
+mle-workflow
+statistical-analysis
+data-visualization
+explore-data
+validate-data

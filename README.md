@@ -1,7 +1,7 @@
 # Claude Skills Library
 
 Personal library of Claude Code skills, plugins, and resources — organized by upstream source.
-**949 skills installed** across 19 groups. MCP servers: SocratiCode (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
+**954 skills installed** across 21 groups (+ code-review-graph MCP + rtk output compressor). MCP servers: code-review-graph (codebase intelligence). Full inventory: [catalog/CATALOG.md](catalog/CATALOG.md)
 
 ---
 
@@ -24,15 +24,22 @@ Personal library of Claude Code skills, plugins, and resources — organized by 
 | 13 | **team-attention/agent-council** | team-attention | [github.com/team-attention/agent-council](https://github.com/team-attention/agent-council) |
 | 14 | **pablo-mano/Obsidian-CLI-skill** | pablo-mano | [github.com/pablo-mano/Obsidian-CLI-skill](https://github.com/pablo-mano/Obsidian-CLI-skill) |
 | 15 | **multica-ai/andrej-karpathy-skills** | multica-ai | [github.com/multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) |
-| 16 | **giancarloerra/SocratiCode** | giancarloerra | [github.com/giancarloerra/SocratiCode](https://github.com/giancarloerra/SocratiCode) |
+| 16 | **tirth8205/code-review-graph** (MCP · code intelligence, not skills) | tirth8205 | [github.com/tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph) |
 | 17 | **elementalsouls/Claude-BugHunter** | elementalsouls | [github.com/elementalsouls/Claude-BugHunter](https://github.com/elementalsouls/Claude-BugHunter) |
 | 18 | **ibelick/ui-skills** (Skills for Design Engineers) | ibelick | [github.com/ibelick/ui-skills](https://github.com/ibelick/ui-skills) |
 | 19 | **hamelsmu/evals-skills** (LLM eval methodology) | Hamel Husain | [github.com/hamelsmu/evals-skills](https://github.com/hamelsmu/evals-skills) |
+| 20 | **dietrichgebert/ponytail** ("lazy senior engineer") | Dietrich Gebert | [github.com/dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) |
+| 21 | **BehiSecc/VibeSec** (proactive secure coding) | BehiSecc | [github.com/BehiSecc/VibeSec-Skill](https://github.com/BehiSecc/VibeSec-Skill) |
+| 22 | **petergyang/no-ai-slop** (sharper, more human writing) | Peter Yang | [github.com/petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) |
+| 23 | **ayghri/i-have-adhd** (concise, action-first output style) | ayghri | [github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) |
+| 24 | **product-on-purpose/pm-skills** (methodology-driven PM lifecycle · 68 skills) | Product on Purpose | [github.com/product-on-purpose/pm-skills](https://github.com/product-on-purpose/pm-skills) |
+| 25 | **dyoshikawa/rulesync** (author agents once, sync AGENTS.md + subagents across 30+ tools) | dyoshikawa | [github.com/dyoshikawa/rulesync](https://github.com/dyoshikawa/rulesync) |
 
 ---
 
 ## Group 1 — AgriciDaniel / claude-obsidian (Karpathy pattern)
 
+> **⚠️ Not bundled in SuperBob.** These Obsidian / personal-wiki skills are kept here for reference only — the SuperBob distributable **excludes** them so it never touches your own Obsidian setup. Install them yourself if you want them.
 > **Upstream:** [github.com/AgriciDaniel/claude-obsidian](https://github.com/AgriciDaniel/claude-obsidian)
 > Karpathy's LLM wiki concept — compile knowledge once into interconnected markdown. Built on [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills).
 > **Bundle:** [zips/claude-obsidian-skills.zip](zips/claude-obsidian-skills.zip) · Install: `claude plugin marketplace add AgriciDaniel/claude-obsidian`
@@ -204,6 +211,10 @@ All 14 skills ✅ installed in `~/.claude/skills/`
 | [cowork-package](skills/cowork-package/) | Package skills into Cowork-ready zips — one skill per zip, verified | `install X into cowork`, `package for cowork` | ✅ |
 | [mission-control](skills/mission-control/) | **Master orchestrator** — classifies task type, routes to the right skills in order, resolves all overlap conflicts across G1–G17 | `start working on`, `which skill`, `new session` | ✅ |
 | [pm-agent](skills/pm-agent/) | Multi-product PM agent — orchestrates pm-skills, writes weekly reports across a portfolio | `/pm-agent`, `weekly PM run` | ✅ |
+| [jobs-to-be-done](skills/jobs-to-be-done/) | JTBD lens — functional/emotional/social jobs, four forces of progress, switch interviews, job statements | `what job is the customer hiring us for`, `discovery interview` | ✅ |
+| [hook-model](skills/hook-model/) | Habit design — Trigger→Action→Variable Reward→Investment, with the ethics gate | `retention`, `how do we get users back`, `habit loop` | ✅ |
+| [cro-objections](skills/cro-objections/) | Objection→counter-objection conversion optimization, research-first (not "best practices") | `why aren't people converting`, `audit this landing page` | ✅ |
+| [skill-library-lint](skills/skill-library-lint/) | Integrity gate for the mode library — fails if any mode or the router points at a missing skill, or a mode pulls in a vendor/crypto dependency | `lint the skill library`, `did I break a mode`, `check the modes` | ✅ |
 | pptx-from-template | Brand-faithful PowerPoint builder — edit from template, never regenerate from scratch | `from my template`, `match our deck` | ✅ local |
 | update-skills-library | Sync this repo from all upstream sources, rebuild zips, push | `update skills library` | ✅ local |
 
@@ -324,17 +335,17 @@ All 14 skills ✅ installed.
 
 ---
 
-## Group 16 — SocratiCode (2 skills + MCP server · codebase intelligence)
+## Group 16 — code-review-graph (2 skills + MCP server · codebase intelligence)
 
-> **Upstream:** [github.com/giancarloerra/SocratiCode](https://github.com/giancarloerra/SocratiCode) · 3,062 ⭐
+> **Upstream:** [github.com/tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph) · 3,062 ⭐
 > Enterprise-grade codebase intelligence for 40M+ LOC repos. Hybrid semantic search, polyglot dependency graphs, symbol-level call-flow analysis, cross-project and branch-aware search. 61% fewer tokens, 84% fewer tool calls, 37× faster navigation.
-> **MCP:** `npx -y socraticode` (added to user config via `claude mcp add`)
-> **Package:** [packages/socraticode/](packages/socraticode/)
+> **MCP:** `npx -y code-review-graph` (added to user config via `claude mcp add`)
+> **Package:** [packages/code-review-graph/](packages/code-review-graph/)
 
 | Component | What it does |
 |-----------|-------------|
 | MCP server | Semantic search, dependency graphs, call-flow, cross-repo search |
-| `codebase-exploration` skill | Guides structured exploration of unfamiliar codebases |
+| `code-review-graph` (MCP) skill | Guides structured exploration of unfamiliar codebases |
 | `codebase-management` skill | Manages codebase health, refactoring, cross-cutting changes |
 
 ✅ MCP server added. ✅ 2 skills installed.
@@ -407,6 +418,14 @@ claude-skills-library/
 │   ├── 15-cowork-skills/         ← G3: Brock/YouTube
 │   ├── anthropics-skills/        ← G4: anthropics/skills
 │   └── knowledge-work-plugins/   ← G5: anthropics/knowledge-work-plugins
+├── superbob/                     ← SEPARATE PROJECT: the IBM Bob extension.
+│   │                               A consumer of this library, not part of it.
+│   │                               Packages the library into a .vsix for Bob.
+│   │                               See superbob/README.md. Liftable to its own
+│   │                               repo (superbob/config.sh → SB_LIBRARY).
+│   ├── vsix/                     ← extension source + build-vsix.sh
+│   ├── bob/                      ← kits, /superbob command, native mode, build-package.sh
+│   └── config.sh                ← declares the library dependency
 └── zips/                         ← installable archives
     ├── claude-obsidian-skills.zip ← G1 bundle (11 core skills)
     ├── pm-skills-bundle.zip       ← G2 bundle
@@ -463,3 +482,108 @@ claude-skills-library/
 
 **The rule that matters:** never trust a judge you haven't calibrated against human labels.
 `write-judge-prompt` without `validate-evaluator` produces a number that means nothing.
+
+---
+
+## Group 20 — dietrichgebert/ponytail (6 skills · "lazy senior engineer")
+
+> Biases the agent toward minimal code — "the best code is the code you don't write."
+> Complements `karpathy-guidelines` with an aggressive delete/YAGNI instinct.
+> **Upstream:** [github.com/dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) — MIT
+> **Install:** `cp -r packages/ponytail/skills/* ~/.claude/skills/`
+
+| Skill | Description | Installed |
+|-------|-------------|-----------|
+| [ponytail](packages/ponytail/) | Forces the laziest working solution — YAGNI, stdlib before custom (levels: lite/full/ultra) | ✅ |
+| ponytail-review | Reviews a diff only for over-engineering — what to delete | ✅ |
+| ponytail-audit | Whole-repo bloat audit — ranked list of what to cut | ✅ |
+| ponytail-debt | Harvests `ponytail:` shortcut comments into a debt ledger | ✅ |
+| ponytail-gain | Scoreboard of ponytail's measured impact | ✅ |
+| ponytail-help | Quick-reference card for the ponytail skills | ✅ |
+
+---
+
+## Group 21 — BehiSecc/VibeSec (1 skill · proactive secure coding)
+
+> Write secure web code proactively (bug-hunter mindset). Complements BugHunter (which
+> *hunts* existing vulns) — vibesec *prevents* them at write time.
+> **Upstream:** [github.com/BehiSecc/VibeSec-Skill](https://github.com/BehiSecc/VibeSec-Skill) — Apache 2.0
+> **Install:** `cp -r packages/vibesec/skills/* ~/.claude/skills/`
+
+| Skill | Description | Installed |
+|-------|-------------|-----------|
+| [vibesec](packages/vibesec/) | Secure-by-default web code: access control, XSS/CSRF, SQLi/SSRF, auth, API security | ✅ |
+
+---
+
+## Group 22 — petergyang/no-ai-slop (1 skill · sharper, more human writing)
+
+> Strips 20+ AI-slop patterns from a draft while keeping the writer's voice, or detects them
+> (names each pattern, no rewrite). Distinct from the generate/style writing skills.
+> **Upstream:** [github.com/petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) — MIT
+> **Install:** `cp -r packages/no-ai-slop/skills/* ~/.claude/skills/`
+
+| Skill | Description | Installed |
+|-------|-------------|-----------|
+| [no-ai-slop](packages/no-ai-slop/) | Edit drafts to remove AI-slop patterns while keeping voice; or detect-only | ✅ |
+
+---
+
+## Group 23 — ayghri/i-have-adhd (1 skill · concise, action-first output)
+
+> Shapes output for an ADHD reader (and anyone who wants brevity): lead with the next action,
+> number multi-step work, no preamble or closers. In **SuperBob it's a toggleable always-on
+> add-on** — it sits with the core skills and layers on every kit, but has an on/off switch
+> (turn it off for verbose output).
+> **Upstream:** [github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) — MIT
+> **Install:** `cp -r packages/i-have-adhd/skills/* ~/.claude/skills/`
+
+| Skill | Description | Installed |
+|-------|-------------|-----------|
+| [i-have-adhd](packages/i-have-adhd/) | Direct, action-first responses: next action first, numbered steps, specific time estimates, no filler | ✅ |
+
+---
+
+## Group 24 — product-on-purpose/pm-skills (68 skills · methodology-driven PM lifecycle)
+
+> A production-quality PM library built on a repeatable lifecycle: **Foundation → Discover →
+> Define → Develop → Deliver → Measure → Iterate**, plus Google-Ventures-style **Design Sprint**
+> and **Foundation Sprint** toolkits and PM utilities (pm-critic, workflow-orchestrator). Each
+> skill has a canonical output contract and refuses to fabricate data. Passed the injection scan
+> clean (0 findings).
+> **Upstream:** [github.com/product-on-purpose/pm-skills](https://github.com/product-on-purpose/pm-skills) — Apache 2.0
+> **Install:** `cp -r packages/product-on-purpose-pm/skills/* ~/.claude/skills/`
+
+In SuperBob this is the **`pm-methodology`** kit — one anchor skill per phase (foundation-lean-canvas,
+discover-interview-synthesis, define-jtbd-canvas, develop-solution-brief, deliver-prd,
+measure-experiment-design, iterate-retrospective); the full 68-skill set is in the vault for depth.
+
+---
+
+## Group 25 — dyoshikawa/rulesync (1 skill · author agents in the AGENTS.md standard)
+
+> The AGENTS.md authoring engine the library was missing. From a single `.rulesync/` source it
+> generates the portable **AGENTS.md** standard plus **subagents** and native rule/config files for
+> **Claude Code, Roo Code (Bob's family), Codex, Cursor** and 30+ tools; also imports existing
+> CLAUDE.md / cursor rules. A pure file transformer: no API key, no model calls. Anchored on the
+> official spec [agentsmd/agents.md](https://github.com/agentsmd/agents.md). Injection-scanned clean.
+> **Upstream:** [github.com/dyoshikawa/rulesync](https://github.com/dyoshikawa/rulesync) — MIT
+> **Install (skill):** `cp -r packages/rulesync/skills/* ~/.claude/skills/` · **Run:** `npx rulesync generate --targets "*"`
+
+In SuperBob this powers the **`agent-authoring`** kit: `agent-designer` (design the role) →
+`rulesync` (generate AGENTS.md + subagents for Claude and Bob) → `codebase-onboarding` (map the repo)
+→ `no-ai-slop` (tighten).
+
+## Group 26 — Agents365-ai/drawio-skill (1 skill · natural language to editable diagrams)
+
+> Describe a flow, architecture, ERD, or process and get an **editable `.drawio`** diagram with
+> PNG/SVG/PDF export; also turns code, SQL schemas, and infra configs into auto-laid-out diagrams,
+> and self-checks its own layout via the rendered image. A pure prompt/transformer: no API keys.
+> Needs the **draw.io desktop CLI** to render/export (Graphviz optional for large-graph layout).
+> Injection-scanned clean (38 bundled Python extractors, all local).
+> **Upstream:** [github.com/Agents365-ai/drawio-skill](https://github.com/Agents365-ai/drawio-skill) — MIT
+> **Install (skill):** `cp -r skills/drawio-skill ~/.claude/skills/`
+
+In SuperBob this anchors the **`diagramming`** kit (`drawio-skill` + `utility-mermaid-diagrams` +
+`hand-drawn-diagrams` + `wireframe-sketch`), with the draw.io CLI declared as an actionable resource
+(the kit's Requirements section detects it and links the download).

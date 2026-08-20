@@ -1,0 +1,442 @@
+{
+  "wiki": {
+    "tagline": "Turn a codebase you don't know into a clear, readable wiki.",
+    "when": "You've joined a new repo, you're documenting a project, or you want teammates to onboard by reading instead of asking around.",
+    "example": [
+      "Open the repo you want documented, load this kit, and start a new chat.",
+      "Say: \"Onboard this codebase and write a wiki to docs/.\"",
+      "codebase-onboarding maps the tech stack, the entry points, and the folder structure.",
+      "repo-scan inventories the files, and code-tour walks you through the important paths.",
+      "architecture and architecture-decision-records capture how it's built and why those choices were made.",
+      "documentation and docs-page turn all of that into linked Markdown pages; knowledge-ops keeps them organized.",
+      "You end up with a docs/ wiki a new teammate can read start to finish."
+    ],
+    "tips": [
+      "Load the kit, then start a fresh chat so the skills come online.",
+      "Point Bob at the actual repo folder before you ask.",
+      "Ask for it 'written to docs/' so you get real files, not just a chat answer."
+    ]
+  },
+  "product-frameworks": {
+    "tagline": "The three PM thinking frameworks most tools skip: why users come (Jobs to Be Done), why they stay (Hook Model), and why they convert (CRO).",
+    "when": "Retention or growth is the problem, people try the product but don't stick, or don't convert, and you want discovery rooted in real motivation, not feature requests.",
+    "example": [
+      "Start with jobs-to-be-done: run switch interviews to find the real job and, crucially, the ANXIETY blocking the switch.",
+      "Use opportunity-solution-tree to map that job to a few solution bets instead of jumping to features.",
+      "Apply hook-model to design the return loop: internal trigger -> easy action -> variable reward -> investment. Run the ethics gate before shipping.",
+      "At first-use or the paywall, use cro-objections: list the 5 doubts a real visitor has and answer each with evidence, in their own words.",
+      "Prove it with cohort-analysis: does the retention curve flatten? That's the number that says the loop works.",
+      "value-proposition and north-star-metric keep the story and the one metric honest throughout."
+    ],
+    "tips": [
+      "Write the job solution-free (verb + object + context) before proposing anything.",
+      "Design the INTERNAL trigger first, an external notification alone never forms a habit.",
+      "In cro-objections, use the customer's exact words; matching their language is what converts.",
+      "Pick ONE north-star (return rate, not signups) so retention work has a scoreboard."
+    ]
+  },
+  "pm-methodology": {
+    "tagline": "Take a product idea from a blank page to shipped, measured, and iterated, one anchor skill per phase.",
+    "when": "You want a repeatable process instead of ad-hoc PM work, or you are onboarding to a structured product lifecycle.",
+    "example": [
+      "Foundation: foundation-lean-canvas, capture the bet on one page (problem, users, value, the one metric).",
+      "Discover: discover-interview-synthesis, turn raw interviews into patterns and real needs.",
+      "Define: define-jtbd-canvas, frame the job the product is hired to do.",
+      "Develop: develop-solution-brief, shape the solution and its rationale before building.",
+      "Deliver: deliver-prd, write the PRD and hand off to build.",
+      "Measure: measure-experiment-design, design the experiment that tells you if it worked.",
+      "Iterate: iterate-retrospective, capture what you learned and decide the next move."
+    ],
+    "tips": [
+      "Run the phases in order, each phase feeds the next.",
+      "This kit is the spine; the full product-on-purpose set has more skills per phase (discover-market-sizing, deliver-user-stories, measure-experiment-results) when you need depth.",
+      "Pair with the product-frameworks kit for the JTBD / Hook / CRO thinking behind the phases."
+    ]
+  },
+  "software-development": {
+    "tagline": "Ship code a senior would approve. Test first, your stack's patterns, nothing over-built.",
+    "jtbd": "When I add or change a feature in the product, I want it correct and maintainable, so I can ship without fear of regressions.",
+    "description": "Drives a feature from intent to merged code the disciplined way: a failing test first, your stack's idioms, a sane API and system shape, and a verification pass before it claims done. It keeps changes small and free of over-engineering.",
+    "outline": [
+      "Write the failing test first (tdd-workflow)",
+      "Apply your stack's patterns and shape the API and system design",
+      "Trim over-engineering with ponytail and karpathy-guidelines",
+      "Verify the checks before calling it done"
+    ],
+    "examples": [
+      "Say \"add a scheduled CSV export for this dashboard\". It writes the failing test first, builds the endpoint with retry and error handling, then runs the checks before calling it done.",
+      "Say \"refactor the report-to-SQL builder\". It keeps the tests green, applies your stack patterns, and cuts dead complexity as it goes.",
+      "Say \"add a caching layer for these expensive aggregations\". It shapes a clean API, writes the tests, and keeps the design minimal.",
+      "Say \"add a heatmap to the render pipeline\". It tests first, implements the visualization, then adds integration coverage.",
+      "Say \"build a REST connector for this data source\". It writes typed models and failure handling, tests them, and verifies before done."
+    ],
+    "tips": [
+      "Name your stack so it pulls the right patterns.",
+      "It will not claim 'verified' without running the check."
+    ]
+  },
+  "data-analysis": {
+    "tagline": "Analyze data and grade AI output without fooling yourself.",
+    "jtbd": "When I have data or an AI pipeline to assess, I want an honest read, so I can act on findings that hold up.",
+    "description": "Reads real traces, names the failure modes, builds and calibrates a Pass/Fail judge, and runs the SQL and statistics. It refuses to trust a score it has not validated against human labels.",
+    "outline": [
+      "error-analysis on real traces",
+      "write-judge-prompt for a Pass/Fail evaluator",
+      "validate-evaluator against human labels",
+      "SQL and statistics for the numbers"
+    ],
+    "examples": [
+      "Say \"is the natural-language-to-query feature returning the right results?\". It runs error-analysis on real traces, builds a Pass/Fail judge, and calibrates it against analyst labels before scoring.",
+      "Say \"where do users abandon the report builder?\". It writes the cohort SQL over usage events and reads the drop-off.",
+      "Say \"grade these AI dashboard summaries for accuracy\". It builds a judge, validates it against human labels, then scores the batch.",
+      "Say \"which report types fail most, and why?\". error-analysis groups the failures by mode so you fix the biggest one first.",
+      "Say \"check query latency across data sources\". It runs the statistics and separates real differences from noise."
+    ],
+    "tips": [
+      "An uncalibrated judge is a random number.",
+      "Score retrieval and answer separately."
+    ]
+  },
+  "product-management": {
+    "tagline": "From fuzzy idea to shipped, measured feature. The whole PM toolkit.",
+    "jtbd": "When I own a product area, I want to pick the right problem and spec it well, so I can ship something that moves a metric.",
+    "description": "Takes a request or a pile of evidence to a grounded PRD, a ranked backlog, and a measurable launch. It finds the real job behind the ask before it writes a line of spec.",
+    "outline": [
+      "jobs-to-be-done to find the real need",
+      "create-prd and user-stories to spec it",
+      "prioritization-frameworks (RICE) to rank",
+      "north-star-metric and gtm-strategy to ship and measure"
+    ],
+    "examples": [
+      "Say \"we keep getting requests for a new chart type, what should we do?\". jobs-to-be-done finds the real need, then it specs a capability and ranks it with RICE.",
+      "Say \"write the PRD for a natural-language query experience\". create-prd drafts it with success metrics; user-stories breaks it down.",
+      "Say \"rank this quarter's reporting asks\". prioritization-frameworks scores them so the order is defensible.",
+      "Say \"frame an embedded-analytics bet for leadership\". It writes the initiative and the go-to-market.",
+      "Say \"what is the north-star metric for report authoring?\". north-star-metric picks the one number and explains why."
+    ],
+    "tips": [
+      "Describe the situation, not the skills.",
+      "Pair with pm-methodology (process) and product-frameworks (thinking)."
+    ]
+  },
+  "production-engineering": {
+    "tagline": "Design, ship, and run production systems. Past 'works on my laptop'.",
+    "jtbd": "When I take a service to production, I want it to deploy cleanly and survive incidents, so I can sleep.",
+    "description": "Shapes a system for production, ships it with containers and infrastructure as code, and gives you the runbooks and incident playbooks for when it breaks. It plans for failure, not just the happy path.",
+    "outline": [
+      "system-design and deployment-patterns",
+      "docker, kubernetes, terraform to ship it",
+      "runbook and incident-response for operations"
+    ],
+    "examples": [
+      "Say \"design the deployment for a query engine that scales with concurrent runs\". system-design shapes it; deployment-patterns makes it production-ready.",
+      "Say \"roll out the scheduling service with zero downtime\". It containerizes the service and stages the rollout.",
+      "Say \"the data source is down and dashboards are stalling, what do we do?\". incident-response walks the playbook; runbook captures it for next time.",
+      "Say \"add autoscaling for the export workers\". It sizes it to load and wires the infrastructure as code.",
+      "Say \"write the runbook for slow dashboards at peak\". It documents the checks and the fixes step by step."
+    ],
+    "tips": [
+      "Write the runbook before you need it.",
+      "For a specific production bug, add the bug-fixing kit."
+    ]
+  },
+  "test-engineering": {
+    "tagline": "Tests that actually catch regressions. Unit, end to end, and back.",
+    "jtbd": "When I need to trust a release, I want tests that fail when behavior breaks, so I can ship with confidence.",
+    "description": "Decides what to test at each level, writes the unit, end-to-end, and regression suites, and verifies that green means green. It tests behavior, not implementation.",
+    "outline": [
+      "testing-strategy: what to test where",
+      "unit, end-to-end, and regression suites",
+      "verification-before-completion"
+    ],
+    "examples": [
+      "Say \"test the report builder end to end\". testing-strategy scopes it, then it writes tests from data source to rendered chart.",
+      "Say \"this export bug keeps coming back\". It adds a regression test that fails on the bug and passes on the fix.",
+      "Say \"cover the natural-language parser\". It writes unit tests across edge phrasings.",
+      "Say \"test drill-through across linked dashboards\". It writes the end-to-end flow, asserting the carried filter.",
+      "Say \"test scheduled delivery under failure\". It covers timeouts, retries, and partial failures."
+    ],
+    "tips": [
+      "Test behavior, not implementation.",
+      "A test that cannot fail tests nothing."
+    ]
+  },
+  "application-security": {
+    "tagline": "Break it like an attacker, then write code that resists. Audit to fix.",
+    "jtbd": "When a feature handles data or access, I want its weaknesses found before an attacker does, so I can ship it safely.",
+    "description": "Scopes the hunt, works each vulnerability class the way an attacker would, prevents the same bugs at write-time, and hands you a reproducible report. Finding and preventing are both in scope.",
+    "outline": [
+      "bb-methodology to scope the hunt",
+      "hunt-* skills per class (xss, sqli, ssrf, idor, auth)",
+      "vibesec to prevent at write-time",
+      "a clean, reproducible report"
+    ],
+    "examples": [
+      "Say \"audit the embedded-dashboard iframe flow\". bb-methodology scopes it; hunt-xss and related skills probe for injection and clickjacking.",
+      "Say \"can users open reports they should not?\". hunt-idor tests row-level and object-level access on shared reports.",
+      "Say \"is the data-source connector safe from SSRF?\". hunt-ssrf tests user-supplied URLs and internal reachability.",
+      "Say \"review the query API for injection\". hunt-sqli works the filter expressions; vibesec shows how to prevent it at write-time.",
+      "Say \"harden our sharing links\". It checks tokens for guessability and replay, then reports the fixes."
+    ],
+    "tips": [
+      "hunt-* finds; vibesec prevents.",
+      "Reproduce every finding before reporting it."
+    ]
+  },
+  "frontend-design": {
+    "tagline": "Interfaces people enjoy. Polished, accessible, and alive.",
+    "jtbd": "When I build something users see, I want it clear, accessible, and pleasant, so people actually use it.",
+    "description": "Lays out structure, keeps it consistent with a design system, adds motion for feel, and fixes accessibility so everyone can use it. Polish and inclusion are the point, not an afterthought.",
+    "outline": [
+      "frontend-design for structure",
+      "design-system and patterns for consistency",
+      "motion for feel",
+      "fixing-accessibility"
+    ],
+    "examples": [
+      "Say \"make the report-builder canvas easy to use\". frontend-design lays out drag and drop so it is obvious and forgiving.",
+      "Say \"make the filter panel accessible\". fixing-accessibility makes it keyboard and screen-reader friendly.",
+      "Say \"add motion to chart transitions\". motion animates data updates without distracting.",
+      "Say \"give the dashboard widgets a consistent look\". design-system sets the color and type rules.",
+      "Say \"polish the loading and empty states\". It designs the states so a slow visualization still feels intentional."
+    ],
+    "tips": [
+      "Accessibility is not a phase, bake it in.",
+      "Motion should guide, not perform."
+    ]
+  },
+  "web-research": {
+    "tagline": "A synthesized answer with sources. Not 40 open tabs.",
+    "jtbd": "When I need to understand a space fast, I want a grounded answer I can cite, so I can decide without a week of reading.",
+    "description": "Plans the search, gathers the material, and synthesizes it into an answer with sources. It looks things up rather than guessing from memory.",
+    "outline": [
+      "deep-research plans the search",
+      "exa-search and x-research gather",
+      "research-synthesis into a cited answer"
+    ],
+    "examples": [
+      "Say \"how do competitors do natural-language query?\". deep-research plans it, the search skills gather, research-synthesis returns a cited answer.",
+      "Say \"survey embedded-analytics pricing models\". It compiles the landscape with sources.",
+      "Say \"what are the accessibility standards for charts?\". It finds and summarizes them.",
+      "Say \"what drives adoption of self-service reporting?\". It gathers the evidence and synthesizes it.",
+      "Say \"compare semantic-layer approaches\". It lays out the options with trade-offs and sources."
+    ],
+    "tips": [
+      "Ask for sources so you can check the claims.",
+      "search-first before answering from memory."
+    ]
+  },
+  "release-review": {
+    "tagline": "The last gate before ship. Catch what a tired reviewer misses.",
+    "jtbd": "When a change is about to merge, I want the hidden risks surfaced, so I do not ship a regression.",
+    "description": "Reviews a change across correctness, security, simplicity, and tests, and verifies the claims before you merge. One confirmed blocker beats ten vague nits.",
+    "outline": [
+      "code-review across dimensions",
+      "security-audit and a test-coverage check",
+      "verification-before-completion and karpathy-guidelines"
+    ],
+    "examples": [
+      "Say \"review this query-builder change before release\". code-review checks correctness and injection risk; verification confirms the claims.",
+      "Say \"is this new export format ready?\". It gates the change on test coverage and edge cases.",
+      "Say \"did this permissions refactor break access on shared dashboards?\". It hunts for access regressions.",
+      "Say \"review this rendering-performance change\". It checks correctness under large datasets.",
+      "Say \"vet this connector update before customers get it\". It reviews security and tests, then gives a go or no-go."
+    ],
+    "tips": [
+      "Run it before you merge, not after.",
+      "One confirmed blocker beats ten vague nits."
+    ]
+  },
+  "bug-fixing": {
+    "tagline": "Root cause, not symptom. Fixed fast.",
+    "jtbd": "When something is broken, I want the actual cause found and fixed, so it stays fixed.",
+    "description": "Reproduces the failure, isolates the real cause, and fixes it properly. It chases the cause, not the log line.",
+    "outline": [
+      "reproduce, then systematic-debugging to isolate",
+      "caveman-debug when the trail goes cold",
+      "error-handling to fix it right"
+    ],
+    "examples": [
+      "Say \"a scheduled report intermittently delivers an empty file\". systematic-debugging reproduces and isolates the cause; error-handling fixes it so it stays fixed.",
+      "Say \"this chart is blank only for one data source\". It reproduces against that source and patches the root cause.",
+      "Say \"drill-through loses the applied filter\". It traces where the filter drops and fixes it.",
+      "Say \"the dashboard is slow in prod but fast in staging\". It isolates the difference, using caveman-debug if the trail goes cold.",
+      "Say \"this query returns the wrong aggregation\". It finds the real cause, not the symptom."
+    ],
+    "tips": [
+      "Reproduce before you fix.",
+      "Fix the cause, not the log line."
+    ]
+  },
+  "code-simplification": {
+    "tagline": "Delete the over-engineering. The best code is the code you did not write.",
+    "jtbd": "When a change feels heavier than the problem, I want the excess cut, so the code stays easy to change.",
+    "description": "Reads a diff or a repo and ranks what to remove, keeping the laziest working solution. It prefers standard library over custom, and one line over fifty.",
+    "outline": [
+      "ponytail-review ranks what to cut in a diff",
+      "ponytail-audit finds repo-wide bloat",
+      "keep the simplest thing that works"
+    ],
+    "examples": [
+      "Say \"this caching layer feels heavier than it needs to be\". ponytail-review ranks what to cut and keeps the simplest thing that works.",
+      "Say \"we have three near-duplicate chart adapters\". It collapses them into one.",
+      "Say \"find bloat across the repo\". ponytail-audit gives a ranked list of what to remove.",
+      "Say \"simplify the export pipeline\". It cuts the options nobody selects.",
+      "Say \"clean up the filter parser\". It deletes the dead code paths."
+    ],
+    "tips": [
+      "Eight sharp lines beat fifty clever ones.",
+      "Delete first, add back only what you miss."
+    ]
+  },
+  "rag-evaluation": {
+    "tagline": "Prove your RAG works. Retrieval and answer, scored apart.",
+    "jtbd": "When I run a retrieval or RAG feature, I want to know if it is actually good, so I can improve the weak half.",
+    "description": "Scores retrieval and answer quality as separate concerns, finds the pattern in the failures, and gives you a calibrated judge. Bad retrieval and bad generation are different bugs.",
+    "outline": [
+      "evaluate-rag scores retrieval and answer separately",
+      "error-analysis on the failures",
+      "write-judge-prompt and validate-evaluator"
+    ],
+    "examples": [
+      "Say \"is our report-QA assistant any good?\". evaluate-rag scores retrieval first, then answer quality, so you know which half to fix.",
+      "Say \"does docs-search return the right passages?\". It measures retrieval precision on real queries.",
+      "Say \"are the metric explanations faithful to the data?\". It scores answer faithfulness with a calibrated judge.",
+      "Say \"are our failures retrieval or generation?\". error-analysis splits them so you fix the right bug.",
+      "Say \"calibrate a judge for citing the right dashboard\". validate-evaluator checks it against human labels first."
+    ],
+    "tips": [
+      "Never trust an uncalibrated judge.",
+      "Bad retrieval and bad generation are different bugs."
+    ]
+  },
+  "content-writing": {
+    "tagline": "Docs and copy that sound human. Not AI.",
+    "jtbd": "When I write for users, I want clear copy in our voice, so it informs without sounding generated.",
+    "description": "Drafts the first pass, strips the AI tells while keeping your voice, and sets the tone for the audience. It edits for humans, not for word count.",
+    "outline": [
+      "draft-content or copywriting for the first pass",
+      "no-ai-slop to strip the AI tells",
+      "ux-copy and brand-voice for tone, seo if needed"
+    ],
+    "examples": [
+      "Say \"write release notes for the new visualization type\". draft-content writes them, no-ai-slop strips the AI tells.",
+      "Say \"rewrite this data-source error message so it helps\". ux-copy makes it clear and actionable.",
+      "Say \"draft onboarding copy for the report builder\". It writes it in your brand voice.",
+      "Say \"does this announcement sound like AI?\". no-ai-slop names the tells and rewrites them.",
+      "Say \"write tooltip and empty-state copy for the editor\". It writes concise, human microcopy."
+    ],
+    "tips": [
+      "Run no-ai-slop after drafting, not instead of it.",
+      "Match the brand voice, generic copy converts no one."
+    ]
+  },
+  "agentic-authoring": {
+    "tagline": "Build the agentic artifacts you ship: author skills, design agents to the AGENTS.md standard, compose subagents, and wire the MCP tools they call.",
+    "jtbd": "When I am building agents and skills for software, I want one kit that covers the whole lifecycle from definition to a working multi-agent stack, so I follow the current standards instead of hand-rolling each piece.",
+    "description": "A single workbench for making agentic artifacts. Author and validate skills in the SKILL.md format, design agent roles and generate them to the portable AGENTS.md standard plus native subagents for Claude and Bob, compose multi-agent teams, and build the MCP tools they call. rulesync keeps every target in sync from one source with no API key. no-ai-slop keeps the output tight.",
+    "outline": [
+      "Create skills: skill-creator scaffolds to the SKILL.md format, skill-comply validates, writing-skills sharpens, skill-scout finds gaps",
+      "Design agents: agent-designer sets the role and boundaries, agent-architecture plans the system",
+      "Generate to standard: rulesync emits AGENTS.md plus Claude and Bob subagents from one source",
+      "Compose subagents: subagent-driven-development and dispatching-parallel-agents fan work across a team, team-agent-orchestration coordinates them",
+      "Build the tools: mcp-builder and mcp-server-patterns create the MCP servers agents call; autonomous-agent-harness runs long tasks",
+      "Prove it: agent-eval scores the agent before you ship, no-ai-slop tightens the prose"
+    ],
+    "examples": [
+      "Say \"create a skill that grades a metric definition for clarity\". skill-creator scaffolds it, skill-comply checks the format, no-ai-slop tightens the wording.",
+      "Say \"design a data-source-review agent and generate it for Claude and Bob\". agent-designer sets its boundaries, rulesync emits AGENTS.md plus both subagents from one source.",
+      "Say \"turn our dashboard-QA checklist into a reusable subagent\". It writes the subagent once and syncs it to every tool.",
+      "Say \"stand up a team of subagents to audit a reporting pipeline in parallel\". subagent-driven-development and dispatching-parallel-agents fan the work out, team-agent-orchestration coordinates the results.",
+      "Say \"build an MCP server that exposes our query catalog to agents\". mcp-builder scaffolds it and mcp-server-patterns keeps it to the spec.",
+      "Say \"score this agent against cases before I ship it\". agent-eval runs it and reports where it fails.",
+      "Say \"import our existing CLAUDE.md into the shared format\". rulesync pulls it into .rulesync/ so you can regenerate everywhere."
+    ],
+    "tips": [
+      "Follow the standards on purpose: SKILL.md for skills, AGENTS.md for agents, the MCP spec for tools. This kit is organized around them.",
+      "Design the role with agent-designer before you generate, so the agent has clear boundaries.",
+      "Run `npx rulesync generate --targets \"*\" --features \"*\"` to emit every tool, including subagents, at once.",
+      "Validate before you ship: skill-comply for skills, agent-eval for agents.",
+      "rulesync is a pure file transformer: no API key, no model calls, so it works inside Bob out of the box."
+    ]
+  },
+  "diagramming": {
+    "tagline": "Turn ideas, specs, and code into clean, editable diagrams: draw.io, mermaid, sketches, and UI wireframes.",
+    "jtbd": "When I need a diagram for a spec or a system, I want to describe it in words and get an editable draw.io file plus exports, so I stop hand-drawing boxes.",
+    "description": "Describe a flow, architecture, ERD, or process and get an editable .drawio diagram with PNG/SVG/PDF export, a mermaid diagram from text, a rough hand-drawn sketch, or a UI wireframe. drawio-skill can also turn existing code, SQL schemas, or infrastructure configs into auto-laid-out diagrams, and it self-checks its own layout. Everything runs locally with no API keys.",
+    "outline": [
+      "drawio-skill: describe it and get an editable .drawio plus exports, or turn code, SQL, and infra into a diagram",
+      "diagram-design: generate editorial, brand-matched diagrams (29 types) as self-contained HTML+SVG, or convert an existing draw.io / mermaid diagram into that polished design system",
+      "utility-mermaid-diagrams: quick flowcharts and sequence diagrams from plain text",
+      "hand-drawn-diagrams: loose, sketchy diagrams for early thinking",
+      "wireframe-sketch: low-fidelity UI wireframes",
+      "diagram-review: after you generate with any tool above, critique the diagram for readability, hierarchy, and edge crossings, then apply the fixes so it looks professional"
+    ],
+    "examples": [
+      "Say \"diagram the data flow from source to dashboard\". drawio-skill lays it out as an editable .drawio and exports a PNG.",
+      "Say \"turn this SQL schema into an ERD\". It parses the tables and draws the entity relationships.",
+      "Say \"draw a C4 container diagram for our reporting service\". It generates the boxes and connections, then checks the layout for overlaps.",
+      "Say \"flowchart this onboarding process\" and get a mermaid flowchart you can drop straight into a doc.",
+      "Say \"sketch a wireframe for the metrics page\". wireframe-sketch blocks out the layout before any design work.",
+      "Say \"diagram this repo's module dependencies\". drawio-skill extracts the imports and auto-lays them out."
+    ],
+    "tips": [
+      "drawio-skill renders and exports with the draw.io desktop app's command line. The kit's Requirements section checks for it and links the download if it is missing.",
+      "Graphviz is optional but improves auto-layout for large diagrams.",
+      "You get an editable .drawio file, not a flat image, so you can keep refining it by hand.",
+      "Chain diagram-review after any tool: generate the diagram, then say \"review this diagram\" to get professional-layout fixes. It is tool-agnostic.",
+      "For a professional, on-brand look, use diagram-design; it can also restyle a draw.io or mermaid diagram into its editorial system (PNG/SVG export uses Playwright)."
+    ]
+  },
+  "web-design": {
+    "tagline": "Design and build web interfaces: Figma to components, a real design system, and professional UI standards.",
+    "jtbd": "When I am designing or building a web UI, I want to move from Figma to clean, on-system components without reinventing the design language each time.",
+    "description": "Work in Figma (read files, generate and implement designs), scaffold UI with shadcn components, and hold to real design-system standards and the Vercel web-design guidelines (layout, typography, color, accessibility). Turns a design into on-brand, accessible front-end instead of one-off screens.",
+    "outline": [
+      "figma-use: read and work with a Figma file via the Figma connection",
+      "figma-generate-design / figma-implement-design: create designs in Figma and turn them into code",
+      "shadcn-ui + design-system: build with a component library on a consistent design system",
+      "web-design-guidelines + ui-ux-pro-max: apply layout, typography, color, and accessibility standards",
+      "baseline-ui: a clean starting baseline for a new UI"
+    ],
+    "examples": [
+      "Say \"turn this Figma frame into shadcn components\". figma-implement-design plus shadcn-ui build it to the design system.",
+      "Say \"design a settings page in Figma from this spec\". figma-generate-design lays it out in the file.",
+      "Say \"review this UI against the design guidelines\". web-design-guidelines checks layout, type, color, and accessibility.",
+      "Say \"scaffold a dashboard with shadcn\". shadcn-ui plus design-system give you consistent components.",
+      "Say \"build a landing hero on our design system\". baseline-ui and design-system keep it on-brand.",
+      "Say \"pull the components from our Figma library\". figma-use reads the file through the Figma connection."
+    ],
+    "tips": [
+      "figma-use needs the Figma connection set up; the kit's Requirements section links it.",
+      "Start from the design system (shadcn + design-system) so screens stay consistent instead of one-off.",
+      "Run web-design-guidelines as a final pass to catch layout, contrast, and accessibility issues."
+    ]
+  },
+  "spec-driven-delivery": {
+    "tagline": "Run the full delivery loop with a team of AI specialists: clarify, plan, design, build, verify, learn.",
+    "jtbd": "When I take a feature from a vague idea to shipped, I want a repeatable loop with a specialist for each phase, so assumptions become explicit and nothing skips the gate.",
+    "description": "A document-driven delivery method. Clarify the problem into a brief, plan it into a PRD and stories, design the approach, build it test-first, verify it against acceptance criteria, and run a retro that feeds the next loop. It loads the phase skills and installs six role subagents (analyst, product-manager, architect, developer, qa-reviewer, retro-facilitator) that the SuperBob mode hands each phase to.",
+    "outline": [
+      "Clarify: the analyst turns a vague idea into a grounded brief",
+      "Plan: the product-manager writes the PRD and prioritized stories with acceptance criteria",
+      "Design: the architect defines the smallest sound approach and the build order",
+      "Build: the developer implements test-first, in small verifiable steps",
+      "Verify: qa-reviewer checks every acceptance criterion before ship",
+      "Learn: retro-facilitator captures lessons and feeds the next loop"
+    ],
+    "examples": [
+      "Say \"clarify what we are really building for the metrics export\". The analyst writes a brief with the job and the risky assumptions.",
+      "Say \"turn this brief into a PRD and stories\". The product-manager plans the smallest shippable slice with acceptance criteria.",
+      "Say \"design the approach for the export service\". The architect sketches components, interfaces, and the one risk to watch.",
+      "Say \"build the first story test-first\". The developer implements it in small steps and tells you exactly what to run.",
+      "Say \"verify this against the acceptance criteria before we ship\". qa-reviewer returns pass or fail per criterion, failures first.",
+      "Say \"run a retro on the slice we shipped\". retro-facilitator returns keep, drop, and the one change for the next loop."
+    ],
+    "tips": [
+      "Go phase by phase; each specialist hands the next a concrete artifact: brief, PRD, design, change, verdict, retro.",
+      "This complements pm-methodology (PM only) by covering the whole build lifecycle, and reuses your existing engineering and PM skills.",
+      "Load it, then say what phase you are in; the SuperBob mode delegates to the right specialist."
+    ]
+  }
+}

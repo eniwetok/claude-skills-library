@@ -1,0 +1,5 @@
+deep-research
+research-synthesis
+exa-search
+x-research
+search-first

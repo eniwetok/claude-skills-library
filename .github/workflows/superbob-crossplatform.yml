@@ -1,0 +1,37 @@
+name: SuperBob cross-platform
+
+# Proves the extension works on real Windows, macOS, and Linux — not just the
+# maintainer's Mac. Runs the same gates the local build runs, plus a real extraction
+# on each OS, so a change that breaks a platform fails CI before anyone installs it.
+
+on:
+  push:
+    paths:
+      - 'superbob/vsix/**'
+      - '.github/workflows/superbob-crossplatform.yml'
+  pull_request:
+    paths:
+      - 'superbob/vsix/**'
+  workflow_dispatch: {}
+
+jobs:
+  gates:
+    name: gates (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Webview scripts parse
+        run: node superbob/vsix/validate-webviews.js
+      - name: Static platform lint
+        run: node superbob/vsix/validate-platform.js
+      - name: Dynamic cross-platform tests (win32 + darwin)
+        run: node superbob/vsix/test-platform.js
+      - name: Real extraction on this OS
+        run: node superbob/vsix/test-extract-real.js

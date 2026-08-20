@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <title>Super Bob Skills Activity Bar Icon</title>
+  <g stroke="#424242" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15 15H49L53 23C51.3 35.8 43.7 46.7 32 54C20.3 46.7 12.7 35.8 11 23Z"/>
+    <path d="M25 21V44M25 21H34C39.5 21 42 23.3 42 27C42 30.7 39.5 33 34 33H25M25 33H35C40.5 33 43 35.2 43 39C43 42.8 40.5 44 35 44H25"/>
+  </g>
+</svg>

@@ -1,7 +1,7 @@
 # Claude Resource Catalog
 
 Complete inventory of Claude skills, plugins, and connectors in this library.
-Last updated: 2026-07-20. **949 skills installed in `~/.claude/skills/`.** MCP: SocratiCode.
+Last updated: 2026-07-24. **958 skills installed in `~/.claude/skills/`.** MCP: code-review-graph (local, MIT).
 
 ---
 
@@ -409,6 +409,7 @@ All 264 skills ✅ installed. Key categories:
 | **requesting-code-review** | Verify work meets requirements and prepare review request | After completing implementation |
 | **receiving-code-review** | Process review feedback with technical rigor — verify before implementing | When code review arrives |
 | **using-git-worktrees** | Set up isolated workspace via git worktree before feature work | Before starting isolated feature work |
+| **worktree-audit** | Read-only triage of all worktrees: OPEN (unmerged) / merged-but-dirty / closable, with status of the open ones | "which worktrees are open", worktree cleanup, before bulk removal |
 | **dispatching-parallel-agents** | Fan out 2+ independent tasks to parallel agents | When tasks have no shared state or sequential dependencies |
 | **subagent-driven-development** | Execute implementation plans with independent tasks in the current session | When a plan has parallelizable steps |
 | **finishing-a-development-branch** | Structured options for integrating completed work — merge, PR, or cleanup | When implementation is done and tests pass |
@@ -428,10 +429,12 @@ All 14 skills ✅ installed in `~/.claude/skills/`
 | **caveman-debug** | Print-statement debugging — instruments code with `[CAVE]` prefixed logs at every dark zone, then strips them after the bug is found. Covers 10 languages. | `caveman`, `caveman debug this`, `add print statements`, `log everything` | ✅ installed |
 | **mission-control** | Master orchestrator — classifies task type, selects the right skills in order, resolves overlaps/conflicts among all 934 installed skills. The unifying glue across G1–G17. | `start working on`, `which skill should I use`, `new session`, `help me build` | ✅ installed |
 | **pm-agent** | Multi-product PM agent — orchestrates pm-skills, generates weekly product reports across a portfolio | `/pm-agent`, `weekly PM run`, `pm report` | ✅ installed |
+| **skill-library-lint** | Integrity gate for the mode library — checks every mode profile + the mission-control router point at real vault skills, flags vendor/crypto dependencies and data-egress risks, reports per-mode token cost. Exit 1 on any broken reference; wired into `build-package.sh` as a pre-build gate. | `lint the skill library`, `did I break a mode`, `check the modes`, `audit the skills` | ✅ installed |
 | **pptx-from-template** | Brand-faithful PowerPoint builder — unpack template → clone layouts → inject content → repack. Never regenerates from scratch. | `from my template`, `match our deck`, `use this pptx as template` | ✅ local only |
 | **update-skills-library** | Sync this repo from all upstream sources — clone, diff, copy changes, rebuild zips, update README/CATALOG, push | `update skills library`, `sync skills from upstream` | ✅ local only |
+| **granola-archive** | Bulk-export Granola meetings to a local per-conversation corpus (summary + verbatim transcript + meta.json), resumable across sessions. Encodes the connector's silent 500-result cap, its shared hourly rate limit, and how to move transcripts without a model ever retyping them. | `export all granola meetings`, `build meeting archive`, `pull granola transcripts`, `re-sync granola` | ✅ local only |
 
-*`pptx-from-template` and `update-skills-library` are in `~/.claude/skills/` locally but not tracked in this repo's `skills/` folder.*
+*`pptx-from-template`, `update-skills-library` and `granola-archive` are in `~/.claude/skills/` locally but not tracked in this repo's `skills/` folder.*
 
 ---
 
@@ -580,3 +583,127 @@ Directly applicable to the Cognos data-query-agent work (Task #7).
 **Core principle:** start with `error-analysis` on real traces, never with metrics.
 Metrics chosen before looking at failures are vanity metrics. And never trust an
 uncalibrated judge — `validate-evaluator` is not optional.
+
+
+---
+
+## Group 20 — dietrichgebert/ponytail (6 skills · "lazy senior engineer")
+
+**Source:** [github.com/dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) · MIT · 44k+ stars
+**Package:** `packages/ponytail/`
+
+Biases the agent toward minimal code — "the best code is the code you don't write."
+Reportedly cuts ~50% of the lines an agent would otherwise write. Complements
+`karpathy-guidelines` (broad coding hygiene) with an aggressive delete/YAGNI instinct.
+
+| Skill | What it does | Triggers | Status |
+|-------|-------------|----------|--------|
+| **ponytail** | Forces the laziest working solution — YAGNI, stdlib before custom, one line before fifty. Levels: lite/full/ultra | `ponytail`, `be lazy`, `simplest solution`, `yagni`, `do less` | ✅ installed |
+| **ponytail-review** | Reviews a diff only for over-engineering — what to delete | `review for over-engineering`, `/ponytail-review` | ✅ installed |
+| **ponytail-audit** | Whole-repo bloat audit — ranked list of what to cut | `audit for over-engineering`, `find bloat`, `/ponytail-audit` | ✅ installed |
+| **ponytail-debt** | Harvests `ponytail:` shortcut comments into a debt ledger | `ponytail debt`, `list the shortcuts` | ✅ installed |
+| **ponytail-gain** | Scoreboard of ponytail's measured impact | `/ponytail-gain`, `what does ponytail save` | ✅ installed |
+| **ponytail-help** | Quick-reference card for the ponytail skills | `/ponytail-help`, `ponytail help` | ✅ installed |
+
+Wired into SuperBob: added to the **code** and **ship-it** modes, a new **declutter**
+mode, and the Maintainability pillar in `mission-control`.
+
+
+## Group 21 — BehiSecc/VibeSec (1 skill · proactive secure coding)
+
+**Source:** [github.com/BehiSecc/VibeSec-Skill](https://github.com/BehiSecc/VibeSec-Skill) · Apache-2.0
+**Package:** `packages/vibesec/`
+
+| Skill | What it does | Triggers | Status |
+|-------|-------------|----------|--------|
+| **vibesec** | Write secure web code proactively (bug-hunter mindset): access control, XSS/CSRF, SQLi/SSRF, auth, API security | `secure code`, `security scan`, `audit for vulnerabilities` | ✅ installed |
+
+Complements BugHunter (which *hunts* existing vulns) — vibesec *prevents* them at write time. Wired into the SuperBob **security** mode.
+
+## Tools (not skills)
+
+- **code-review-graph** (MIT, MCP) — blast-radius code review graph; registered as a Claude MCP.
+- **rtk** (Apache-2.0, CLI) — Rust Token Killer; compresses bash output 60-90% via a PreToolUse hook.
+
+
+## Group 22 — petergyang/no-ai-slop (1 skill · sharper, more human writing)
+
+**Source:** [github.com/petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) - MIT
+**Package:** packages/no-ai-slop/
+
+| Skill | What it does | Triggers | Status |
+|-------|-------------|----------|--------|
+| **no-ai-slop** | Edit drafts to remove 20+ AI-slop patterns while keeping the writer's voice; or detect (name each pattern, no rewrite) | 'less AI-sounding', 'make this clearer', 'is this AI slop', 'audit my writing' | installed |
+
+Distinct from the generate/style writing skills - this one strips slop and detects it. Wired into the SuperBob **writing** mode.
+
+
+## Group 23 — ayghri/i-have-adhd (1 skill · concise, action-first output)
+
+**Source:** [github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) - MIT
+**Package:** packages/i-have-adhd/
+
+| Skill | What it does | Triggers | Status |
+|-------|-------------|----------|--------|
+| **i-have-adhd** | Shapes every reply to be direct and action-first: next action first, numbered steps, specific time estimates, no preamble/recap/closers. Persists until "stop adhd mode". | `/i-have-adhd`, toggle in SuperBob panel | ✅ installed |
+
+In SuperBob this is a **toggleable always-on add-on** (a new concept): it sits in the core box with `using-superpowers` + `mission-control` and layers on every kit, but unlike those it has an on/off switch — it's a preference (concise vs verbose). Off by default. The auto-rule instructs Bob to honor it whenever active.
+
+
+## Group 24 — product-on-purpose/pm-skills (68 skills · methodology-driven PM lifecycle)
+
+**Source:** [github.com/product-on-purpose/pm-skills](https://github.com/product-on-purpose/pm-skills) - Apache 2.0
+**Package:** packages/product-on-purpose-pm/ · scanned clean (0 injection findings)
+
+A repeatable product lifecycle as skills: **Foundation → Discover → Define → Develop → Deliver → Measure → Iterate**, plus **Design Sprint** and **Foundation Sprint** toolkits (`tool-*`) and PM utilities (`utility-pm-critic`, `utility-pm-workflow-orchestrator`, `utility-slideshow-creator`). Each skill has a canonical output contract and refuses to fabricate data (market sizes, OKR baselines, statistical significance).
+
+| Phase | Anchor skill (in the SuperBob `pm-methodology` kit) |
+|-------|------|
+| Foundation | foundation-lean-canvas |
+| Discover | discover-interview-synthesis |
+| Define | define-jtbd-canvas |
+| Develop | develop-solution-brief |
+| Deliver | deliver-prd |
+| Measure | measure-experiment-design |
+| Iterate | iterate-retrospective |
+
+Full 68 skills ship to the vault; the `pm-methodology` kit surfaces the 7-phase spine (~961 tokens). Pairs with the `product-frameworks` kit (JTBD / Hook Model / CRO thinking).
+
+
+## Group 25 — dyoshikawa/rulesync (1 skill · AGENTS.md + subagent authoring)
+
+**Source:** [github.com/dyoshikawa/rulesync](https://github.com/dyoshikawa/rulesync) - MIT
+**Package:** packages/rulesync/ · scanned clean (0 injection findings) · **Run:** `npx rulesync generate --targets "*"`
+
+The AGENTS.md authoring engine the library lacked. One `.rulesync/` source generates the portable **AGENTS.md** standard, **subagents** (multi-agent), and native rule/config files for **Claude Code, Roo Code (Bob), Codex, Cursor** and 30+ tools; imports existing CLAUDE.md / cursor rules too. Pure file transformer (no API key, no model calls). Powers the SuperBob **`agent-authoring`** kit (agent-designer → rulesync → codebase-onboarding → no-ai-slop). Anchored on the official [agents.md](https://github.com/agentsmd/agents.md) spec.
+
+
+## Group 26 — Agents365-ai/drawio-skill (1 skill · natural language to editable diagrams)
+
+**Source:** [github.com/Agents365-ai/drawio-skill](https://github.com/Agents365-ai/drawio-skill) - MIT
+**Skill:** skills/drawio-skill/ · scanned clean (0 injection findings) · zip: zips/drawio-skill.zip
+
+Natural-language to **editable `.drawio`** diagrams with PNG/SVG/PDF export; also converts code, SQL schemas, and infra (Terraform/K8s) into auto-laid-out diagrams and self-checks its own layout from the rendered image. Pure prompt/transformer (no API keys); needs the **draw.io desktop CLI** to render/export, Graphviz optional. Anchors the SuperBob **`diagramming`** kit (drawio-skill + utility-mermaid-diagrams + hand-drawn-diagrams + wireframe-sketch), with the draw.io CLI declared as an actionable resource.
+
+
+## Group 27 — DavidROliverBA/Daves-Claude-Code-Skills (diagram-review · professional diagram critique)
+
+**Source:** [github.com/DavidROliverBA/Daves-Claude-Code-Skills](https://github.com/DavidROliverBA/Daves-Claude-Code-Skills) - MIT
+**Skill:** skills/diagram-review/ · scanned clean (0 injection findings) · zip: zips/diagram-review.zip
+
+Tool-agnostic diagram-quality layer built on graph-drawing research (declaration order controls layout, minimise edge crossings, Gestalt proximity). Reviews any rendered diagram — draw.io, mermaid, excalidraw — for readability, hierarchy, and layout, then recommends concrete fixes. Added to the SuperBob **`diagramming`** kit so you chain it after any tool to make the output professional.
+
+
+## Group 28 — Figma design-to-code skills (scoobynko, madebysan, senlindesign · all MIT)
+
+**Sources:** [scoobynko/claude-code-design-skills](https://github.com/scoobynko/claude-code-design-skills), [madebysan/claude-figma-skills](https://github.com/madebysan/claude-figma-skills), [senlindesign/claude2figma](https://github.com/senlindesign/claude2figma) — all MIT, scanned clean.
+
+Curated 5 skills that complement the existing open-design Figma set: **figma-to-code** (Figma → production React/Next.js), **figma-extract** (design tokens/specs), **figma-review** (in-Figma design review), **figma-style-binding** + **figma-component-rules** (design-system enforcement — components as instances, values bound to tokens). figma-to-code / figma-extract / figma-review are in the SuperBob **`web-design`** kit; the two enforcement skills sit in the vault.
+
+
+## Group 29 — cathrynlavery/diagram-design (editorial, brand-matched diagrams · 8.4k★)
+
+**Source:** [github.com/cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) - MIT
+**Skill:** skills/diagram-design/ · scanned clean (0 injection findings) · zip: zips/diagram-design.zip
+
+Generates 29 editorial-quality, brand-matched diagram types (architecture, flowchart, sequence, state, timeline, etc.) as self-contained HTML+SVG, and converts existing draw.io / mermaid diagrams into that polished design system (PNG/SVG export via Playwright; accessibility built in). Added to the SuperBob **`diagramming`** kit as the professional-output layer alongside drawio-skill (editable .drawio) and diagram-review (critique).

@@ -16,8 +16,23 @@ claude-skills-library/
 │   └── awesome-claude-skills.md  ← community curated index for reference (travisvn)
 ├── skills/                       ← individual skills, one subfolder per skill
 ├── packages/                     ← multi-skill bundles from upstream repos
+├── superbob/                     ← SEPARATE PROJECT — the IBM Bob extension (not library)
 └── zips/                         ← installable archives (one per skill or package)
 ```
+
+**`superbob/` is a separate project, not part of the library.** It is the IBM Bob extension
+that *packages* this library for use in Bob. Keep its code fully inside `superbob/` — never mix
+extension files into `skills/`, `packages/`, or the top level. It reads the library as a build
+input via `superbob/config.sh` (`SB_LIBRARY`), so it can be lifted into its own repo later with
+no code changes. Build it with `superbob/vsix/build-vsix.sh`. See `superbob/README.md`.
+
+**SuperBob must stay Windows + macOS + Linux compatible.** Before editing
+`superbob/vsix/extension/extension.js`, read `superbob/CROSS-PLATFORM.md` — it lists the rules
+(use `path.join`/`os.homedir`; route shell-outs through `loginShell`/`cliInstalled`/`unzip`; no
+`/bin/zsh`, bare `unzip`, or OS-specific file openers; forward-slash globs in config). Four gates
+in `build-vsix.sh` (`validate-webviews.js`, `validate-platform.js`, `test-platform.js`,
+`test-extract-real.js`) plus CI on real Windows/macOS/Linux enforce it — the build aborts on any
+failure. Any new platform-touching change must add a `test-platform.js` case.
 
 ---
 
@@ -41,6 +56,7 @@ claude-skills-library/
 | **14 — pablo-obsidian** | [pablo-mano/Obsidian-CLI-skill](https://github.com/pablo-mano/Obsidian-CLI-skill) | `packages/pablo-obsidian/` | `cp -r packages/pablo-obsidian/skills/obsidian-cli ~/.claude/skills/` |
 | **18 — ui-skills-ibelick** | [ibelick/ui-skills](https://github.com/ibelick/ui-skills) | `packages/ui-skills-ibelick/` | `cp -r packages/ui-skills-ibelick/skills/<name> ~/.claude/skills/` |
 | **19 — evals-skills-hamel** | [hamelsmu/evals-skills](https://github.com/hamelsmu/evals-skills) | `packages/evals-skills-hamel/` | `cp -r packages/evals-skills-hamel/skills/<name> ~/.claude/skills/` |
+| **20 — ponytail** | [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) | `packages/ponytail/` | `cp -r packages/ponytail/skills/* ~/.claude/skills/` |
 | **15 — multica-karpathy** | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | `packages/multica-karpathy/` | `cp -r packages/multica-karpathy/skills/karpathy-guidelines ~/.claude/skills/` |
 
 ---
@@ -79,11 +95,19 @@ Upstreams to check:
 - `https://github.com/affaan-m/ECC`
 - `https://github.com/zhangzhang-111-i/claude-skills`
 - `https://github.com/n8n-io/skills`
+- `https://github.com/dyoshikawa/rulesync`
 - `https://github.com/team-attention/agent-council`
 - `https://github.com/pablo-mano/Obsidian-CLI-skill`
 - `https://github.com/multica-ai/andrej-karpathy-skills`
 - `https://github.com/ibelick/ui-skills`
 - `https://github.com/hamelsmu/evals-skills`
+- `https://github.com/dietrichgebert/ponytail`
+- `https://github.com/Agents365-ai/drawio-skill`
+- `https://github.com/DavidROliverBA/Daves-Claude-Code-Skills`
+- `https://github.com/scoobynko/claude-code-design-skills`
+- `https://github.com/madebysan/claude-figma-skills`
+- `https://github.com/senlindesign/claude2figma`
+- `https://github.com/cathrynlavery/diagram-design`
 
 ---
 

@@ -1,0 +1,15 @@
+{
+  "agentic-authoring": [
+    "skill-author",
+    "agent-designer",
+    "mcp-tool-builder"
+  ],
+  "spec-driven-delivery": [
+    "analyst",
+    "product-manager",
+    "architect",
+    "developer",
+    "qa-reviewer",
+    "retro-facilitator"
+  ]
+}
